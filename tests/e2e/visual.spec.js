@@ -49,6 +49,10 @@ async function seedVisualStore(page, periodKey = '2026-04') {
   await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
   await waitForInitialUi(page);
   await page.evaluate(async targetPeriod => {
+    localStorage.clear();
+    if (typeof storageCache !== 'undefined' && typeof storageCache.clear === 'function') {
+      storageCache.clear();
+    }
     const store = {
       version: window.__APP_INTERNALS__.config.STORE_VERSION,
       activePeriod: targetPeriod,
@@ -56,8 +60,20 @@ async function seedVisualStore(page, periodKey = '2026-04') {
       archives: {}
     };
     await syncAppState(store);
+    saveUIState({
+      activeTab: 'dashboard',
+      studentSearch: '',
+      studentFilterAtendente: '',
+      studentFilterFeedback: '',
+      pendingSearch: '',
+      eventSearch: '',
+      eventTypeFilter: '',
+      eventStatusFilter: '',
+      scaleSearch: ''
+    });
     await saveData({ silent: true, broadcast: false, eventType: 'playwright-visual-seed' });
     await window.__APP_INTERNALS__.actions.switchPeriod(targetPeriod, { silent: true });
+    setActiveTab('dashboard', true);
     renderAll();
     syncPeriodControls();
   }, periodKey);

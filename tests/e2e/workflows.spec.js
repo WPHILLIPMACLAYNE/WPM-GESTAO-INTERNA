@@ -30,6 +30,10 @@ async function waitForPersistedStudents(page, periodKey, expectedCount) {
 async function seedEmptyStore(page, periodKey = '2026-04') {
   await waitForApp(page);
   await page.evaluate(async (targetPeriod) => {
+    localStorage.clear();
+    if (typeof storageCache !== 'undefined' && typeof storageCache.clear === 'function') {
+      storageCache.clear();
+    }
     const emptyPeriod = buildCleanPeriodFromTemplate(null, targetPeriod);
     const store = {
       version: window.__APP_INTERNALS__.config.STORE_VERSION,
@@ -38,6 +42,17 @@ async function seedEmptyStore(page, periodKey = '2026-04') {
       archives: {}
     };
     await syncAppState(store);
+    saveUIState({
+      activeTab: 'dashboard',
+      studentSearch: '',
+      studentFilterAtendente: '',
+      studentFilterFeedback: '',
+      pendingSearch: '',
+      eventSearch: '',
+      eventTypeFilter: '',
+      eventStatusFilter: '',
+      scaleSearch: ''
+    });
     await saveData({ silent: true, broadcast: false, eventType: 'playwright-empty-seed' });
     await window.__APP_INTERNALS__.actions.switchPeriod(targetPeriod, { silent: true });
     renderAll();
@@ -49,6 +64,10 @@ async function seedEmptyStore(page, periodKey = '2026-04') {
 async function seedStoreWithPeriods(page, periodKeys) {
   await waitForApp(page);
   await page.evaluate(async (keys) => {
+    localStorage.clear();
+    if (typeof storageCache !== 'undefined' && typeof storageCache.clear === 'function') {
+      storageCache.clear();
+    }
     const periods = Object.fromEntries(
       keys.map(key => [key, generatePeriodSeed(key)])
     );
@@ -59,6 +78,17 @@ async function seedStoreWithPeriods(page, periodKeys) {
       archives: {}
     };
     await syncAppState(store);
+    saveUIState({
+      activeTab: 'dashboard',
+      studentSearch: '',
+      studentFilterAtendente: '',
+      studentFilterFeedback: '',
+      pendingSearch: '',
+      eventSearch: '',
+      eventTypeFilter: '',
+      eventStatusFilter: '',
+      scaleSearch: ''
+    });
     await saveData({ silent: true, broadcast: false, eventType: 'playwright-seed' });
     await window.__APP_INTERNALS__.actions.switchPeriod(keys[0], { silent: true });
     renderAll();

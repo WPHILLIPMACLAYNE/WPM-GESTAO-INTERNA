@@ -1,0 +1,276 @@
+    function buildPendingMeta(item) {
+      const parts = [];
+      if (item.status === 'aberto') parts.push('<span class="pulse-dot"></span>');
+      if (item.hostess) parts.push(`<span class="meta-item">${esc(item.hostess)}</span>`);
+      if (item.hostess && item.data) parts.push('<span class="meta-sep">•</span>');
+      if (item.data) parts.push(`<span class="meta-item">${formatDate(item.data)}</span>`);
+      return parts.join('') || '<span class="meta-item">Sem dados</span>';
+    }
+
+    function pendingPill(value) {
+      const map = {
+        aberto: ['open-pill', '<span class="pulse-dot"></span>Aberto'],
+        respondido: ['info', 'Respondido'],
+        concluido: ['ok', 'Concluído']
+      };
+      const [cls, text] = map[value] || ['info', esc(value)];
+      return `<span class="pill ${cls}">${text}</span>`;
+    }
+
+    let draggingPendingId = null;
+
+    function updatePendingStatus(id, status) {
+      if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'pending'] })) return;
+      const item = state.pending.find(x => x.id === id);
+      if (!item || item.status === status) return;
+      item.status = status;
+      estadoAcessibilidade.pendenciaFocadaId = id;
+      saveData();
+      requestRender(['hero', 'dashboard', 'pending']);
+    }
+
+    function limparEstadoDropPendencias() {
+      document.querySelectorAll('.kanban-col.drop-target').forEach(col => col.classList.remove('drop-target'));
+    }
+
+    function bindPendingDnD() {
+      if (estadoEventos.dndPendenciasInicializado) return;
+      estadoEventos.dndPendenciasInicializado = true;
+
+      document.addEventListener('dragstart', e => {
+        const card = e.target.closest('[data-pending-id]');
+        if (!card) return;
+        draggingPendingId = card.dataset.pendingId;
+        card.classList.add('dragging');
+      });
+
+      document.addEventListener('dragend', e => {
+        const card = e.target.closest('[data-pending-id]');
+        if (!card) return;
+        card.classList.remove('dragging');
+        draggingPendingId = null;
+        limparEstadoDropPendencias();
+      });
+
+      document.addEventListener('dragover', e => {
+        const col = e.target.closest('[data-drop-status]');
+        if (!col) return;
+        e.preventDefault();
+        col.classList.add('drop-target');
+      });
+
+      document.addEventListener('dragleave', e => {
+        const col = e.target.closest('[data-drop-status]');
+        if (!col) return;
+        const relacionado = e.relatedTarget;
+        if (relacionado && col.contains(relacionado)) return;
+        col.classList.remove('drop-target');
+      });
+
+      document.addEventListener('drop', e => {
+        const col = e.target.closest('[data-drop-status]');
+        if (!col) return;
+        e.preventDefault();
+        col.classList.remove('drop-target');
+        if (!draggingPendingId) return;
+        updatePendingStatus(draggingPendingId, col.dataset.dropStatus);
+      });
+    }
+
+    function positionTooltip(e, el, tooltip) {
+      const offset = 16;
+      const clientX = e?.clientX ?? el.getBoundingClientRect().left;
+      const clientY = e?.clientY ?? el.getBoundingClientRect().bottom;
+      const maxX = window.innerWidth - tooltip.offsetWidth - 12;
+      const maxY = window.innerHeight - tooltip.offsetHeight - 12;
+      let x = clientX + offset;
+      let y = clientY + offset;
+      if (x > maxX) x = Math.max(12, clientX - tooltip.offsetWidth - offset);
+      if (y > maxY) y = Math.max(12, clientY - tooltip.offsetHeight - offset);
+      tooltip.style.left = `${Math.max(12, Math.min(maxX, x))}px`;
+      tooltip.style.top = `${Math.max(12, Math.min(maxY, y))}px`;
+    }
+
+    function bindTooltips() {
+      if (estadoEventos.tooltipInicializado) return;
+      estadoEventos.tooltipInicializado = true;
+
+      const tooltip = document.getElementById('appTooltip');
+      if (!tooltip) return;
+
+      const show = (el, e) => {
+        const text = String(el?.dataset?.tooltip || '').trim();
+        if (!text) return;
+        tooltipAlvoAtual = el;
+        tooltip.innerHTML = esc(text).replace(/\n/g, '<br>');
+        tooltip.classList.add('show');
+        positionTooltip(e, el, tooltip);
+      };
+
+      const hide = () => {
+        tooltipAlvoAtual = null;
+        tooltip.classList.remove('show');
+      };
+
+      document.addEventListener('mouseover', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el === tooltipAlvoAtual) return;
+        show(el, e);
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!tooltipAlvoAtual || !tooltip.classList.contains('show')) return;
+        positionTooltip(e, tooltipAlvoAtual, tooltip);
+      });
+
+      document.addEventListener('mouseout', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el !== tooltipAlvoAtual) return;
+        const relacionado = e.relatedTarget;
+        if (relacionado && el.contains(relacionado)) return;
+        hide();
+      });
+
+      document.addEventListener('focusin', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el) return;
+        show(el, { clientX: el.getBoundingClientRect().left, clientY: el.getBoundingClientRect().bottom });
+      });
+
+      document.addEventListener('focusout', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el !== tooltipAlvoAtual) return;
+        hide();
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // RENDERIZAÇÃO — PENDING — renderPending, savePending, removePending
+    // ══════════════════════════════════════════
+
+    function renderPending() {
+      const { linhas: rows, grupos } = selecionarPendenciasFiltradas();
+      aplicarHtmlSeMudou(document.getElementById('pendingStatusStrip'), `
+        <div class="pending-status-card pending-status-card--open">
+          <span class="pending-status-label">Abertas</span>
+          <strong class="pending-status-value">${grupos.aberto.length}</strong>
+        </div>
+        <div class="pending-status-card pending-status-card--progress">
+          <span class="pending-status-label">Em andamento</span>
+          <strong class="pending-status-value">${grupos.respondido.length}</strong>
+        </div>
+        <div class="pending-status-card pending-status-card--done">
+          <span class="pending-status-label">Resolvidas</span>
+          <strong class="pending-status-value">${grupos.concluido.length}</strong>
+        </div>
+        <div class="pending-status-card pending-status-card--total">
+          <span class="pending-status-label">Total no período</span>
+          <strong class="pending-status-value">${rows.length}</strong>
+        </div>
+      `);
+      const pendingTableBody = document.getElementById('pendingTableBody');
+      if (!rows.length) {
+        aplicarHtmlSeMudou(pendingTableBody, `<tr><td colspan="8"><div class="empty">Nenhuma pendência encontrada.</div></td></tr>`);
+      } else {
+        aplicarPatchLinhas(pendingTableBody, rows, item => item.id, p => `
+          <tr class="${p.status === 'aberto' ? 'row-attention' : ''}">
+            <td><strong class="cell-ellipsis" data-tooltip="${esc(p.nome)}">${esc(p.nome)}</strong></td>
+            <td><span class="cell-ellipsis" data-tooltip="${esc(p.matricula || '-')}">${esc(p.matricula || '-')}</span></td>
+            <td><span class="cell-text multiline pending-cell-main" data-tooltip="${esc(p.pendencia || '-')}">${esc(p.pendencia || '-')}</span></td>
+            <td><span class="cell-ellipsis">${formatDate(p.data)}</span></td>
+            <td><span class="cell-ellipsis" data-tooltip="${esc(p.hostess || '-')}">${esc(p.hostess || '-')}</span></td>
+            <td>${p.resposta ? `<span class="cell-text multiline pending-cell-response" data-tooltip="${esc(p.resposta)}">${esc(p.resposta)}</span>` : '<span class="pending-cell-response-empty">Sem resposta</span>'}</td>
+            <td>${pendingPill(p.status)}</td>
+            <td class="right">
+              <button class="btn btn-ghost btn-xs" data-action="edit-pending" data-id="${p.id}">Editar</button>
+              <button class="btn btn-danger btn-xs" data-action="remove-pending" data-id="${p.id}">Excluir</button>
+            </td>
+          </tr>
+        `);
+      }
+
+      const pendingKanban = document.getElementById('pendingKanban');
+      const colunas = Object.entries(grupos).map(([status, items]) => ({ status, items }));
+      aplicarPatchBlocosAgrupados(pendingKanban, colunas, coluna => coluna.status, coluna => `
+        <div class="kanban-col ${coluna.status === 'aberto' ? 'status-aberto' : ''}" data-drop-status="${coluna.status}">
+          <div class="col-head">
+            <h3>${coluna.status === 'aberto' ? '<span class="pulse-dot"></span>Abertas' : coluna.status === 'respondido' ? 'Respondidas' : 'Concluídas'}</h3>
+          </div>
+          <div class="kanban-list"></div>
+        </div>
+      `);
+
+      colunas.forEach(coluna => {
+        const lista = pendingKanban.querySelector(`[data-drop-status="${coluna.status}"] .kanban-list`);
+        if (!lista) return;
+        if (!coluna.items.length) {
+          aplicarHtmlSeMudou(lista, '<div class="empty">Nenhum item</div>');
+          return;
+        }
+        aplicarPatchItensKanban(lista, coluna.items, item => item.id, item => `
+          <div class="ticket ${item.status === 'aberto' ? 'ticket-attention' : ''}" draggable="true" data-pending-id="${item.id}" data-tooltip="${esc(item.pendencia || '')}" role="listitem" aria-describedby="pendingKeyboardHelp" aria-keyshortcuts="ArrowUp ArrowDown Home End Alt+ArrowLeft Alt+ArrowRight" aria-label="Pendência de ${esc(item.nome)} com status ${esc(item.status)}">
+            <div class="title" data-tooltip="${esc(item.nome)}">${esc(item.nome)}</div>
+            <div class="meta">${buildPendingMeta(item)}</div>
+            <div class="desc" data-tooltip="${esc(item.pendencia)}">${esc(shortText(item.pendencia, 115))}</div>
+            ${item.resposta ? `<div class="desc muted" data-tooltip="${esc(item.resposta)}"><strong style="color:var(--muted)">Resposta:</strong> ${esc(shortText(item.resposta, 85))}</div>` : ''}
+            <div class="foot">
+              <span class="drag-hint"><span class="drag-grip" aria-hidden="true">⋮⋮</span>ARRASTE PARA MOVER</span>
+              <div class="ticket-actions">
+                <button class="btn btn-ghost btn-xs icon-btn" data-action="edit-pending" data-id="${item.id}" title="Editar" aria-label="Editar pendência de ${esc(item.nome)}" draggable="false">✎</button>
+                <button class="btn btn-danger btn-xs icon-btn" data-action="remove-pending" data-id="${item.id}" title="Excluir" aria-label="Excluir pendência de ${esc(item.nome)}" draggable="false">✕</button>
+              </div>
+            </div>
+          </div>
+        `);
+      });
+      restaurarFocoPendenteSeNecessario();
+    }
+
+    function clearPendingForm() {
+      editingPendingId = null;
+      limparErrosValidacao(['pending_nome', 'pending_matricula', 'pending_desc', 'pending_data']);
+      document.getElementById('pendingModalTitle').textContent = 'Nova pendência';
+      ['nome','matricula','desc','data','resposta'].forEach(f => document.getElementById(`pending_${f}`).value = '');
+      document.getElementById('pending_hostess').value = getReceptionists(state)[0] || '';
+      document.getElementById('pending_status').value = 'aberto';
+    }
+
+    function finalizePendingSaveUI() {
+      closeModal('pendingModal');
+      clearPendingForm();
+    }
+
+    function renderPendingSaveUI() {
+      requestRender(['hero', 'dashboard', 'pending']);
+    }
+
+    function editPending(id) {
+      const p = state.pending.find(x => x.id === id);
+      if (!p) return;
+      editingPendingId = id;
+      document.getElementById('pendingModalTitle').textContent = 'Editar pendência';
+      document.getElementById('pending_nome').value = p.nome || '';
+      document.getElementById('pending_matricula').value = p.matricula || '';
+      document.getElementById('pending_desc').value = p.pendencia || '';
+      document.getElementById('pending_data').value = p.data || '';
+      document.getElementById('pending_hostess').value = p.hostess || getReceptionists(state)[0] || '';
+      document.getElementById('pending_resposta').value = p.resposta || '';
+      document.getElementById('pending_status').value = p.status || 'aberto';
+      openModal('pendingModal');
+    }
+
+    function removePending(id) {
+      if (!assertWritableCurrentPeriod()) return;
+      showConfirm('Deseja excluir esta pendência?', async () => {
+        const existing = state.pending.find(p => p.id === id);
+        if (!existing) return;
+        state.pending = state.pending.filter(p => p.id !== id);
+        const saved = await saveData();
+        if (!saved) {
+          state.pending.push(existing);
+          showToast('Falha ao salvar exclusão. Tente novamente.', 'danger');
+          return;
+        }
+        requestRender(['hero', 'dashboard', 'pending']);
+      });
+    }

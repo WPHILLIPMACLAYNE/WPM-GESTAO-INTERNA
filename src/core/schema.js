@@ -1,10 +1,6 @@
     // PIPELINE DE MIGRAÇÃO — normalizeStore, getDefaultStore, migrateStoreToV1..V4, migrateStore, sanitizeStore, saveData
     // ══════════════════════════════════════════
 
-    function isValidPeriodKey(key) {
-      return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(key || ''));
-    }
-
     function normalizeStore(store) {
       store = store && typeof store === 'object' ? store : {};
       store.activePeriod = isValidPeriodKey(store.activePeriod) ? String(store.activePeriod) : getInitialPeriodKey();

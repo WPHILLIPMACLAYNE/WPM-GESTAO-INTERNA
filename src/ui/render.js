@@ -325,26 +325,6 @@
       return sorted.find(item => `${item.date || ''}T${item.time || '00:00'}` >= nowKey && item.status !== 'Cancelado') || sorted[0];
     }
 
-    function toneLabel(value) {
-      return value === 'green' ? 'Sábado' : value === 'red' ? 'Feriado' : 'Dia normal';
-    }
-
-    function eventStatusClass(value) {
-      const key = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      if (key.includes('confirm')) return 'event-status-confirmado';
-      if (key.includes('concl')) return 'event-status-concluido';
-      if (key.includes('cancel')) return 'event-status-cancelado';
-      return 'event-status-programado';
-    }
-
-    function normalizeSearchText(value) {
-      return String(value || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .trim();
-    }
-
     function getScaleFilteredList() {
       const { query } = getScaleViewFilters();
       const list = Array.isArray(state.scale) ? state.scale.slice() : [];
@@ -399,25 +379,6 @@
     function getEventSummaryText(item) {
       if (!item) return 'Nenhum evento ou ação programado neste período.';
       return `${item.type || 'Agenda'} • ${getPeriodDisplayDate(item.date)}${item.time ? ` • ${item.time}` : ''}`;
-    }
-
-    function suggestScaleTone(dateStr) {
-      if (!dateStr) return 'neutral';
-      const [y, m, d] = dateStr.split('-').map(Number);
-      if (!y || !m || !d) return 'neutral';
-      const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-      if (weekday === 6) return 'green';
-      return 'neutral';
-    }
-
-    function normalizeEventType(value) {
-      const key = String(value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-      if (key.includes('acao')) return 'acao';
-      if (key.includes('camp')) return 'campanha';
-      if (key.includes('trein')) return 'treinamento';
-      if (key.includes('feriado')) return 'feriado';
-      if (key.includes('evento')) return 'evento';
-      return 'outro';
     }
 
     function getCurrentPeriodDateInfo() {
@@ -866,15 +827,6 @@
     }
 
     // formatRecadoDateTime já existe em src/utils/helpers.js (duplicata removida)
-
-    function formatPctPrecise(value) {
-      const pct = Number(value || 0) * 100;
-      const isInteger = Math.abs(pct - Math.round(pct)) < 0.001;
-      return `${pct.toLocaleString('pt-BR', {
-        minimumFractionDigits: isInteger ? 0 : 2,
-        maximumFractionDigits: 2
-      })}%`;
-    }
 
     function getUnreadRecadosCount(periodKey = currentPeriodKey) {
       return loadRecados(periodKey).filter(item => !item.read).length;
@@ -1687,15 +1639,6 @@
       });
     }
 
-    function getRiskBand(score) {
-      const value = clamp(Number(score || 0), 0, 100);
-      if (value <= 20) return { label: 'Faixa crítica • vermelho', tone: 'risk-red' };
-      if (value <= 40) return { label: 'Faixa de atenção • laranja', tone: 'risk-orange' };
-      if (value <= 60) return { label: 'Faixa moderada • amarelo', tone: 'risk-yellow' };
-      if (value <= 80) return { label: 'Faixa boa • verde claro', tone: 'risk-green-light' };
-      return { label: 'Faixa excelente • verde escuro', tone: 'risk-green-dark' };
-    }
-
     function getSortedMentions() {
       return selecionarRankingNps().ranking;
     }
@@ -1710,14 +1653,6 @@
 
     function trendBadge(item) {
       return `<span class="trend-badge ${item.tendencia?.classe || 'trend-stable'}">${item.tendencia?.rotulo || '— estável'}</span>`;
-    }
-
-    function getNpsHistoryBandClass(score) {
-      if (score <= 20) return 'is-risk';
-      if (score <= 40) return 'is-warning';
-      if (score <= 60) return 'is-mid';
-      if (score <= 80) return 'is-good';
-      return 'is-excellent';
     }
 
     function getNpsHistoryRows(limit = 6) {
@@ -2502,13 +2437,6 @@
         archives: Object.keys(storeRef.archives || {}).length,
         ...totals
       };
-    }
-
-    function formatBytes(bytes) {
-      const value = Math.max(0, Number(bytes || 0));
-      if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(value >= 10 * 1024 * 1024 ? 1 : 2)} MB`;
-      if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`;
-      return `${value} B`;
     }
 
     function getSettingsStorageUsage() {

@@ -271,12 +271,6 @@
       });
     }
 
-    function getNpsGoalProgress(score, goal) {
-      const safeScore = clamp(Number(score || 0), 0, 100);
-      const safeGoal = clamp(Number(goal || 0), 0, 100);
-      return safeGoal ? Math.min(100, (safeScore / safeGoal) * 100) : 0;
-    }
-
     function selecionarIndicadoresDashboard() {
       const assinatura = criarAssinaturaSelector(
         state.students,

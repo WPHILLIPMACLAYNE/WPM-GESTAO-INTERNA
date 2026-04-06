@@ -307,12 +307,6 @@
       }
     }
 
-    function shortText(value, max = 120) {
-      const text = String(value ?? '').trim();
-      return text.length > max ? `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…` : text;
-    }
-
-
     function slugify(value) {
       return String(value || '')
         .toLowerCase()
@@ -437,24 +431,6 @@
 
     let scaleShiftDrafts = [];
     let npsObservationsDebounce = null;
-    function getPeriodLabel(key = currentPeriodKey) {
-      const [year, month] = String(key).split('-');
-      const monthIndex = Math.max(0, Number(month || 1) - 1);
-      return `${MONTH_NAMES[monthIndex] || month}/${year}`;
-    }
-
-    function getNextPeriodKey(key = currentPeriodKey) {
-      const [yearStr, monthStr] = String(key).split('-');
-      const dt = new Date(Number(yearStr), Number(monthStr) - 1, 1);
-      dt.setMonth(dt.getMonth() + 1);
-      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-    }
-    function getPreviousPeriodKey(key = currentPeriodKey) {
-      const [yearStr, monthStr] = String(key).split('-');
-      const dt = new Date(Number(yearStr), Number(monthStr) - 1, 1);
-      dt.setMonth(dt.getMonth() - 1);
-      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-    }
 
     const LOCKED_CURRENT_PERIOD_ACTIONS = new Set([
       'close-current-month',

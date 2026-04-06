@@ -93,9 +93,9 @@
       return rows.map(row => row.map(csvEscape).join(';')).join('\n');
     }
 
-    function shortText(value, max) {
-      const str = String(value || '');
-      return str.length > max ? str.slice(0, max) + '…' : str;
+    function shortText(value, max = 120) {
+      const text = String(value ?? '').trim();
+      return text.length > max ? `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…` : text;
     }
 
     function formatBytes(bytes) {
@@ -133,23 +133,22 @@
 
     function getPeriodLabel(key = currentPeriodKey) {
       const [year, month] = String(key).split('-');
-      return `${MONTH_NAMES[Number(month) - 1] || month}/${year}`;
+      const monthIndex = Math.max(0, Number(month || 1) - 1);
+      return `${MONTH_NAMES[monthIndex] || month}/${year}`;
     }
 
     function getPreviousPeriodKey(key) {
       const [yearStr, monthStr] = String(key).split('-');
-      let year = Number(yearStr);
-      let month = Number(monthStr) - 1;
-      if (month < 1) { month = 12; year -= 1; }
-      return `${year}-${String(month).padStart(2, '0')}`;
+      const dt = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+      dt.setMonth(dt.getMonth() - 1);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
     }
 
     function getNextPeriodKey(key) {
       const [yearStr, monthStr] = String(key).split('-');
-      let year = Number(yearStr);
-      let month = Number(monthStr) + 1;
-      if (month > 12) { month = 1; year += 1; }
-      return `${year}-${String(month).padStart(2, '0')}`;
+      const dt = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+      dt.setMonth(dt.getMonth() + 1);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
     }
 
     function getInitialPeriodKey() {
@@ -214,8 +213,9 @@
     }
 
     function getNpsGoalProgress(score, goal) {
-      if (!goal || goal <= 0) return 0;
-      return Math.min(100, (score / goal) * 100);
+      const safeScore = clamp(Number(score || 0), 0, 100);
+      const safeGoal = clamp(Number(goal || 0), 0, 100);
+      return safeGoal ? Math.min(100, (safeScore / safeGoal) * 100) : 0;
     }
 
     function getRiskBand(score) {

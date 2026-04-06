@@ -5,15 +5,6 @@
     //   state, currentPeriodKey      — estado global / main.js
     //   compareByDateTime            — utils/helpers.js (função pura)
 
-    function csvEscape(value) {
-      const normalized = String(value ?? '').replace(/\r?\n/g, ' ');
-      return /[";,]/.test(normalized) ? `"${normalized.replace(/"/g, '""')}"` : normalized;
-    }
-
-    function buildCsvContent(rows) {
-      return rows.map(row => row.map(csvEscape).join(';')).join('\n');
-    }
-
     function downloadCsvFile(filename, rows) {
       const csv = buildCsvContent(rows);
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });

@@ -87,12 +87,6 @@
       return persistenceTechState;
     }
 
-    function formatPersistenceTimestamp(value) {
-      if (!value) return '—';
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('pt-BR');
-    }
-
     function normalizePersistenceOptions(input, defaultEventType = 'save') {
       if (typeof input === 'boolean') {
         return {
@@ -353,21 +347,6 @@
 
     function getUIState() {
       return readStoredJsonWithFallback(UI_KEY, LEGACY_UI_KEYS, {});
-    }
-
-    // ─── sanitizeDeep: higieniza dados recursivamente antes da importação ─────
-    // Em vez de remover < e > (que destrói emails, fórmulas e nomes legítimos),
-    // apenas trim strings e remove null bytes. A proteção XSS é feita pelo
-    // esc() nos templates de renderização, que já escapa HTML corretamente.
-    function sanitizeDeep(value) {
-      if (Array.isArray(value)) return value.map(sanitizeDeep);
-      if (value !== null && typeof value === 'object') {
-        return Object.fromEntries(
-          Object.entries(value).map(([k, v]) => [k, sanitizeDeep(v)])
-        );
-      }
-      if (typeof value === 'string') return value.replace(/\x00/g, '').trim();
-      return value;
     }
 
     function saveUIState(patch = {}) {
@@ -649,11 +628,6 @@
           data.addons[name][type] = Array.from({ length: data.settings.monthDays }, () => 0);
         });
       });
-    }
-
-    function getInitialPeriodKey() {
-      const now = new Date();
-      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     }
 
     // ─── buildCleanPeriodFromTemplate: cria período limpo herdando settings ──────

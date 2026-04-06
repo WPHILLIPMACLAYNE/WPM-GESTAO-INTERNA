@@ -2,7 +2,7 @@
   "meta": {
     "kind": "app-backup",
     "appVersion": "v34",
-    "exportedAt": "2026-04-06T21:06:22.895Z"
+    "exportedAt": "2026-04-06T21:38:04.430Z"
   },
   "version": 4,
   "activePeriod": "2026-04",
@@ -39,7 +39,7 @@
       },
       "students": [
         {
-          "id": "bfe30cf4-9992-410d-908a-8e357f42ebd8",
+          "id": "0c97d42b-0e04-4695-b3db-179ddd9440fd",
           "nome": "Felipe Barbosa",
           "matricula": "20260401",
           "ultimaVisita": "2026-04-26",
@@ -52,7 +52,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "6417fbd6-aedf-4a77-9927-3e42911f7019",
+          "id": "89e68a28-e6c9-4a67-8414-60703696387c",
           "nome": "Debora Silva",
           "matricula": "20260402",
           "ultimaVisita": "2026-04-05",
@@ -65,7 +65,7 @@
           "observacoes": "Fluxo alto esperado no período da tarde. Acompanhar próxima visita."
         },
         {
-          "id": "b1fb3451-7b14-4fb1-a2e8-39ccf2883b44",
+          "id": "08b93108-ce35-4df2-8c47-4557fed7c416",
           "nome": "Hugo Teixeira",
           "matricula": "20260403",
           "ultimaVisita": "2026-04-02",
@@ -78,7 +78,7 @@
           "observacoes": "Cobertura planejada para horários críticos. Perfil com potencial para retenção."
         },
         {
-          "id": "d84289ba-5a28-474b-a8c0-045b40ccf5fb",
+          "id": "fec016a6-ed3a-46d6-aee5-97913f31db62",
           "nome": "João Klein",
           "matricula": "20260404",
           "ultimaVisita": "2026-04-11",
@@ -91,7 +91,7 @@
           "observacoes": "Foco em retenção e relacionamento. Acompanhar próxima visita."
         },
         {
-          "id": "34cca7e7-5422-4999-a117-e00c5e43bbc7",
+          "id": "0e289ad5-1a1f-4c5f-8a7c-7f760edfa9de",
           "nome": "Vinicius Dias",
           "matricula": "20260405",
           "ultimaVisita": "2026-04-22",
@@ -104,7 +104,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Perfil com potencial para retenção."
         },
         {
-          "id": "6e8d4ae8-84b5-44e0-a476-7dbd2a4a3365",
+          "id": "ad10137f-a37d-4d84-8870-739630422721",
           "nome": "Igor Teixeira",
           "matricula": "20260406",
           "ultimaVisita": "2026-04-06",
@@ -117,7 +117,7 @@
           "observacoes": "Fluxo alto esperado no período da tarde. Acompanhar próxima visita."
         },
         {
-          "id": "156fafb2-d85e-418b-a966-d035fda56fb0",
+          "id": "7c9c2bc3-130c-4e34-9cae-b99de570f237",
           "nome": "Bruno Vieira",
           "matricula": "20260407",
           "ultimaVisita": "2026-04-15",
@@ -130,7 +130,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Acompanhar próxima visita."
         },
         {
-          "id": "e988a538-483d-47e7-bf82-f11466d77396",
+          "id": "867e4f51-6cf5-4990-aab2-b75c2de9ca4e",
           "nome": "Thiago Henrique",
           "matricula": "20260408",
           "ultimaVisita": "2026-04-04",
@@ -143,7 +143,7 @@
           "observacoes": "Cobertura planejada para horários críticos. Perfil com potencial para retenção."
         },
         {
-          "id": "ef42505b-0974-4ca0-a20d-aa955cfa6936",
+          "id": "23732ba5-03d5-4f18-a0a6-c77dfce02578",
           "nome": "Rafael Silva",
           "matricula": "20260409",
           "ultimaVisita": "2026-04-12",
@@ -156,7 +156,7 @@
           "observacoes": "Foco em retenção e relacionamento. Acompanhar próxima visita."
         },
         {
-          "id": "7ff1d1b8-7ad0-401b-843e-f51d77070eb5",
+          "id": "a72c984d-6568-4f36-a7fa-be587ba68511",
           "nome": "Bruno Cardoso",
           "matricula": "20260410",
           "ultimaVisita": "2026-04-29",
@@ -169,7 +169,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Perfil com potencial para retenção."
         },
         {
-          "id": "50f836e8-0470-4c81-87a8-5e6b89014d6f",
+          "id": "29971fa3-6859-43ab-a65e-82c0c6a66fff",
           "nome": "Igor Henrique",
           "matricula": "20260411",
           "ultimaVisita": "2026-04-03",
@@ -182,7 +182,7 @@
           "observacoes": "Fluxo alto esperado no período da tarde. Perfil com potencial para retenção."
         },
         {
-          "id": "7e792fc0-7acc-4f6c-a80c-56973d96da7f",
+          "id": "fb479c23-9e59-48ad-b831-b9029f950b92",
           "nome": "Rafael Ramos",
           "matricula": "20260412",
           "ultimaVisita": "2026-04-06",
@@ -195,7 +195,7 @@
           "observacoes": "Fluxo alto esperado no período da tarde. Perfil com potencial para retenção."
         },
         {
-          "id": "74066914-e305-4434-a088-118e6b5e1743",
+          "id": "343272eb-bf64-4a7b-895f-ca503e0eaa74",
           "nome": "Guilherme Ramos",
           "matricula": "20260413",
           "ultimaVisita": "2026-04-23",
@@ -208,7 +208,7 @@
           "observacoes": "Fluxo alto esperado no período da tarde. Perfil com potencial para retenção."
         },
         {
-          "id": "55ace058-7718-480e-a872-9db899504913",
+          "id": "4e047d63-a573-461b-bf4d-c0ed6d754fbb",
           "nome": "Paulo Dias",
           "matricula": "20260414",
           "ultimaVisita": "2026-04-21",
@@ -221,7 +221,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "4e9e462f-47a4-4b63-9f72-ca211c5d3cb7",
+          "id": "fbba195c-5026-40de-987e-517d1d835c50",
           "nome": "Eduarda Almeida",
           "matricula": "20260415",
           "ultimaVisita": "2026-04-30",
@@ -234,7 +234,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "90a37661-0412-4b52-8d37-1ae5b81836e5",
+          "id": "24f61ed6-aee7-43c3-908a-0f33af6608fd",
           "nome": "Yasmin Uchoa",
           "matricula": "20260416",
           "ultimaVisita": "2026-04-15",
@@ -247,7 +247,7 @@
           "observacoes": "Cobertura planejada para horários críticos. Perfil com potencial para retenção."
         },
         {
-          "id": "593837d5-f486-4a33-8b47-2757eedd7f86",
+          "id": "695a22ae-e374-4cde-a327-1cdf094e4ced",
           "nome": "João Vieira",
           "matricula": "20260417",
           "ultimaVisita": "2026-04-07",
@@ -260,7 +260,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "6ecf00b7-eba6-4864-8fce-5e77d712db3e",
+          "id": "72dc3839-e405-4a13-aab8-f447ca8dd005",
           "nome": "Ana Vieira",
           "matricula": "20260418",
           "ultimaVisita": "2026-04-04",
@@ -273,7 +273,7 @@
           "observacoes": "Foco em retenção e relacionamento. Acompanhar próxima visita."
         },
         {
-          "id": "0676ec3a-1eef-4b89-9eb4-d94de971fe80",
+          "id": "db19cc53-6215-4522-8181-2c2f9988a5d4",
           "nome": "Sabrina Esteves",
           "matricula": "20260419",
           "ultimaVisita": "2026-04-01",
@@ -286,7 +286,7 @@
           "observacoes": "Foco em retenção e relacionamento. Perfil com potencial para retenção."
         },
         {
-          "id": "a1490510-a916-4799-8d14-de820db82ebe",
+          "id": "95e8ea3e-3923-466c-b8b7-08d66777e149",
           "nome": "Leandro Cardoso",
           "matricula": "20260420",
           "ultimaVisita": "2026-04-13",
@@ -299,7 +299,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "7e25a2a4-9662-43e5-9a0a-3b8a5dd701bc",
+          "id": "e73baf08-bda3-46ab-ac47-9d2dab7dcceb",
           "nome": "Mirela Silva",
           "matricula": "20260421",
           "ultimaVisita": "2026-04-17",
@@ -312,7 +312,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Acompanhar próxima visita."
         },
         {
-          "id": "654d43c9-e42c-49dd-9f93-b3fef7227b22",
+          "id": "b5e0531c-5a0f-417b-a95d-bf3602321f21",
           "nome": "Thiago Ferreira",
           "matricula": "20260422",
           "ultimaVisita": "2026-04-30",
@@ -325,7 +325,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Perfil com potencial para retenção."
         },
         {
-          "id": "b96a2984-6766-4589-8956-8d9f7255fd9b",
+          "id": "2aa152a5-9c8b-4441-97fa-26324c5b711b",
           "nome": "Paulo Barbosa",
           "matricula": "20260423",
           "ultimaVisita": "2026-04-27",
@@ -338,7 +338,7 @@
           "observacoes": "Cobertura planejada para horários críticos. Acompanhar próxima visita."
         },
         {
-          "id": "47ff7400-0d52-43b1-a89b-cf5f62e2cecd",
+          "id": "e67468f9-f3cf-4226-af35-552e03f2b983",
           "nome": "Felipe Ramos",
           "matricula": "20260424",
           "ultimaVisita": "2026-04-11",
@@ -351,7 +351,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Perfil com potencial para retenção."
         },
         {
-          "id": "26f564b7-876e-48b5-aabb-979520559975",
+          "id": "7209d3e6-e030-4678-90bd-17d6ec77bdfe",
           "nome": "Fabiana Esteves",
           "matricula": "20260425",
           "ultimaVisita": "2026-04-01",
@@ -364,7 +364,7 @@
           "observacoes": "Foco em retenção e relacionamento. Perfil com potencial para retenção."
         },
         {
-          "id": "6032da0d-6244-44b3-b0f1-e689aa43e360",
+          "id": "67294d4b-ed96-409f-bf88-e748599e72bc",
           "nome": "Helena Cardoso",
           "matricula": "20260426",
           "ultimaVisita": "2026-04-16",
@@ -377,7 +377,7 @@
           "observacoes": "Cobertura planejada para horários críticos. Perfil com potencial para retenção."
         },
         {
-          "id": "cd3d16c6-a1f5-4159-8439-1a83d94e31ba",
+          "id": "11d0354d-013d-4536-bc2d-195cc891a4c9",
           "nome": "Carla Esteves",
           "matricula": "20260427",
           "ultimaVisita": "2026-04-01",
@@ -390,7 +390,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Perfil com potencial para retenção."
         },
         {
-          "id": "e1b32f0f-e490-4e75-ac74-910c0b006829",
+          "id": "ebb48b0a-6008-4fa4-a1d2-09762c6f8787",
           "nome": "Wesley Ibrahim",
           "matricula": "20260428",
           "ultimaVisita": "2026-04-11",
@@ -403,7 +403,7 @@
           "observacoes": "Reforçar abordagem comercial na recepção. Perfil com potencial para retenção."
         },
         {
-          "id": "48cda9d0-cd93-4e61-a255-1f48064389ef",
+          "id": "7f03ded2-96b2-44d5-bbf8-518160701051",
           "nome": "Guilherme Almeida",
           "matricula": "20260429",
           "ultimaVisita": "2026-04-03",
@@ -416,7 +416,7 @@
           "observacoes": "Monitorar retorno dos alunos com visita inicial. Acompanhar próxima visita."
         },
         {
-          "id": "a1913f01-bc29-4fd2-9cab-e84f4ed3e522",
+          "id": "034b4676-1185-4a50-be2a-ae8c76ac0f0d",
           "nome": "Felipe Lopes",
           "matricula": "20260430",
           "ultimaVisita": "2026-04-17",
@@ -436,57 +436,57 @@
         "observations": "Mês Abril com 86 citações distribuídas entre recepção e professores. Reforçar retorno ativo em horários de pico e manter abordagem comercial padronizada.",
         "mentions": [
           {
-            "id": "cf4ef316-2b98-4bc0-8be1-1dfc54d6d6f2",
+            "id": "edbf320a-095b-433e-bc9d-06d6d61a692d",
             "name": "Wallace",
             "count": 7
           },
           {
-            "id": "35e7804e-85b1-4e2c-9b6d-cd50588f1710",
+            "id": "5cc9ccd0-9acc-4a8a-891a-97ec46551348",
             "name": "Emilia",
             "count": 13
           },
           {
-            "id": "4a740aaa-59e9-400d-95d9-d747406e5a92",
+            "id": "470d954e-4043-46d3-92b7-83fd154a7ca7",
             "name": "Gessica",
             "count": 9
           },
           {
-            "id": "bd31b280-6bf1-41b2-a18a-4f05cb98a744",
+            "id": "64a49c95-d786-4186-9324-c00a47276fcc",
             "name": "Maickon",
             "count": 7
           },
           {
-            "id": "b07e981f-2aa8-4e9f-bc92-427700d471ec",
+            "id": "007b763e-2d00-4f30-bf86-ab0ec8664a89",
             "name": "Charles",
             "count": 9
           },
           {
-            "id": "67300485-3357-4d79-b58d-4f129d4851e2",
+            "id": "86501259-412f-492b-9793-171d9b45eb02",
             "name": "Phillipe",
             "count": 11
           },
           {
-            "id": "73908ff3-de0e-4676-a608-15d6db268a56",
+            "id": "70af2a68-d944-42e8-84d3-418c32594a6e",
             "name": "Junior",
             "count": 5
           },
           {
-            "id": "8ee7586c-9ac5-41bb-8a2e-efafe7202437",
+            "id": "f6409ff3-3940-4195-a3d3-2b2875fc18c5",
             "name": "Samuel",
             "count": 8
           },
           {
-            "id": "008596ae-3303-4fd7-992c-ceab573282b7",
+            "id": "7e0c9e6c-c047-4578-9945-63b3b2234a05",
             "name": "Gabriel",
             "count": 7
           },
           {
-            "id": "bb8d1daf-1902-4cd9-becd-e66317a4c3c5",
+            "id": "a3270d41-5a83-4982-925f-fe582972b1df",
             "name": "Maicon",
             "count": 2
           },
           {
-            "id": "5d66cac4-6851-415d-9131-33ac13772ab8",
+            "id": "81f217c4-5efe-4cc5-9f98-48d55bed3da8",
             "name": "Saulo",
             "count": 8
           }
@@ -507,18 +507,18 @@
       },
       "scale": [
         {
-          "id": "ccdf66c7-9c12-46e6-98ae-a926bf8aca12",
+          "id": "a8e611f9-8bb7-49e6-aea5-0aa6eb6c142f",
           "date": "2026-04-01",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "5e56f2ec-7f0a-4537-9173-c2fad265d0ab",
+              "id": "39c27c09-0c73-45f9-aeec-4a9b137cfe0c",
               "time": "14h - 20h",
               "name": "Phillipe",
               "swap": ""
             },
             {
-              "id": "bc785850-268c-4bb8-831d-3866f5bdfd96",
+              "id": "76bd8509-46b2-467d-9691-7dc50dc83008",
               "time": "08h - 14h",
               "name": "Samuel",
               "swap": ""
@@ -530,24 +530,24 @@
           "note": "Reforçar abordagem comercial na recepção."
         },
         {
-          "id": "b7e2c563-9596-45fe-9f79-b54376fe2022",
+          "id": "38d063e3-3cf1-4300-9bd5-31382268fb10",
           "date": "2026-04-02",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "c3817476-0eea-49c2-a305-24400a9b2cd8",
+              "id": "7b79a243-a80e-4c7f-a5e2-825d7786804b",
               "time": "06h - 12h",
               "name": "Saulo",
               "swap": "Cobertura"
             },
             {
-              "id": "0d9e5329-3967-449f-8f39-9c5ce98657f5",
+              "id": "d8eef91f-2a37-412e-9064-f9a35abc1cef",
               "time": "13h - 19h",
               "name": "Junior",
               "swap": ""
             },
             {
-              "id": "6f699edf-cd87-4aae-b1e3-1afa6403a26f",
+              "id": "62be174c-5111-48c6-b063-961d51bd7a51",
               "time": "08h - 14h",
               "name": "Phillipe",
               "swap": "Cobertura"
@@ -559,24 +559,24 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "78e28f62-28a6-4137-a7e3-eb10c05ddb4a",
+          "id": "8c17742b-b196-4b46-a47a-95f8ac3a1812",
           "date": "2026-04-03",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "abd295bc-5299-465b-8f32-e846296c70e8",
+              "id": "f069a4d1-f12d-44a6-b90b-f447d163781a",
               "time": "13h - 19h",
               "name": "Junior",
               "swap": ""
             },
             {
-              "id": "cab0961f-ed1f-4ed1-bdc9-e7beee482b97",
+              "id": "84976a22-7f02-4521-bc3d-a8d631693eed",
               "time": "07h - 13h",
               "name": "Junior",
               "swap": ""
             },
             {
-              "id": "3b94281f-9fe0-4e32-9e74-a2cd4fdbb617",
+              "id": "9b77bba6-ed61-4ede-bdf0-057efd447740",
               "time": "06h - 12h",
               "name": "Maicon",
               "swap": "Cobertura"
@@ -588,24 +588,24 @@
           "note": "Reforçar abordagem comercial na recepção."
         },
         {
-          "id": "024b979b-edc0-45b7-9456-ce917e5f0548",
+          "id": "42caaec8-e94b-483d-b054-b766e6abaee2",
           "date": "2026-04-04",
           "rowTone": "green",
           "professorShifts": [
             {
-              "id": "f88ffd45-0b00-4cee-84f0-f8a201681470",
+              "id": "685732c5-797a-48d5-ae09-974b667c814f",
               "time": "16h - 22h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "6a7fd69c-a202-49fb-b29e-f91128f969fb",
+              "id": "e3d454f9-e969-48bb-a867-c63f60180e25",
               "time": "08h - 14h",
               "name": "Phillipe",
               "swap": ""
             },
             {
-              "id": "5822047f-fa4e-4a5d-adf5-b3586fc40af1",
+              "id": "a08d4a20-2a3e-40fe-b082-a77e6201b4e7",
               "time": "14h - 20h",
               "name": "Maicon",
               "swap": ""
@@ -617,24 +617,24 @@
           "note": "Cobertura planejada para horários críticos."
         },
         {
-          "id": "c5f5f7ee-f9d1-43b0-bf66-c495797fad66",
+          "id": "49c069f9-ec38-4c8e-a783-ed81ac250376",
           "date": "2026-04-05",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "950d89a7-7478-4fb9-96ef-23a83efb6e72",
+              "id": "16454770-953d-472c-b6e0-668516c227fb",
               "time": "12h - 18h",
               "name": "Gabriel",
               "swap": ""
             },
             {
-              "id": "26956f33-b091-4106-a447-06496c1c0da3",
+              "id": "7b908b0c-0078-4aec-a418-57566f41c24d",
               "time": "12h - 18h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "347d1dd0-ca75-4aa6-83bd-3f00de435304",
+              "id": "99d58d86-000d-44ef-aa08-94937ddc3b4e",
               "time": "16h - 22h",
               "name": "Gabriel",
               "swap": ""
@@ -646,12 +646,12 @@
           "note": "Cobertura planejada para horários críticos."
         },
         {
-          "id": "28e7688e-6c68-471e-af07-f77c8c1928f5",
+          "id": "4c04e0df-e3cc-4432-829a-471b43da2d6e",
           "date": "2026-04-06",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "0e73ffc3-09c8-4bd4-a381-524df15e297b",
+              "id": "2c280426-ced5-40f8-9e16-9ab5f9f580b4",
               "time": "07h - 13h",
               "name": "Charles",
               "swap": ""
@@ -663,18 +663,18 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "b0ee730e-8ee3-443c-ae9b-8a0868666c7d",
+          "id": "9bde8cb2-803f-4e70-ae0a-c85c426b1e0c",
           "date": "2026-04-07",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "45f23a5b-4c4f-4673-8a81-84c50212921a",
+              "id": "b3864206-feb0-475e-878f-4b6bdd378298",
               "time": "07h - 13h",
               "name": "Gabriel",
               "swap": "Cobertura"
             },
             {
-              "id": "c43c0412-bffc-4130-94a4-a8caede7b089",
+              "id": "d92934f2-91c2-4e11-ba14-aecbab689212",
               "time": "06h - 12h",
               "name": "Saulo",
               "swap": ""
@@ -686,18 +686,18 @@
           "note": "Foco em retenção e relacionamento."
         },
         {
-          "id": "1652d32a-0d08-42c1-8894-71435f9ef2e2",
+          "id": "373ad262-e375-42ae-a710-8bc63a8613e8",
           "date": "2026-04-08",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "dd0701e2-e34d-472d-8ac9-00f4a369365a",
+              "id": "45b5d125-62d3-408c-b20c-7f153e9a980a",
               "time": "08h - 14h",
               "name": "Phillipe",
               "swap": ""
             },
             {
-              "id": "b874d52d-c268-4d43-9381-790095c12c68",
+              "id": "756e1b9c-b10b-47b2-bc4f-c227a577fed3",
               "time": "13h - 19h",
               "name": "Samuel",
               "swap": ""
@@ -709,24 +709,24 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "20daa848-c19b-4d15-8475-9800ecab5b1d",
+          "id": "16b21531-e683-4641-b8fa-d1ca5527f5f8",
           "date": "2026-04-09",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "7041de4f-b26d-4749-9d6c-d32443279bf7",
+              "id": "89d5e2d2-863f-40b6-9c38-cd34d30007f8",
               "time": "16h - 22h",
               "name": "Charles",
               "swap": ""
             },
             {
-              "id": "1e065cef-1927-41b9-a8c9-7e6116e909c5",
+              "id": "1fe1aac1-7a33-4f29-a277-c2d285c95467",
               "time": "13h - 19h",
               "name": "Charles",
               "swap": ""
             },
             {
-              "id": "2f7e5d7c-ace2-4af1-919b-3c7a9501597b",
+              "id": "1de6d180-75ca-48d0-a3cb-7a8bbdd82b84",
               "time": "12h - 18h",
               "name": "Gabriel",
               "swap": ""
@@ -738,18 +738,18 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "36f07979-6b55-4806-863f-e227b82927f6",
+          "id": "ce50f3be-8117-490f-8b73-05d792aa492d",
           "date": "2026-04-10",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "195c6067-2f9d-48c9-b0f9-4795b82117fc",
+              "id": "79d5e6f3-3fd0-4e6d-941c-5e6a6a5bc82e",
               "time": "16h - 22h",
               "name": "Charles",
               "swap": ""
             },
             {
-              "id": "ed7047ff-8cc4-4100-8dc1-714ccc7f6309",
+              "id": "55f23ec7-567b-4cc7-af7b-47b9f6bf41f6",
               "time": "12h - 18h",
               "name": "Junior",
               "swap": ""
@@ -761,12 +761,12 @@
           "note": "Cobertura planejada para horários críticos."
         },
         {
-          "id": "2d77ccf1-f517-4195-a13d-ca936d5621ad",
+          "id": "32788d60-0431-45a2-9866-dd9f9194ad33",
           "date": "2026-04-11",
           "rowTone": "green",
           "professorShifts": [
             {
-              "id": "200ae294-32fc-42dd-8ef3-a8e311052d59",
+              "id": "1fd14538-cd48-4f7e-a130-fe5d66f03e23",
               "time": "07h - 13h",
               "name": "Phillipe",
               "swap": ""
@@ -778,24 +778,24 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "91978857-2ed8-45da-a262-de5fa3b4057f",
+          "id": "498bf518-bdf4-45fc-b597-86bb36786279",
           "date": "2026-04-12",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "d619ec42-c62a-4ee8-b5c8-37724c7abf83",
+              "id": "0f806530-14ae-4663-9839-c0b03bf5f212",
               "time": "08h - 14h",
               "name": "Junior",
               "swap": ""
             },
             {
-              "id": "319c212e-49f5-4789-836d-1048a7371e21",
+              "id": "c7c0f9a6-7ac9-4cca-863c-57e1bad5e080",
               "time": "16h - 22h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "d4e0cc97-7164-4686-a8ed-55130a474423",
+              "id": "1b530aaa-b1a2-4093-8731-8f4f1bc5b738",
               "time": "08h - 14h",
               "name": "Charles",
               "swap": ""
@@ -807,24 +807,24 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "a64ec363-3ca1-48b0-b09c-ea7c9fe5dd1b",
+          "id": "ed1b097e-d0b5-4954-bc0b-4ddfbef02137",
           "date": "2026-04-13",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "e47ab792-0c5a-41d8-96c7-cc0b4f2591cc",
+              "id": "6381d6c4-92d5-46bf-a9f2-c0dddfeaed4b",
               "time": "12h - 18h",
               "name": "Saulo",
               "swap": ""
             },
             {
-              "id": "7e0d2a49-772d-4b86-b560-6759b2a29bef",
+              "id": "77ee7952-d6bd-40bf-9834-524e17172be6",
               "time": "12h - 18h",
               "name": "Charles",
               "swap": ""
             },
             {
-              "id": "c545ebc3-dc25-409b-9d78-f352827854de",
+              "id": "ba2b11cc-89e8-4f26-92cd-d02623c3177c",
               "time": "12h - 18h",
               "name": "Junior",
               "swap": ""
@@ -836,24 +836,24 @@
           "note": "Reforçar abordagem comercial na recepção."
         },
         {
-          "id": "050018ba-2461-43ce-ad2a-9742322fcf96",
+          "id": "e04cf08a-a833-4818-b4dc-1ec356bae67d",
           "date": "2026-04-14",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "4407b9b8-aaf9-46f9-b75e-878b3e12a92f",
+              "id": "392cc5e6-c7f5-4d31-8ffd-bda7ac0ff3c7",
               "time": "07h - 13h",
               "name": "Maicon",
               "swap": ""
             },
             {
-              "id": "aaf4929c-1d10-4ee8-8bc1-0ff318d7a6b8",
+              "id": "579f44b2-814b-4204-8c3f-c764d3064035",
               "time": "16h - 22h",
               "name": "Phillipe",
               "swap": ""
             },
             {
-              "id": "afacb006-13bc-4feb-8a20-bd4bbbb63996",
+              "id": "5130da7e-0fce-4e4c-bb17-2ea1a5e2e6ef",
               "time": "14h - 20h",
               "name": "Samuel",
               "swap": "Cobertura"
@@ -865,24 +865,24 @@
           "note": "Foco em retenção e relacionamento."
         },
         {
-          "id": "00246761-a9b3-4701-95d8-4eabab08d8c4",
+          "id": "7f966c9a-a4f3-40f7-a3f6-fa8d65077eca",
           "date": "2026-04-15",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "ec953f67-76f2-4bb1-b047-25e7082a1c01",
+              "id": "dd4824ac-6b43-4827-b178-01ccb9f68dd9",
               "time": "12h - 18h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "983207af-d26b-4618-8f48-d9ada80f49b3",
+              "id": "f67a1fc2-f8b6-4c26-bcd0-26737c6d9d58",
               "time": "07h - 13h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "b0bbce0c-7d66-4524-9ecd-4e607d3fc43b",
+              "id": "462810c0-d450-4f45-a9df-de7032f0300b",
               "time": "13h - 19h",
               "name": "Maicon",
               "swap": ""
@@ -894,12 +894,12 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "84ef7e95-97f8-44e4-bb5a-07cb24063fb3",
+          "id": "97de9b27-6fbc-41cf-84d0-6d3d62825037",
           "date": "2026-04-16",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "596e8808-75e5-4785-9f53-56da578383bd",
+              "id": "331d4f0a-d6fd-4c77-9f31-f455cb48be36",
               "time": "07h - 13h",
               "name": "Junior",
               "swap": ""
@@ -911,12 +911,12 @@
           "note": "Foco em retenção e relacionamento."
         },
         {
-          "id": "0444d56c-1e63-46c3-8d69-0bf206f75f8a",
+          "id": "712670a5-d58e-423a-a076-fae94a9d9470",
           "date": "2026-04-17",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "db8fd67e-b0ef-4545-b4f1-1025cc25f3d8",
+              "id": "15756cbf-6cba-40db-b137-981dd50e890b",
               "time": "07h - 13h",
               "name": "Charles",
               "swap": "Cobertura"
@@ -928,24 +928,24 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "f7e65db3-ab19-40ec-b579-5fc9e51e5b9e",
+          "id": "cfb9332b-4be2-432c-88fb-c4c5fb03a148",
           "date": "2026-04-18",
           "rowTone": "green",
           "professorShifts": [
             {
-              "id": "21f8d48a-1f11-4ee4-a528-2fe44319a3fd",
+              "id": "0599215b-f41d-4188-a383-532d36d4dadb",
               "time": "16h - 22h",
               "name": "Maicon",
               "swap": ""
             },
             {
-              "id": "883613ba-2793-4a64-a771-f13b45120e8f",
+              "id": "edf32ac4-8038-4ee3-acb4-64ee401b3d29",
               "time": "06h - 12h",
               "name": "Junior",
               "swap": ""
             },
             {
-              "id": "93eb7e79-b245-49f5-ab83-effb4481f35c",
+              "id": "4b7f0dd3-27cf-40f2-b39f-94d6dc91b17f",
               "time": "08h - 14h",
               "name": "Saulo",
               "swap": ""
@@ -957,18 +957,18 @@
           "note": "Foco em retenção e relacionamento."
         },
         {
-          "id": "51d19ae4-baac-4725-b7c9-c4c7598915fd",
+          "id": "05dc92eb-4bd5-42c7-9b8f-b497c120c7c1",
           "date": "2026-04-19",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "8244893b-4a64-46db-b3c9-4262a970b58b",
+              "id": "88af2fb6-e44e-4d52-8a2b-7ac5783d255b",
               "time": "13h - 19h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "2dd0a41d-752c-402e-8099-e0c57d434ed8",
+              "id": "9c93b30f-064d-48f8-b5b5-f8064362522e",
               "time": "12h - 18h",
               "name": "Phillipe",
               "swap": ""
@@ -980,12 +980,12 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "aad97931-e949-4781-b2c3-ea87a696b25d",
+          "id": "98e2d003-d220-4e97-ba48-ed88ffdbf8e0",
           "date": "2026-04-20",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "e430a290-0a98-4473-9c9c-c0dd6f6f49ab",
+              "id": "8f060ee5-7949-4e28-9aba-2e48a54a44fe",
               "time": "12h - 18h",
               "name": "Junior",
               "swap": ""
@@ -997,12 +997,12 @@
           "note": "Reforçar abordagem comercial na recepção."
         },
         {
-          "id": "13905cc6-01ad-4804-8b2b-ac48fa2fa637",
+          "id": "73353f9e-0186-46c1-9a22-6f8b465ab0b3",
           "date": "2026-04-21",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "151dba7c-1d06-433c-98d9-b54f5902bdb2",
+              "id": "ff417e1d-c221-4dad-aea7-5447acf8536e",
               "time": "08h - 14h",
               "name": "Saulo",
               "swap": "Cobertura"
@@ -1014,12 +1014,12 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "aa32cd98-b6e0-4622-b2fe-88f59efae947",
+          "id": "013e509d-24f7-487a-93b4-046a8d2fb44f",
           "date": "2026-04-22",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "59521d20-907d-415c-b718-706e58aebb5f",
+              "id": "c2b4b3c6-b636-45d7-8299-f0a04c8b02f1",
               "time": "12h - 18h",
               "name": "Samuel",
               "swap": ""
@@ -1031,18 +1031,18 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "6c734646-8b15-4f49-bb79-225d01335e47",
+          "id": "7b7c884c-0b97-4971-afcb-fe6878a98e1f",
           "date": "2026-04-23",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "7e1b7968-3512-47f4-b5f8-0ab916034523",
+              "id": "032cb821-f820-402e-9dc1-5b6831be9bed",
               "time": "08h - 14h",
               "name": "Maicon",
               "swap": "Cobertura"
             },
             {
-              "id": "2f8a39bb-e700-4366-b702-8c1852e47638",
+              "id": "6d3ccb2b-5934-44ac-870e-967fd0732007",
               "time": "16h - 22h",
               "name": "Phillipe",
               "swap": "Cobertura"
@@ -1054,18 +1054,18 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "731312ff-d453-4207-8f19-aabcac70468c",
+          "id": "35f94540-ac2d-4108-901a-ab5151a3c23b",
           "date": "2026-04-24",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "e46e94ef-6984-45a8-aa12-3339a4d2cc82",
+              "id": "f35e4199-4feb-4a57-aa00-04b74af30ea1",
               "time": "14h - 20h",
               "name": "Saulo",
               "swap": ""
             },
             {
-              "id": "f7e8dcde-6956-4d48-8f9e-7fc499dd8eed",
+              "id": "c6d6c33a-30b1-4b4e-8063-a7158b0af971",
               "time": "13h - 19h",
               "name": "Maicon",
               "swap": ""
@@ -1077,24 +1077,24 @@
           "note": "Monitorar retorno dos alunos com visita inicial."
         },
         {
-          "id": "b866c851-ca87-4590-888f-78c54b90c673",
+          "id": "597d29f8-9286-4ac3-926c-76b613f01648",
           "date": "2026-04-25",
           "rowTone": "green",
           "professorShifts": [
             {
-              "id": "e2be50e5-1b4a-44df-bef0-7a77f32c04f8",
+              "id": "a5724b65-7288-46ac-9883-dd96b123bf6e",
               "time": "13h - 19h",
               "name": "Gabriel",
               "swap": ""
             },
             {
-              "id": "a28ff042-5bd1-40bf-9e84-00a6bef7701d",
+              "id": "1d9a7102-9cc8-425c-a317-3ca2a94ac5b8",
               "time": "06h - 12h",
               "name": "Phillipe",
               "swap": ""
             },
             {
-              "id": "9a24458f-9389-4b9e-b820-e0c0f369bf09",
+              "id": "0500ab03-3930-4fc6-a42e-8376c120dce5",
               "time": "08h - 14h",
               "name": "Gabriel",
               "swap": ""
@@ -1106,12 +1106,12 @@
           "note": "Reforçar abordagem comercial na recepção."
         },
         {
-          "id": "5fa8b05b-a512-45f8-9dd2-e128d5c5a0ca",
+          "id": "60a33526-00dd-4faf-87dc-1e3b5cb39f57",
           "date": "2026-04-26",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "bcfeff86-d61d-49c4-883c-611f77164025",
+              "id": "0703f65c-77f2-480b-afe9-b9091cb90516",
               "time": "14h - 20h",
               "name": "Phillipe",
               "swap": ""
@@ -1123,12 +1123,12 @@
           "note": "Cobertura planejada para horários críticos."
         },
         {
-          "id": "291a1f72-d1a2-4163-8246-55243b089a5d",
+          "id": "03aea7cf-acfe-461f-b420-676733e520d5",
           "date": "2026-04-27",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "e78ff5c2-8dad-4209-b6c9-a81307e36832",
+              "id": "1ff10176-0c52-47c8-aef1-86356c8a35cc",
               "time": "12h - 18h",
               "name": "Phillipe",
               "swap": "Cobertura"
@@ -1140,12 +1140,12 @@
           "note": "Cobertura planejada para horários críticos."
         },
         {
-          "id": "0a7ea953-f3ae-46bd-8f35-91cb52412ddb",
+          "id": "616d3b94-b31b-456c-bda5-36cfd02dcb69",
           "date": "2026-04-28",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "9b3db0d4-fa9e-41d5-b644-5d553a01703a",
+              "id": "46a4c9f9-1c74-44b4-8ca2-338325490a7c",
               "time": "14h - 20h",
               "name": "Gabriel",
               "swap": ""
@@ -1157,18 +1157,18 @@
           "note": "Fluxo alto esperado no período da tarde."
         },
         {
-          "id": "d968875b-97f4-4f68-9930-9b41138f721e",
+          "id": "1733fdf9-76a3-470b-b691-ac0efabd0419",
           "date": "2026-04-29",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "b4e886d9-83d1-49f7-9dfe-35c721547d58",
+              "id": "5d0aba46-3a73-42f7-ad43-3194c3d3470c",
               "time": "12h - 18h",
               "name": "Samuel",
               "swap": ""
             },
             {
-              "id": "cca3cfb5-e9f3-47eb-8f55-887f067e2212",
+              "id": "bbd6960f-6e41-4ce9-a9bc-4b299dcbb4ac",
               "time": "16h - 22h",
               "name": "Charles",
               "swap": ""
@@ -1180,24 +1180,24 @@
           "note": "Foco em retenção e relacionamento."
         },
         {
-          "id": "f0914ca5-25aa-41d9-8256-053eda24ad78",
+          "id": "a099da93-a48e-4d1d-8afa-0aef08af7e22",
           "date": "2026-04-30",
           "rowTone": "neutral",
           "professorShifts": [
             {
-              "id": "e6061c71-405a-423f-833b-2cd89a6acf81",
+              "id": "3f86c306-c06e-41cf-aa9c-4666d11ce8df",
               "time": "07h - 13h",
               "name": "Maicon",
               "swap": ""
             },
             {
-              "id": "49c58fb7-4f16-4ec9-89b7-7a74dfcd640f",
+              "id": "b0bec500-5bda-4318-89d7-9e64896c303f",
               "time": "12h - 18h",
               "name": "Charles",
               "swap": ""
             },
             {
-              "id": "e60744fe-05e5-4324-ac40-58895e65a92c",
+              "id": "0c809890-dfdd-46a5-a876-cfa5f8e3d51a",
               "time": "13h - 19h",
               "name": "Saulo",
               "swap": ""
@@ -1211,7 +1211,7 @@
       ],
       "events": [
         {
-          "id": "b553260c-dddf-48f9-81ec-70398f484bb4",
+          "id": "2e286b8a-56da-445f-a630-15afb222f9b6",
           "date": "2026-04-11",
           "time": "15:15",
           "type": "Feriado",
@@ -1222,7 +1222,7 @@
           "description": "Monitorar retorno dos alunos com visita inicial. Preparar comunicação visual."
         },
         {
-          "id": "22aceda3-b1c3-4e56-a64d-5d7a154de317",
+          "id": "04cf95c8-7019-4812-9996-acbdb11bda09",
           "date": "2026-04-04",
           "time": "13:45",
           "type": "Treinamento",
@@ -1233,7 +1233,7 @@
           "description": "Foco em retenção e relacionamento. Registrar resultados no fechamento do mês."
         },
         {
-          "id": "fed4b567-aca3-4501-b494-84f4c4332d21",
+          "id": "fd206391-44a8-42b5-9af0-3047c3f82c85",
           "date": "2026-04-16",
           "time": "11:45",
           "type": "Evento",
@@ -1244,7 +1244,7 @@
           "description": "Reforçar abordagem comercial na recepção. Acionar equipe completa."
         },
         {
-          "id": "90264da2-4da6-42fc-9375-0d08bfa81b7c",
+          "id": "c0df7975-0410-415b-bb65-0786880ed6c4",
           "date": "2026-04-19",
           "time": "11:00",
           "type": "Feriado",
@@ -1255,7 +1255,7 @@
           "description": "Reforçar abordagem comercial na recepção. Registrar resultados no fechamento do mês."
         },
         {
-          "id": "23f391e8-a444-4739-8a6b-7be785a68739",
+          "id": "3155606d-06dc-41b1-961c-f05d9863ddf2",
           "date": "2026-04-04",
           "time": "19:15",
           "type": "Campanha",
@@ -1266,7 +1266,7 @@
           "description": "Foco em retenção e relacionamento. Preparar comunicação visual."
         },
         {
-          "id": "6af0e216-71aa-41bd-bd70-2f42ba56a9ce",
+          "id": "599b16f2-6187-4969-a32a-d2e8a299674a",
           "date": "2026-04-08",
           "time": "15:45",
           "type": "Evento",
@@ -1277,7 +1277,7 @@
           "description": "Fluxo alto esperado no período da tarde. Acionar equipe completa."
         },
         {
-          "id": "690d4f9c-6cdc-4e88-855b-7b8bcc5dbbcc",
+          "id": "e2730218-a2c7-4f3f-814e-b55b476d4aef",
           "date": "2026-04-25",
           "time": "19:15",
           "type": "Evento",
@@ -1288,7 +1288,7 @@
           "description": "Fluxo alto esperado no período da tarde. Acionar equipe completa."
         },
         {
-          "id": "7db45d82-9ecc-45b9-a9e4-4b85f364b7e6",
+          "id": "fffea21c-9d67-4130-a312-139c355f0af0",
           "date": "2026-04-03",
           "time": "12:15",
           "type": "Campanha",
@@ -1299,7 +1299,7 @@
           "description": "Cobertura planejada para horários críticos. Acionar equipe completa."
         },
         {
-          "id": "c8ef4cf5-4f42-42b2-b182-6ee7e723a062",
+          "id": "99eb781b-2cff-463f-8452-a6439fa0cf37",
           "date": "2026-04-27",
           "time": "19:00",
           "type": "Evento",
@@ -1310,7 +1310,7 @@
           "description": "Cobertura planejada para horários críticos. Acompanhar leads gerados no mesmo dia."
         },
         {
-          "id": "74610006-fd8c-49c2-a31b-a28755228718",
+          "id": "33d1be66-e05d-4528-b6d3-4cb78fbd8f0c",
           "date": "2026-04-05",
           "time": "12:15",
           "type": "Evento",
@@ -1323,7 +1323,7 @@
       ],
       "pending": [
         {
-          "id": "1ca19c42-c682-4c3e-98f1-31d631f530f2",
+          "id": "090d4080-22ef-48e8-9237-a31a577c4429",
           "nome": "Felipe Barbosa",
           "matricula": "20260401",
           "pendencia": "Confirmar plano familiar — validar no sistema.",
@@ -1333,7 +1333,7 @@
           "status": "respondido"
         },
         {
-          "id": "fe2d0c23-a9f1-4faa-8475-a680c0183642",
+          "id": "69392d0b-54a6-435b-9b58-99088227a62b",
           "nome": "Rafael Silva",
           "matricula": "20260409",
           "pendencia": "Enviar contrato assinado — validar no sistema.",
@@ -1343,7 +1343,7 @@
           "status": "respondido"
         },
         {
-          "id": "47fbfe36-2b05-477d-9359-ad7c3855a408",
+          "id": "d0163588-98b6-4bd7-b659-0ac970ba96b0",
           "nome": "Felipe Lopes",
           "matricula": "20260430",
           "pendencia": "Regularizar biometria — validar no sistema.",
@@ -1353,7 +1353,7 @@
           "status": "concluido"
         },
         {
-          "id": "bc32a9de-f748-4c12-a9f5-d05a16fd7233",
+          "id": "3d8d463c-c2f5-4f71-9732-b45f0d22dca7",
           "nome": "Vinicius Dias",
           "matricula": "20260405",
           "pendencia": "Atualizar cadastro — validar no sistema.",
@@ -1363,7 +1363,7 @@
           "status": "concluido"
         },
         {
-          "id": "a23427da-ee29-40fe-9523-f94a5b62036e",
+          "id": "714ae431-7bae-4666-9038-688187ca9492",
           "nome": "Eduarda Almeida",
           "matricula": "20260415",
           "pendencia": "Validar dependente — acompanhar no próximo turno.",
@@ -1373,7 +1373,7 @@
           "status": "respondido"
         },
         {
-          "id": "45787d42-6ca8-4654-8593-3ab5ff11f6a4",
+          "id": "559c28ae-03cd-4680-8487-ca1b255dc2c5",
           "nome": "Felipe Barbosa",
           "matricula": "20260401",
           "pendencia": "Entregar atestado — cliente aguardando retorno.",
@@ -1383,7 +1383,7 @@
           "status": "concluido"
         },
         {
-          "id": "f09f2f18-a9de-4391-a1e9-f7e57bdb2287",
+          "id": "a777da19-c0cf-46f0-8689-615bc6fb97a9",
           "nome": "Paulo Dias",
           "matricula": "20260414",
           "pendencia": "Regularizar biometria — acompanhar no próximo turno.",
@@ -1393,7 +1393,7 @@
           "status": "aberto"
         },
         {
-          "id": "2acb23c9-2076-4252-960d-eb8218378436",
+          "id": "3c8fb8cd-d42f-4bf8-80d4-1b67bd3baab4",
           "nome": "Thiago Ferreira",
           "matricula": "20260422",
           "pendencia": "Atualizar cadastro — cliente aguardando retorno.",
@@ -1403,7 +1403,7 @@
           "status": "aberto"
         },
         {
-          "id": "5fe8e939-0aac-45bd-8d1d-7540ca2ff807",
+          "id": "4f915066-7739-4327-876b-910662249267",
           "nome": "Fabiana Esteves",
           "matricula": "20260425",
           "pendencia": "Atualizar cadastro — cliente aguardando retorno.",
@@ -1413,7 +1413,7 @@
           "status": "aberto"
         },
         {
-          "id": "aade7e98-f250-4ffc-bc69-7b2aed8b3366",
+          "id": "e899821a-4dc0-49e4-a8c3-424f2b50a5a4",
           "nome": "Igor Teixeira",
           "matricula": "20260406",
           "pendencia": "Ajustar vencimento — cliente aguardando retorno.",
@@ -1423,7 +1423,7 @@
           "status": "concluido"
         },
         {
-          "id": "aff1f5d7-9b8d-4929-9e47-419c88d5f6ea",
+          "id": "c7f74f27-7249-4d45-ba24-353a3c507686",
           "nome": "Felipe Ramos",
           "matricula": "20260424",
           "pendencia": "Reagendar retorno comercial — acompanhar no próximo turno.",
@@ -1433,7 +1433,7 @@
           "status": "respondido"
         },
         {
-          "id": "e48d7cef-1dd7-412a-b3bd-dae9c4f512e7",
+          "id": "0be15375-da45-4aee-9f2f-c7710f32c6b4",
           "nome": "Eduarda Almeida",
           "matricula": "20260415",
           "pendencia": "Confirmar plano familiar — validar no sistema.",
@@ -1443,7 +1443,7 @@
           "status": "concluido"
         },
         {
-          "id": "7ac7cfc5-5765-43d9-8066-4bf15e5e38b7",
+          "id": "19042aea-f9cb-4b41-b064-84e6575bb55a",
           "nome": "Rafael Silva",
           "matricula": "20260409",
           "pendencia": "Confirmar plano familiar — validar no sistema.",
@@ -1453,7 +1453,7 @@
           "status": "aberto"
         },
         {
-          "id": "b2b2ab80-49a6-4a52-803c-19d65dc8cd0f",
+          "id": "9ddf8146-4503-4898-8f33-557ace6e0b82",
           "nome": "Ana Vieira",
           "matricula": "20260418",
           "pendencia": "Liberar acesso no totem — prioridade alta.",
@@ -1463,7 +1463,7 @@
           "status": "concluido"
         },
         {
-          "id": "e59d9cd6-30d9-4729-87d4-8ec059a69fa8",
+          "id": "2ae73afd-aeb8-48fb-bed1-5b509dc0a62d",
           "nome": "Sabrina Esteves",
           "matricula": "20260419",
           "pendencia": "Atualizar cadastro — prioridade alta.",
@@ -1473,7 +1473,7 @@
           "status": "concluido"
         },
         {
-          "id": "efe9caee-0e1f-439e-b849-e5504e471c74",
+          "id": "14aad15b-ddfe-4069-b794-4d5105fe01ee",
           "nome": "Sabrina Esteves",
           "matricula": "20260419",
           "pendencia": "Validar dependente — prioridade alta.",
@@ -1483,7 +1483,7 @@
           "status": "aberto"
         },
         {
-          "id": "797051d3-165e-43b7-adbb-6952bbcee295",
+          "id": "68bda330-e8e6-4ce2-bb8d-73ad62c724dc",
           "nome": "Felipe Barbosa",
           "matricula": "20260401",
           "pendencia": "Atualizar cadastro — validar no sistema.",
@@ -1493,7 +1493,7 @@
           "status": "concluido"
         },
         {
-          "id": "917cf96e-56ac-4400-a9ac-f69fd1f79b4b",
+          "id": "51f11174-57a6-47cc-ab07-986062065577",
           "nome": "Paulo Barbosa",
           "matricula": "20260423",
           "pendencia": "Enviar contrato assinado — prioridade alta.",
@@ -1503,7 +1503,7 @@
           "status": "aberto"
         },
         {
-          "id": "4f45ecd7-f10d-4522-a260-841bcebf584c",
+          "id": "c5e86840-cada-4b72-b1cc-6e10661c8a49",
           "nome": "Mirela Silva",
           "matricula": "20260421",
           "pendencia": "Enviar contrato assinado — prioridade alta.",
@@ -1513,7 +1513,7 @@
           "status": "concluido"
         },
         {
-          "id": "40007020-0daf-483b-b9fe-e0ea5ff601b5",
+          "id": "e798369c-b64f-4e69-94fa-0b3a0f069486",
           "nome": "Paulo Barbosa",
           "matricula": "20260423",
           "pendencia": "Validar dependente — validar no sistema.",

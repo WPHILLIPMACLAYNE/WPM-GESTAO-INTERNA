@@ -300,3 +300,64 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 - `Docs/DOCUMENTACAO.md` — Documentação técnica completa (API, schema, migração, a11y)
 - `Docs/ETAPA_5_FINALIZACAO.md` — Detalhes da refatoração modular
 - `Docs/CORRECOES_ETAPA_[1-4].md` — Histórico de correções por etapa
+
+---
+
+## Pós-auditoria
+
+### Data
+
+- Auditoria concluída em `2026-04-06`
+
+### Resultado Final dos Testes
+
+- **Vitest:** `116/116` ✅
+- **Playwright:** `42/42` ✅
+- **Total consolidado:** `158/158` ✅
+
+### Resultado da Comparação Monólito × Modular
+
+- A superfície pública do `APP_INTERNALS` foi preservada: **nenhuma função pública do monólito ficou ausente** na versão modular.
+- Diferenças de declaração encontradas fora da superfície pública:
+  - presentes no monólito, mas não com a mesma declaração top-level na versão modular: `doSave`, `saveEventItem`, `savePending`, `saveStudent`
+  - adicionadas na versão modular: `createCrudHandler`, `doResizeMonth`, `sanitizeHtml`
+- Duplicações relevantes entre módulos:
+  - `csvEscape`, `buildCsvContent`
+  - `formatBytes`, `formatPersistenceTimestamp`
+  - `getRiskBand`, `getNpsGoalProgress`, `getNpsHistoryBandClass`
+  - `normalizeSearchText`, `normalizeEventType`, `eventStatusClass`
+  - `shortText`, `toneLabel`, `suggestScaleTone`
+
+### Correções Confirmadas
+
+- Correção prévia confirmada:
+  - `studentStatusPill`, `npsPill` e `pendingPill` permanecem em `src/ui/render.js`, eliminando o bug de ordem de carga que quebrava Alunos Novos e Pendências.
+- Correção adicional feita na pós-auditoria:
+  - `src/ui/render.js`: `aplicarPatchLinhas()` foi ajustado para preservar `<tr>` reais no navegador e estabilizar CRUD + E2E.
+
+### Status Final de Cada Módulo
+
+- `src/utils/helpers.js` — `✅ OK`
+- `src/core/config.js` — `✅ OK`
+- `src/core/schema.js` — `⚠ depende de globais tardios`
+- `src/core/storage.js` — `⚠ mistura persistência, schema e UI state`
+- `src/domain/selectors.js` — `✅ OK`
+- `src/features/forms.js` — `✅ OK`
+- `src/features/crud.js` — `✅ OK`
+- `src/features/csv.js` — `⚠ mantém utilidades duplicadas`
+- `src/features/diagnostics.js` — `✅ OK`
+- `src/features/nps.js` — `✅ OK`
+- `src/ui/render.js` — `⚠ arquivo muito grande / multi-responsabilidade`
+- `src/ui/events.js` — `⚠ alto acoplamento por globais`
+- `src/main.js` — `⚠ orquestração centralizada`
+
+### Observações Finais da Auditoria
+
+- O CSS foi preservado funcionalmente: mesmas `39` variáveis e `14` media queries do monólito.
+- Os mecanismos de performance foram preservados:
+  - `aplicarHtmlSeMudou()`
+  - `requestRender()`
+  - `lerSelectorMemorizado()` com limite de `120`
+  - `queueStorageOperation()`
+- O seed determinístico funciona, mas o bootstrap padrão do app continua iniciando meses vazios em vez de usar `generatePeriodSeed()`.
+- A modularização melhorou manutenção e testabilidade, mas o projeto continua dependente da ordem de `<script>` e de globais implícitos.

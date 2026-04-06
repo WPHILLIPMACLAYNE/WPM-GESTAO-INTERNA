@@ -183,8 +183,15 @@
 
     function criarNoRenderizado(html, chave, assinatura) {
       const template = document.createElement('template');
-      template.innerHTML = sanitizeHtml(html.trim());
-      const no = template.content.firstElementChild;
+      const markup = sanitizeHtml(html.trim());
+      if (/^<tr[\s>]/i.test(markup)) {
+        template.innerHTML = `<table><tbody>${markup}</tbody></table>`;
+      } else {
+        template.innerHTML = markup;
+      }
+      const no = /^<tr[\s>]/i.test(markup)
+        ? template.content.querySelector('tr')
+        : template.content.firstElementChild;
       if (!no) throw new Error('Renderização sem nó raiz.');
       no.dataset.chaveRender = String(chave);
       no.dataset.assinaturaRender = assinatura;
@@ -271,10 +278,17 @@
     }
 
     function aplicarPatchLinhas(container, itens, obterChave, renderizarLinha) {
-      aplicarPatchPorChave(container, itens.map(item => ({
-        chave: obterChave(item),
-        html: renderizarLinha(item)
-      })));
+      if (!container) return;
+      const foco = capturarEstadoFoco(container);
+      const html = itens.map(item => renderizarLinha(item)).join('');
+      const assinatura = criarAssinaturaHtml(html);
+      if (container.dataset.assinaturaRender !== assinatura) {
+        // Linhas de tabela já chegam com conteúdo escapado por esc() e markup
+        // controlado pelo próprio app; usar innerHTML cru aqui preserva <tr>/<td>.
+        container.innerHTML = html;
+        container.dataset.assinaturaRender = assinatura;
+      }
+      restaurarEstadoFoco(container, foco);
     }
 
     function aplicarPatchCards(container, itens, obterChave, renderizarCard) {

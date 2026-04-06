@@ -61,6 +61,15 @@
       return value;
     }
 
+    function cloneSerializable(value) {
+      if (value === undefined) return undefined;
+      try {
+        return structuredClone(value);
+      } catch {
+        return JSON.parse(JSON.stringify(value));
+      }
+    }
+
     function clamp(value, min, max) {
       return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
     }

@@ -22,15 +22,6 @@
       return store;
     }
 
-    function seedYear(year) {
-      const periods = {};
-      for (let month = 1; month <= 12; month++) {
-        const key = `${year}-${String(month).padStart(2, '0')}`;
-        periods[key] = buildEmptyPeriodFromTemplate(null, key);
-      }
-      return periods;
-    }
-
     function getDefaultStore() {
       const initialKey = getInitialPeriodKey();
       return sanitizeStore({

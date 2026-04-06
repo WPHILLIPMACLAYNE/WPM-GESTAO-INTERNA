@@ -1,0 +1,163 @@
+name: CI — Testes Automatizados
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Executar diariamente às 06:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  # ─── Testes Unitários ───────────────────────────────────────────────
+  unit-tests:
+    name: Testes Unitários
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar testes unitários
+        run: npm test
+
+      - name: Upload de coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  # ─── Testes E2E (Playwright) ────────────────────────────────────────
+  e2e-tests:
+    name: Testes E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar browsers do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Executar testes E2E
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Upload de screenshots (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: test-results/
+          retention-days: 7
+
+      - name: Upload de relatório HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  # ─── Validação de Estrutura ─────────────────────────────────────────
+  structure-validation:
+    name: Validação de Estrutura
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verificar existência dos arquivos
+        run: |
+          test -f index.html && echo "✅ index.html existe" || (echo "❌ index.html ausente" && exit 1)
+          test -f styles.css && echo "✅ styles.css existe" || (echo "❌ styles.css ausente" && exit 1)
+          test -f app.js && echo "✅ app.js existe" || (echo "❌ app.js ausente" && exit 1)
+          test -f package.json && echo "✅ package.json existe" || (echo "❌ package.json ausente" && exit 1)
+
+      - name: Validar imports no index.html
+        run: |
+          grep -q '<link rel="stylesheet" href="styles.css"' index.html && echo "✅ CSS importado" || (echo "❌ CSS não importado" && exit 1)
+          grep -q '<script src="app.js"' index.html && echo "✅ JS importado" || (echo "❌ JS não importado" && exit 1)
+
+      - name: Validar CSP
+        run: |
+          grep -q 'Content-Security-Policy' index.html && echo "✅ CSP presente" || (echo "❌ CSP ausente" && exit 1)
+
+      - name: Validar DOMPurify
+        run: |
+          grep -q 'dompurify' index.html && echo "✅ DOMPurify referenciado" || (echo "❌ DOMPurify ausente" && exit 1)
+
+      - name: Validar prefers-reduced-motion
+        run: |
+          grep -q 'prefers-reduced-motion' styles.css && echo "✅ Reduced motion presente" || (echo "❌ Reduced motion ausente" && exit 1)
+
+      - name: Contar funções no app.js
+        run: |
+          FUNC_COUNT=$(grep -c 'function ' app.js)
+          echo "📊 Funções no app.js: $FUNC_COUNT"
+          if [ "$FUNC_COUNT" -lt 300 ]; then
+            echo "⚠️ Contagem de funções abaixo do esperado (esperado: 370+)"
+          else
+            echo "✅ Contagem de funções OK"
+          fi
+
+  # ─── Responsividade (Playwright Script) ─────────────────────────────
+  responsive-test:
+    name: Teste de Responsividade
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Executar teste de responsividade
+        run: node responsive-test.mjs
+
+  # ─── Resumo de Status ───────────────────────────────────────────────
+  summary:
+    name: Resumo
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [unit-tests, e2e-tests, structure-validation, responsive-test]
+    steps:
+      - name: Gerar resumo
+        run: |
+          echo "## Status dos Jobs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Structure | ${{ needs.structure-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Responsive | ${{ needs.responsive-test.result }} |" >> $GITHUB_STEP_SUMMARY

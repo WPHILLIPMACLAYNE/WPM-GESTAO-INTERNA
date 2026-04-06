@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WPM Gestão Interna — Controle de atendimentos, addons, pendências, NPS, escala e eventos. Criado por Wallace Phillip Maclayne." />
+  <meta name="theme-color" content="#FFC20F" />
+  <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
+  <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <title>WPM Gestão Interna • v34</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
+          crossorigin="anonymous"></script>
+  <!-- Módulos da aplicação (ordem de carregamento importa) -->
+  <script src="src/utils/helpers.js"></script>
+  <script src="src/core/config.js"></script>
+  <script src="src/core/schema.js"></script>
+  <script src="src/core/storage.js"></script>
+  <script src="src/domain/selectors.js"></script>
+  <script src="src/features/forms.js"></script>
+  <script src="src/features/nps.js"></script>
+  <script src="src/features/csv.js"></script>
+  <script src="src/features/diagnostics.js"></script>
+  <script src="src/ui/render.js"></script>
+  <script src="src/features/crud.js"></script>
+  <script src="src/ui/events.js"></script>
+  <script src="src/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
+  <noscript>
+    <div style="padding:16px;background:#111;color:#fff;border-bottom:1px solid rgba(255,255,255,.12);font:600 14px/1.5 Montserrat,system-ui,sans-serif;">
+      Este aplicativo precisa de JavaScript habilitado para funcionar corretamente.
+    </div>
+  </noscript>
+  <div class="app">
+    <header class="topbar glass">
+      <div class="topbar-left">
+        <div class="brand-mark" aria-hidden="true">WPM</div>
+        <div class="brand-copy">
+          <div class="brand-title">Wallace Phillip Maclayne</div>
+          <div class="brand-subtitle">Gestão Interna</div>
+        </div>
+        <div class="divider-v"></div>
+        <div class="period-controls">
+          <span class="period-label" id="periodLabel">Mês</span>
+          <select id="periodMonthSelect" class="period-select" aria-labelledby="periodLabel"></select>
+          <input id="periodYearInput" class="period-year" type="number" min="2020" max="2100" step="1" aria-label="Ano do período" />
+          <span class="month-status-badge" id="monthStatusBadge">Mês em andamento</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-social">
+          <a href="https://www.instagram.com/maclayne_phillip_wallace?igsh=aHloOHF6eHVpZHo3" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm5.25-2.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/></svg></a>
+          <a href="https://wa.me/5531982266089" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2Zm0 1.8c4.47 0 8.11 3.64 8.11 8.11 0 4.47-3.64 8.11-8.11 8.11-1.52 0-3-.42-4.28-1.22l-.31-.18-3.22.84.86-3.14-.2-.32a8.07 8.07 0 0 1-1.25-4.31c0-4.35 3.64-7.89 8.4-7.89Zm-3.44 4.4c-.2 0-.51.07-.78.37s-1 .98-1 2.39 1.03 2.77 1.17 2.96c.15.2 2.02 3.09 4.9 4.33.69.3 1.22.47 1.64.6.69.22 1.31.19 1.81.12.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.25.17-1.37-.07-.12-.27-.2-.56-.34-.3-.15-1.75-.86-2.02-.96-.27-.1-.46-.15-.66.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.34.44-.52.15-.17.2-.3.3-.49.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.58Z"/></svg></a>
+          <a href="https://www.linkedin.com/in/wpmaclayne" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14Zm-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.75.6-1.36 1.36-1.36.76 0 1.36.61 1.36 1.36v4.93h2.86ZM6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68Zm1.39 9.94v-8.37H5.5v8.37h2.77Z"/></svg></a>
+        </div>
+        <div class="topbar-actions"><button type="button" class="btn btn-ghost" data-action="reset-selected-month" aria-label="Resetar dados do mês selecionado">Resetar mês</button><button type="button" class="btn btn-primary" id="closeMonthBtn" data-action="close-current-month" aria-label="Fechar o mês atual e avançar">▼ Fechar mês</button></div>
+      </div>
+    </header>
+    <main id="main-content" class="app-main">
+      <section class="hero-shell" aria-labelledby="app-title">
+      <div class="hero">
+        <header class="hero-main glass">
+          <div class="hero-copy">
+            <div class="eyebrow">WPM Gestão Interna • v34</div>
+            <h1 id="app-title">Painel executivo da recepção</h1>
+            <p class="subtitle">
+              Centro de comando da operação: acompanhe atendimentos, vendas de addons, pendências e NPS em tempo real.
+              Gestão mensal independente por período com exportação, backup e diagnóstico integrados.
+            </p>
+          </div>
+        </header>
+        <aside class="hero-side glass" id="heroSummary" aria-label="Resumo do período"></aside>
+      </div>
+      <div class="hero-action-bar glass" aria-label="Ações rápidas do período">
+        <div class="hero-actions hero-actions--bar">
+          <button type="button" class="btn btn-primary" data-action="open-student-modal" aria-label="Cadastrar novo atendimento">+ Novo atendimento</button>
+          <button type="button" class="btn btn-ghost" data-action="open-pending-modal" aria-label="Registrar nova pendência">+ Nova pendência</button>
+          <button type="button" class="btn btn-ghost" data-action="download-data" aria-label="Exportar backup completo em JSON">Exportar backup</button>
+          <label class="btn btn-ghost import-label" for="importFile">IMPORTAR BACKUP</label>
+          <input id="importFile" type="file" accept="application/json" class="sr-only" aria-label="Selecionar arquivo de backup para importação" />
+        </div>
+      </div>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Módulos do sistema">
+      <button type="button" class="tab-btn active" id="tab-dashboard" data-tab="dashboard" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</button>
+      <button type="button" class="tab-btn" id="tab-students" data-tab="students" role="tab" aria-controls="students" aria-selected="false">Alunos novos</button>
+      <button type="button" class="tab-btn" id="tab-addons" data-tab="addons" role="tab" aria-controls="addons" aria-selected="false">Vendas de addons</button>
+      <button type="button" class="tab-btn" id="tab-pending" data-tab="pending" role="tab" aria-controls="pending" aria-selected="false">Pendências</button>
+      <button type="button" class="tab-btn" id="tab-nps" data-tab="nps" role="tab" aria-controls="nps" aria-selected="false">NPS</button>
+      <button type="button" class="tab-btn" id="tab-scale" data-tab="scale" role="tab" aria-controls="scale" aria-selected="false">Escala</button>
+      <button type="button" class="tab-btn" id="tab-events" data-tab="events" role="tab" aria-controls="events" aria-selected="false">Eventos e ações</button>
+      <button type="button" class="tab-btn" id="tab-settings" data-tab="settings" role="tab" aria-controls="settings" aria-selected="false">Configurações</button>
+      </nav>
+
+    <section class="view active" id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard" tabindex="0">
+      <div class="stats-grid" id="dashboardCards"></div>
+      <div class="insight-grid" id="dashboardInsights"></div>
+      <div class="grid-2 dashboard-balance-row">
+        <div class="section glass dashboard-section">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <span class="section-kicker">Resumo da equipe</span>
+              <h2>Desempenho por atendente</h2>
+              <p>Resumo executivo de produtividade, feedback, addons e eficiência por atendente.</p>
+            </div>
+          </div>
+          <div class="summary-list" id="summaryList"></div>
+        </div>
+        <div class="section glass dashboard-section dashboard-section--feedback">
+          <div class="toolbar-title">
+            <span class="section-kicker">Destaque</span>
+            <h2>Feedback positivo</h2>
+            <p>Leitura comparativa do percentual de feedback positivo por atendente.</p>
+          </div>
+          <div class="chart-box">
+            <div class="chart" id="feedbackChart"></div>
+            <div class="feedback-summary" id="feedbackSummary" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="section glass dashboard-section">
+          <div class="toolbar-title">
+            <span class="section-kicker">Performance comercial</span>
+            <h2>Addons do mês</h2>
+            <p>Total por atendente e por categoria.</p>
+          </div>
+          <div id="addonsOverview"></div>
+        </div>
+        <div class="section glass dashboard-section">
+          <div class="toolbar-title">
+            <span class="section-kicker">Operação</span>
+            <h2>Pendências</h2>
+            <p>Visão rápida do fluxo de atendimento e conclusão.</p>
+          </div>
+          <div id="pendingOverview"></div>
+        </div>
+      </div>
+      <div class="section glass dashboard-section recados-section">
+        <div class="recados-header">
+          <div class="toolbar-title">
+            <span class="section-kicker">Troca de turno</span>
+            <h2>Painel de recados</h2>
+            <p>Deixe avisos e recados para a equipe do próximo turno.</p>
+          </div>
+          <div class="recados-counter" id="recadosCounter" aria-live="polite">0 recados não lidos</div>
+        </div>
+        <form class="recados-form" id="recadosForm">
+          <div class="field">
+            <label for="recadoFrom">De:</label>
+            <select id="recadoFrom" aria-label="Selecionar remetente do recado"></select>
+          </div>
+          <div class="field">
+            <label for="recadoTo">Para:</label>
+            <select id="recadoTo" aria-label="Selecionar destinatário do recado"></select>
+          </div>
+          <div class="field field-recado-message">
+            <label for="recadoMessage">Recado:</label>
+            <textarea id="recadoMessage" placeholder="Deixe um aviso claro para quem assume o próximo turno." aria-label="Escrever recado para o próximo turno"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary recados-submit">Publicar</button>
+        </form>
+        <div class="recados-list" id="recadosList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="students" role="tabpanel" aria-labelledby="tab-students" tabindex="0" hidden>
+      <div class="section glass">
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <h2 id="studentsSectionTitle">Alunos novos (mês)</h2>
+            <p>Cadastre atendimentos, filtre registros e edite data/hora da visita direto na tabela.</p>
+          </div>
+          <div class="toolbar-actions students-toolbar-actions">
+            <input id="studentSearch" type="text" placeholder="Buscar por nome, matrícula, atendente ou observação" aria-label="Buscar alunos por nome, matrícula, atendente ou observação" />
+            <select id="studentFilterAtendente" aria-label="Filtrar alunos por atendente"></select>
+            <select id="studentFilterFeedback" aria-label="Filtrar alunos por feedback">
+              <option value="">Todos os feedbacks</option>
+              <option value="Respondeu">Respondeu</option>
+              <option value="Não respondeu">Não respondeu</option>
+              <option value="Pendente">Pendente</option>
+            </select>
+            <button class="btn btn-primary" data-action="open-student-modal">Adicionar</button>
+          </div>
+        </div>
+        <div class="students-summary-bar" id="studentsSummaryBar" aria-live="polite"></div>
+        <div class="table-wrap">
+          <table class="student-table">
+            <caption class="sr-only">Lista de alunos novos do período ativo</caption>
+            <thead>
+              <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Matrícula</th>
+                <th scope="col">Última visita</th>
+                <th scope="col">Hora visita</th>
+                <th scope="col">Início</th>
+                <th scope="col">Aviso NPS</th>
+                <th scope="col">Atendimento</th>
+                <th scope="col">Feedback</th>
+                <th scope="col">Addon</th>
+                <th scope="col">Observações</th>
+                <th scope="col" class="right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="addons" role="tabpanel" aria-labelledby="tab-addons" tabindex="0" hidden>
+      <div class="section glass">
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <h2>Vendas Addons (mês)</h2>
+            <p>Formato inspirado na sua planilha, mas com atualização dinâmica e totalização automática.</p>
+          </div>
+          <div class="toolbar-actions">
+            <select id="monthDaysSelector" aria-label="Selecionar quantidade de dias do mês para addons">
+              <option value="28">28 dias</option>
+              <option value="29">29 dias</option>
+              <option value="30">30 dias</option>
+              <option value="31" selected>31 dias</option>
+            </select>
+            <button class="btn btn-ghost" data-action="add-person">+ Atendente</button>
+          </div>
+        </div>
+        <div class="addon-grid" id="addonsGrid"></div>
+        <div class="addons-ranking-card">
+          <div class="toolbar addons-ranking-head">
+            <div class="toolbar-title">
+              <h2>Top vendedores de addons</h2>
+              <p>Ranking mensal calculado a partir dos atendimentos com addon marcado.</p>
+            </div>
+          </div>
+          <div class="addons-ranking-list" id="addonsTopSellers"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="pending" role="tabpanel" aria-labelledby="tab-pending" tabindex="0" hidden>
+      <div class="pending-status-strip" id="pendingStatusStrip" aria-live="polite"></div>
+      <div class="grid-3">
+        <div class="section glass">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <h2>Pendências (mês)</h2>
+              <p>Controle completo do que foi solicitado, respondido e finalizado.</p>
+            </div>
+            <div class="toolbar-actions">
+              <input id="pendingSearch" type="text" placeholder="Buscar pendências" aria-label="Buscar pendências por nome, matrícula, hostess, resposta ou descrição" />
+              <button class="btn btn-ghost" data-action="export-pending-csv">Exportar CSV</button>
+              <button class="btn btn-primary" data-action="open-pending-modal">Adicionar</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="pending-table">
+              <caption class="sr-only">Tabela de pendências do período ativo</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Matrícula</th>
+                  <th scope="col">Pendência</th>
+                  <th scope="col">Solicitação</th>
+                  <th scope="col">Hostess</th>
+                  <th scope="col">Resposta</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="pendingTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="section glass">
+          <div class="toolbar-title">
+            <h2>Quadro de acompanhamento</h2>
+            <p>Separação visual por etapa para facilitar o dia a dia.</p>
+          </div>
+          <p id="pendingKeyboardHelp" class="sr-only">No quadro de acompanhamento, use Tab para entrar no card ativo, seta para cima e seta para baixo para navegar entre os cards, Home e End para ir ao primeiro ou último item, e Alt mais seta para a esquerda ou direita para mover a pendência entre aberto, respondido e concluído.</p>
+          <div class="kanban-scroll"><div class="kanban" id="pendingKanban" role="list" aria-label="Quadro kanban de pendências" aria-describedby="pendingKeyboardHelp"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="nps" role="tabpanel" aria-labelledby="tab-nps" tabindex="0" hidden>
+      <div class="nps-grid">
+        <div class="section glass nps-left-panel">
+          <div class="toolbar-title">
+            <h2>NPS atual</h2>
+            <p>Risk Meter interativo com edição rápida da pontuação do dia.</p>
+          </div>
+          <div id="npsMeterBox"></div>
+          <div id="npsHistoryBox"></div>
+          <div class="obs-box nps-observations-panel">
+            <div class="toolbar-title">
+              <h2>Observações de NPS</h2>
+              <p>Campo livre para anotações, contexto do dia, elogios e oportunidades de melhoria.</p>
+            </div>
+            <textarea id="npsObservations" placeholder="Escreva observações, destaques das pesquisas, padrões percebidos e próximos passos..."></textarea>
+            <div class="inline-actions">
+              <button class="btn btn-success" data-action="save-nps-observations">Salvar observações</button>
+            </div>
+          </div>
+        </div>
+        <div class="section glass nps-ranking-panel">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <h2>Ranking de citações NPS</h2>
+              <p>Registre funcionários citados nas pesquisas e acompanhe a movimentação do ranking.</p>
+            </div>
+          </div>
+          <div class="field-grid" style="grid-template-columns:1.2fr .5fr auto;">
+            <div class="field">
+              <label>Funcionário citado</label>
+              <input id="npsMentionName" list="teamSuggestions" placeholder="Ex: Maria Silva" />
+            </div>
+            <div class="field">
+              <label>Qtd. citações</label>
+              <input id="npsMentionCount" type="number" min="1" value="1" />
+            </div>
+            <div class="field" style="justify-content:end;">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary" data-action="register-mention">Registrar citação</button>
+            </div>
+          </div>
+          <div class="rank-list" id="npsRankingList"></div>
+          <div id="npsHistLeaders"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="view" id="scale" role="tabpanel" aria-labelledby="tab-scale" tabindex="0" hidden>
+      <div class="section glass">
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <h2>Escala do mês</h2>
+            <p>Monte a escala do período ativo com professores, recepção, horários, trocas e observações por dia.</p>
+          </div>
+          <div class="toolbar-actions">
+            <input id="scaleSearch" type="text" placeholder="Buscar por dia, professor, recepção ou observação" aria-label="Buscar escala por dia, professor, recepção ou observação" />
+            <button class="btn btn-ghost" data-action="reset-view-filters" data-view="scale">Limpar busca</button>
+            <button class="btn btn-ghost" data-action="export-scale-csv">Exportar CSV</button>
+            <button class="btn btn-primary" data-action="open-scale-modal">Adicionar dia de escala</button>
+          </div>
+        </div>
+        <div class="schedule-note-box">
+          A escala acompanha o <strong>mês de referência</strong> selecionado no topo. Ao trocar o período, você visualiza e edita a escala daquele mês específico.
+          Você pode registrar finais de semana, feriados, trocas, horários e observações livres.
+          <div class="scale-legend">
+            <span class="scale-legend-item"><span class="scale-legend-swatch red"></span>Vermelho = Feriado</span>
+            <span class="scale-legend-item"><span class="scale-legend-swatch green"></span>Verde = Sábado</span>
+            <span class="scale-legend-item"><span class="scale-legend-swatch neutral"></span>Neutro = Dia normal</span>
+          </div>
+        </div>
+        <div class="schedule-topbar">
+          <div class="schedule-kpis" id="scaleSummaryCards"></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-ghost" data-action="duplicate-previous-month-scale">Duplicar mês anterior</button>
+          </div>
+        </div>
+        <div class="scale-ops-summary" id="scaleOperationalSummary" aria-live="polite"></div>
+        <div class="scale-board-wrap">
+          <div class="toolbar-title">
+            <h2>Escala visual do mês</h2>
+            <p>Leitura executiva inspirada no quadro de escala da unidade, com destaque para horários, professores e recepção.</p>
+          </div>
+          <div id="scaleBoard" class="scale-board"></div>
+        </div>
+        <div class="table-wrap schedule-matrix">
+          <table>
+            <thead>
+              <tr>
+                <th>Dia</th>
+                <th>Horário</th>
+                <th>Professor</th>
+                <th>Troca</th>
+                <th>Horário</th>
+                <th>Recepcionista</th>
+                <th>Troca</th>
+              </tr>
+            </thead>
+            <tbody id="scaleTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="events" role="tabpanel" aria-labelledby="tab-events" tabindex="0" hidden>
+      <div class="event-stack">
+        <div class="section glass">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <h2>Agenda de eventos e ações</h2>
+              <p>Calendário mensal de eventos, ações promocionais, ativações e campanhas da unidade.</p>
+            </div>
+            <div class="toolbar-actions">
+              <input id="eventSearch" type="text" placeholder="Buscar por título, local, responsável ou descrição" aria-label="Buscar eventos por título, local, responsável ou descrição" />
+              <select id="eventTypeFilter" aria-label="Filtrar eventos por tipo">
+                <option value="">Todos os tipos</option>
+                <option value="Evento">Evento</option>
+                <option value="Ação">Ação</option>
+                <option value="Campanha">Campanha</option>
+                <option value="Treinamento">Treinamento</option>
+                <option value="Feriado">Feriado</option>
+              </select>
+              <select id="eventStatusFilter" aria-label="Filtrar eventos por status">
+                <option value="">Todos os status</option>
+                <option value="Programado">Programado</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Concluído">Concluído</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+              <button class="btn btn-ghost" data-action="reset-view-filters" data-view="events">Limpar filtros</button>
+              <button class="btn btn-ghost" data-action="export-events-csv">Exportar CSV</button>
+              <button class="btn btn-primary" data-action="open-event-modal">Adicionar</button>
+            </div>
+          </div>
+          <div class="events-quick-summary" id="eventsQuickSummary" aria-live="polite"></div>
+          <div class="events-topbar">
+            <div class="schedule-kpis event-kpis" id="eventSummaryCards"></div>
+          </div>
+          <div class="event-overview-grid">
+            <div class="event-calendar-card">
+              <div class="event-calendar-shell">
+                <div class="event-calendar-head">
+                  <div>
+                    <div class="event-calendar-title">Calendário visual do mês</div>
+                    <div class="event-calendar-subtitle">Visão mensal para antecipar ações, ativações, feriados e entregas programadas no período ativo.</div>
+                  </div>
+                  <div class="event-calendar-legend">
+                    <span class="event-legend-chip"><span class="event-legend-dot event-dot-evento"></span>Evento</span>
+                    <span class="event-legend-chip"><span class="event-legend-dot event-dot-acao"></span>Ação</span>
+                    <span class="event-legend-chip"><span class="event-legend-dot event-dot-campanha"></span>Campanha</span>
+                    <span class="event-legend-chip"><span class="event-legend-dot event-dot-treinamento"></span>Treinamento</span>
+                    <span class="event-legend-chip"><span class="event-legend-dot event-dot-feriado"></span>Feriado</span>
+                  </div>
+                </div>
+                <div id="eventsCalendar"></div>
+              </div>
+            </div>
+            <div class="event-sidebar-stack">
+              <div class="event-consolidated-card">
+                <div class="toolbar-title">
+                  <h2>Próxima programação</h2>
+                  <p>Resumo executivo do que vem na sequência para facilitar a preparação da operação.</p>
+                </div>
+                <div id="eventsUpcoming"></div>
+              </div>
+              <div class="event-consolidated-card">
+                <div class="toolbar-title">
+                  <h2>Agenda em cards</h2>
+                  <p>Lista detalhada para edição rápida do período ativo.</p>
+                </div>
+                <div class="event-list" id="eventsList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section glass event-consolidated-card">
+          <div class="toolbar-title">
+            <h2>Agenda consolidada</h2>
+            <p>Visão tabular do período ativo.</p>
+          </div>
+          <div class="table-wrap">
+            <table class="pending-table">
+              <caption class="sr-only">Agenda consolidada do período ativo</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Data</th>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Título</th>
+                  <th scope="col">Local</th>
+                  <th scope="col">Responsável</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="settings" role="tabpanel" aria-labelledby="tab-settings" tabindex="0" hidden>
+      <div class="settings-health-bar" id="settingsHealthBar" aria-live="polite"></div>
+      <div class="settings-shell">
+        <div class="settings-main-column">
+          <div class="section glass settings-card settings-card--primary">
+            <div class="settings-card-head">
+              <span class="section-kicker">Preferências e operação</span>
+              <h2>Equipe e categorias</h2>
+              <p>Defina a estrutura usada pelos módulos operacionais sem editar código.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-form-grid">
+                <div class="field-stack settings-field-card">
+                  <label>Recepcionistas (uma por linha)</label>
+                  <div class="settings-field-help">Base de alunos, pendências e addons.</div>
+                  <textarea id="receptionistEditor" placeholder="Uma recepcionista por linha"></textarea>
+                </div>
+                <div class="field-stack settings-field-card">
+                  <label>Professores (um por linha)</label>
+                  <div class="settings-field-help">Lista usada na escala mensal.</div>
+                  <textarea id="professorEditor" placeholder="Um professor por linha"></textarea>
+                </div>
+                <div class="field-stack settings-field-card settings-field-card--full">
+                  <label>Categorias de addon (uma por linha)</label>
+                  <div class="settings-field-help">Disponíveis nos cadastros e totais comerciais.</div>
+                  <textarea id="addonTypeEditor"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-success" data-action="save-settings">Salvar configurações</button>
+            </div>
+            <div class="settings-card-foot">
+              <div class="settings-note">Se uma recepcionista for removida, atendimentos e pendências são realocados para a primeira opção disponível.</div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card">
+            <div class="settings-card-head">
+              <span class="section-kicker">Dados e manutenção</span>
+              <h2>Resumo da base ativa</h2>
+              <p>Veja o volume atual e mantenha um snapshot local antes de operações maiores.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Backup atual</h3>
+                  <p>Volume exportável e último snapshot salvo no navegador.</p>
+                </div>
+                <div class="summary-list" id="backupSummaryList"></div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-ghost" data-action="save-local-snapshot">Salvar snapshot local</button>
+            </div>
+            <div class="settings-card-foot">
+              <div class="settings-note settings-note--soft">Use esta etapa antes de importar, restaurar ou resetar dados.</div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card">
+            <div class="settings-card-head">
+              <span class="section-kicker">Importar, exportar e restaurar</span>
+              <h2>Movimentação de dados</h2>
+              <p>Faça backup, traga um JSON do app ou recupere rapidamente o snapshot local.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="summary-list settings-help-list">
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Exportar backup</div>
+                    <div class="muted">Baixa um JSON completo do armazenamento atual.</div>
+                  </div>
+                </div>
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Importar backup</div>
+                    <div class="muted">Lê um JSON gerado pelo app e pede confirmação antes de substituir a base.</div>
+                  </div>
+                </div>
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Restaurar snapshot</div>
+                    <div class="muted">Recupera o último snapshot salvo localmente neste navegador.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-ghost" data-action="download-data">Exportar backup</button>
+              <label class="btn btn-ghost import-label" for="importFile">Importar backup</label>
+              <button class="btn btn-ghost" data-action="restore-local-snapshot">Restaurar snapshot</button>
+            </div>
+            <div class="settings-card-foot">
+              <div class="settings-note">Ao importar, o app gera antes um backup de segurança do estado atual.</div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--critical">
+            <div class="settings-card-head">
+              <span class="section-kicker">Ações críticas</span>
+              <h2>Restaurar base de exemplo</h2>
+              <p>Use apenas quando quiser substituir toda a base atual pela massa inicial do app.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-note settings-note--warn">Esta ação sobrescreve os dados atuais após confirmação. Faça backup antes se quiser preservar o estado corrente.</div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-danger" data-action="reset-demo-data">Restaurar exemplo</button>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--support settings-maintenance-card">
+            <div class="settings-card-head">
+              <span class="section-kicker">Informações e manutenção</span>
+              <h2>Sobre o sistema</h2>
+              <p>Contexto rápido da versão atual, uso aproximado do armazenamento e ações seguras de manutenção da base.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Sobre o sistema</h3>
+                  <p>Referência curta sobre autoria, stack e propósito da SPA.</p>
+                </div>
+                <div id="settingsAboutPanel"></div>
+              </div>
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Uso de armazenamento</h3>
+                  <p>Estimativa do espelho local do navegador. A persistência principal do app continua em IndexedDB.</p>
+                </div>
+                <div id="settingsStorageUsage"></div>
+              </div>
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Ações de manutenção</h3>
+                  <p>Atalhos para exportação geral e limpeza de períodos sem massa operacional.</p>
+                </div>
+                <div class="summary-list" id="settingsMaintenanceList"></div>
+              </div>
+            </div>
+            <div class="settings-card-actions settings-maintenance-actions">
+              <button class="btn btn-ghost" data-action="download-data">Exportar todos os meses</button>
+              <button class="btn btn-ghost" data-action="clear-empty-months">Limpar meses vazios</button>
+              <button class="btn btn-success" data-action="save-local-snapshot">Salvar snapshot local</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-side-column">
+          <div class="section glass settings-card settings-card--support">
+            <div class="settings-card-head">
+              <span class="section-kicker">Guia rápido</span>
+              <h2>Leitura operacional</h2>
+              <p>Referência curta para quem abre o arquivo e precisa entender o fluxo.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="summary-list settings-help-list">
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Abra o HTML no navegador</div>
+                    <div class="muted">Use Chrome, Edge ou outro navegador moderno.</div>
+                  </div>
+                </div>
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Os dados ficam locais</div>
+                    <div class="muted">A base usa IndexedDB, cache em memória e sincronização entre abas.</div>
+                  </div>
+                </div>
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Faça backup com frequência</div>
+                    <div class="muted">Exporte um JSON antes de mudanças maiores.</div>
+                  </div>
+                </div>
+                <div class="summary-item summary-item--col1 settings-help-step">
+                  <div>
+                    <div class="name">Ajuste a estrutura aqui</div>
+                    <div class="muted">Equipe e categorias alimentam os módulos do app.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--secondary">
+            <div class="settings-card-head">
+              <span class="section-kicker">Diagnóstico técnico</span>
+              <h2>Integridade e persistência</h2>
+              <p>Painéis úteis para revisão, mas em segundo plano em relação às ações operacionais.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Diagnóstico estrutural</h3>
+                  <p>Checklist rápido da base ativa.</p>
+                </div>
+                <div class="summary-list" id="diagnosticSummaryList"></div>
+              </div>
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Painel técnico de persistência</h3>
+                  <p>Leitura somente consulta do backend, status e última gravação.</p>
+                </div>
+                <div class="summary-list" id="persistenceTechList"></div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-success" data-action="run-system-diagnostics" data-silent="false">Validar sistema</button>
+              <button class="btn btn-ghost" data-action="run-persistence-self-test">Autoteste de persistência</button>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--support">
+            <div class="settings-card-head">
+              <span class="section-kicker">Auditoria</span>
+              <h2>Cobertura dos períodos</h2>
+              <p>Revisão rápida da massa carregada mês a mês.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="summary-list" id="periodAuditList"></div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--secondary">
+            <div class="settings-card-head">
+              <span class="section-kicker">Autotestes rápidos</span>
+              <h2>Suíte de segurança</h2>
+              <p>Validação não destrutiva dos fluxos mais sensíveis do app.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Resultado atual</h3>
+                  <p>Relatório da última execução da suíte.</p>
+                </div>
+                <div class="summary-list" id="flowSmokeList"></div>
+              </div>
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>O que a suíte cobre</h3>
+                  <p>Escopo resumido dos testes rápidos.</p>
+                </div>
+                <div class="summary-list settings-help-list">
+                  <div class="summary-item summary-item--col1 settings-help-step">
+                    <div><div class="name">Backup JSON</div><div class="muted">Serializa e desserializa a base sem trocar o estado real.</div></div>
+                  </div>
+                  <div class="summary-item summary-item--col1 settings-help-step">
+                    <div><div class="name">CSVs do período ativo</div><div class="muted">Valida a geração textual de pendências, escala e eventos.</div></div>
+                  </div>
+                  <div class="summary-item summary-item--col1 settings-help-step">
+                    <div><div class="name">Reset simulado</div><div class="muted">Recria o mês em clone para conferir a massa mínima de teste.</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-success" data-action="run-flow-smoke-tests" data-silent="false">Executar autotestes</button>
+              <button class="btn btn-ghost" data-action="clear-flow-smoke-tests">Limpar relatório</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <datalist id="teamSuggestions"></datalist>
+    </section>
+    </main>
+  </div>
+
+  <div class="modal" id="studentModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="studentModalTitle">
+    <div class="modal-content glass" tabindex="-1">
+      <div class="modal-head">
+        <h2 id="studentModalTitle">Novo atendimento</h2>
+        <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="studentModal">Fechar</button>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Nome</label><input id="student_nome" /></div>
+        <div class="field"><label>Número da Matrícula</label><input id="student_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
+        <div class="field"><label>Última visita</label><input id="student_ultimaVisita" type="date" /></div>
+        <div class="field"><label>Hora da visita</label><input id="student_horaVisita" type="time" /></div>
+        <div class="field"><label>Início</label><input id="student_inicio" type="date" /></div>
+        <div class="field"><label>Aviso NPS</label>
+          <select id="student_avisoNps">
+            <option>Sim</option><option>Não</option><option>Pendente</option>
+          </select>
+        </div>
+        <div class="field"><label>Atendimento</label><select id="student_atendimento"></select></div>
+        <div class="field"><label>Feedback resposta</label>
+          <select id="student_feedback">
+            <option>Respondeu</option><option>Não respondeu</option><option>Pendente</option>
+          </select>
+        </div>
+        <div class="field"><label>Addon</label>
+          <select id="student_addon"><option value="">Nenhum</option></select>
+        </div>
+      </div>
+      <div class="field-stack" style="margin-top:12px;"><label>Observações</label><textarea id="student_observacoes"></textarea></div>
+      <div class="inline-actions">
+        <button type="button" class="btn btn-success" data-action="save-student">Salvar atendimento</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="pendingModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pendingModalTitle">
+    <div class="modal-content glass" tabindex="-1">
+      <div class="modal-head">
+        <h2 id="pendingModalTitle">Nova pendência</h2>
+        <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="pendingModal">Fechar</button>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Nome</label><input id="pending_nome" /></div>
+        <div class="field"><label>Número da Matrícula</label><input id="pending_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
+        <div class="field"><label>Hostess</label><select id="pending_hostess"></select></div>
+        <div class="field"><label>Data solicitação</label><input id="pending_data" type="date" /></div>
+        <div class="field"><label>Status</label>
+          <select id="pending_status">
+            <option value="aberto">Aberto</option>
+            <option value="respondido">Respondido</option>
+            <option value="concluido">Concluído</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-stack" style="margin-top:12px;"><label>Pendência</label><textarea id="pending_desc"></textarea></div>
+      <div class="field-stack"><label>Resposta</label><textarea id="pending_resposta"></textarea></div>
+      <div class="inline-actions">
+        <button type="button" class="btn btn-success" data-action="save-pending">Salvar pendência</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="scaleModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="scaleModalTitle">
+    <div class="modal-content glass" tabindex="-1">
+      <div class="modal-head">
+        <h2 id="scaleModalTitle">Novo dia de escala</h2>
+        <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="scaleModal">Fechar</button>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Dia</label><input id="scale_date" type="date" /></div>
+        <div class="field"><label>Cor / destaque</label>
+          <select id="scale_tone">
+            <option value="green">Verde = Sábado</option>
+            <option value="red">Vermelho = Feriado</option>
+            <option value="neutral">Neutro = Dia normal</option>
+          </select>
+        </div>
+        <div class="field"><label>Horário recepção</label><input id="scale_receptionTime" placeholder="Ex: 08h - 17h" /></div>
+        <div class="field"><label>Recepcionista</label><input id="scale_receptionist" placeholder="Ex: WALLACE" /></div>
+        <div class="field"><label>Troca recepção</label><input id="scale_receptionSwap" placeholder="Se houver" /></div>
+      </div>
+      <div class="field-stack" style="margin-top:12px;">
+        <label>Observações do dia</label>
+        <textarea id="scale_note" placeholder="Ex: Troca autorizada pelo líder, feriado, férias, atestado..."></textarea>
+      </div>
+      <div class="toolbar" style="margin-top:12px;">
+        <div class="toolbar-title">
+          <h2 style="font-size:16px;margin:0;">Professores escalados</h2>
+          <p>Adicione quantas linhas forem necessárias para o dia.</p>
+        </div>
+        <button class="btn btn-ghost btn-xs" type="button" data-action="add-scale-shift-row">+ Linha de professor</button>
+      </div>
+      <div class="shift-editor-list" id="scaleShiftRows"></div>
+      <div class="inline-actions">
+        <button type="button" class="btn btn-success" data-action="save-scale-day">Salvar dia da escala</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="eventModalTitle">
+    <div class="modal-content glass" tabindex="-1">
+      <div class="modal-head">
+        <h2 id="eventModalTitle">Novo evento / ação</h2>
+        <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="eventModal">Fechar</button>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Data</label><input id="event_date" type="date" /></div>
+        <div class="field"><label>Hora</label><input id="event_time" type="time" /></div>
+        <div class="field"><label>Tipo</label>
+          <select id="event_type">
+            <option>Evento</option>
+            <option>Ação</option>
+            <option>Campanha</option>
+            <option>Treinamento</option>
+            <option>Feriado</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="event_status">
+            <option>Programado</option>
+            <option>Confirmado</option>
+            <option>Concluído</option>
+            <option>Cancelado</option>
+          </select>
+        </div>
+        <div class="field"><label>Título</label><input id="event_title" /></div>
+        <div class="field"><label>Local</label><input id="event_place" placeholder="Ex: Unidade / Mall / Online" /></div>
+        <div class="field"><label>Responsável</label><input id="event_owner" placeholder="Ex: Marketing / Recepção" /></div>
+      </div>
+      <div class="field-stack" style="margin-top:12px;">
+        <label>Descrição</label>
+        <textarea id="event_description" placeholder="Detalhes do evento, ação, campanha ou orientação operacional."></textarea>
+      </div>
+      <div class="inline-actions">
+        <button type="button" class="btn btn-success" data-action="save-event-item">Salvar evento / ação</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tooltip" id="appTooltip"></div>
+  <div class="save-toast" id="saveToast" role="status" aria-live="polite" aria-atomic="true">✓ salvo automaticamente</div>
+  <div id="appLiveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="appLiveRegionUrgente" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+  <div id="appValidationFeedback" class="sr-only" role="alert" aria-atomic="true"></div>
+
+  <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirmModalMsg">
+    <div class="modal-content glass confirm-modal-content" tabindex="-1">
+      <div class="modal-head">
+        <h2 class="confirm-message" id="confirmModalMsg"></h2>
+      </div>
+      <div class="inline-actions confirm-actions">
+        <button type="button" class="btn btn-ghost" data-action="confirm-cancel">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-action="confirm-ok">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="author-line">© 2024–2026 Wallace Phillip Maclayne — Todos os direitos reservados</div>
+    <div class="project-line">Sistema WPM Gestão Interna • Projeto autoral concebido, arquitetado e desenvolvido integralmente pelo autor</div>
+    <div class="claude-mark">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="38" stroke="currentColor" stroke-width="3" fill="none"/>
+        <path d="M26 50c0-7.73 6.27-14 14-14s14 6.27 14 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <circle cx="33" cy="32" r="3.5" fill="currentColor"/>
+        <circle cx="47" cy="32" r="3.5" fill="currentColor"/>
+      </svg>
+      Engenharia assistida por Claude · Anthropic · v34
+    </div>
+  </footer>
+</body>
+</html>

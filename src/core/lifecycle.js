@@ -77,7 +77,8 @@
       'event_title',
       'event_place',
       'event_owner',
-      'event_description'
+      'event_description',
+      'settingsInitializeMonthsWithTestData'
     ];
 
     function normalizeData(data) {
@@ -305,7 +306,7 @@
 
     function ensurePeriod(key, template = state) {
       if (!storage.periods[key]) {
-        storage.periods[key] = buildEmptyPeriodFromTemplate(template || demoData, key);
+        storage.periods[key] = buildBootstrapPeriod(template || demoData, key, { storeRef: storage });
       }
       normalizeData(storage.periods[key]);
       return storage.periods[key];
@@ -374,8 +375,14 @@
         const nextPeriod = storage.periods[nextKey];
 
         const finishClose = async resetNextPeriod => {
-          if (resetNextPeriod) resetPeriodData(nextKey, state);
-          else ensurePeriod(nextKey, state);
+          if (!nextPeriod) {
+            storage.periods[nextKey] = buildBootstrapPeriod(state, nextKey, { storeRef: storage });
+            normalizeData(storage.periods[nextKey]);
+          } else if (resetNextPeriod) {
+            resetPeriodData(nextKey, state);
+          } else {
+            ensurePeriod(nextKey, state);
+          }
           const saved = await saveData(true);
           if (!saved) {
             if (previousArchive) storage.archives[currentPeriodKey] = previousArchive;

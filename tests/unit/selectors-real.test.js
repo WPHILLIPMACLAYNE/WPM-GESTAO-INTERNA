@@ -26,6 +26,48 @@ async function createSeededApp(periodKey = '2026-07') {
 }
 
 describe('Seletores reais do app modularizado', () => {
+  it('bootstrap em localhost ativa seed por padrão e respeita o toggle para meses novos', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+
+    const storageKey = app.window.__APP_INTERNALS__.config.STORAGE_KEY;
+    await app.window.initializeApp();
+    let currentStore = app.window.__APP_INTERNALS__.persistence.readStoredJson(storageKey);
+    if (!currentStore) {
+      currentStore = await app.window.__APP_INTERNALS__.persistence.loadStore();
+    }
+
+    expect(app.window.__APP_INTERNALS__.config.APP_RUNTIME).toBe('development');
+    expect(app.window.__APP_INTERNALS__.config.DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA).toBe(true);
+    expect(currentStore.preferences.initializeMonthsWithTestData).toBe(true);
+    expect(currentStore.periods[currentStore.activePeriod].students).toHaveLength(30);
+
+    await app.setStore({
+      version: app.window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: '2026-04',
+      preferences: { initializeMonthsWithTestData: false },
+      periods: {
+        '2026-04': app.window.buildCleanPeriodFromTemplate(null, '2026-04')
+      },
+      archives: {}
+    });
+
+    await app.window.__APP_INTERNALS__.actions.switchPeriod('2026-05', { silent: true });
+    let nextStore = app.window.__APP_INTERNALS__.persistence.readStoredJson(storageKey);
+    expect(nextStore.preferences.initializeMonthsWithTestData).toBe(false);
+    expect(nextStore.periods['2026-05'].students).toHaveLength(0);
+    expect(nextStore.periods['2026-05'].pending).toHaveLength(0);
+
+    nextStore.preferences.initializeMonthsWithTestData = true;
+    await app.setStore(nextStore);
+    await app.window.__APP_INTERNALS__.actions.switchPeriod('2027-01', { silent: true });
+    nextStore = app.window.__APP_INTERNALS__.persistence.readStoredJson(storageKey);
+    expect(nextStore.preferences.initializeMonthsWithTestData).toBe(true);
+    expect(nextStore.periods['2027-01'].students).toHaveLength(30);
+    expect(nextStore.periods['2027-01'].pending).toHaveLength(20);
+    expect(nextStore.periods['2027-01'].events).toHaveLength(10);
+  });
+
   it('generatePeriodSeed() cria a massa determinística esperada por mês', async () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;

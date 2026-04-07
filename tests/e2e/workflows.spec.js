@@ -237,11 +237,18 @@ test.describe('Fluxos E2E reais', () => {
     await page.getByRole('button', { name: 'Salvar atendimento' }).click();
 
     await aliceRow.locator('input[data-field="ultimaVisita"]').fill('2026-04-08');
-    await aliceRow.locator('input[data-field="horaVisita"]').evaluate((el, value) => {
-      el.value = value;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, '10:15');
+    await expect.poll(async () => (
+      page.evaluate(() => {
+        const store = window.__APP_INTERNALS__.persistence.readStoredJson(window.__APP_INTERNALS__.config.STORAGE_KEY);
+        return store.periods['2026-04'].students.find(item => item.nome === 'Alice Audit')?.ultimaVisita || '';
+      })
+    )).toBe('2026-04-08');
+
+    const refreshedAliceRow = page.locator('#studentTableBody tr').filter({ hasText: 'Alice Audit' });
+    const horaInput = refreshedAliceRow.locator('input[data-field="horaVisita"]');
+    await horaInput.click();
+    await horaInput.fill('10:15');
+    await horaInput.blur();
     await expect.poll(async () => (
       page.evaluate(() => {
         const store = window.__APP_INTERNALS__.persistence.readStoredJson(window.__APP_INTERNALS__.config.STORAGE_KEY);

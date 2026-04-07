@@ -156,6 +156,7 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 - `src/core/lifecycle.js` centraliza o lifecycle mensal: `switchPeriod()`, `closePeriod()`, `resetPeriod()`, `changePeriodFromControls()`, `duplicatePreviousMonthScale()`, `syncPeriodControls()` e `syncAppState()`.
 - `src/core/backup.js` concentra persistência de alto nível e restauração: `loadStore()`, `saveStore()`, `saveData()`, snapshots commitados, `exportBackup()`, `importBackup()`, `saveLocalSnapshot()` e `restoreLocalSnapshot()`.
 - `src/main.js` deixou de carregar regras de lifecycle e backup. O arquivo agora só expõe `APP_INTERNALS`, executa `initializeApp()` e instala o listener de `DOMContentLoaded`.
+- A política de bootstrap de períodos agora é controlada por `storage.preferences.initializeMonthsWithTestData`: ligada por padrão em `localhost/dev` e desligada por padrão em `file://` e produção.
 
 ### Arquitetura em Camadas
 
@@ -192,7 +193,7 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 | **NPS** | Score 0-100 com risk meter, metas, menções a funcionários, ranking com tendências |
 | **Escala** | Calendário mensal com turnos de professores + recepção, código de cores, duplicação |
 | **Eventos** | Registro de eventos/ações/campanhas, calendário visual, filtros por tipo/status |
-| **Configurações** | Equipe, backup/restauração JSON, fechar mês, resetar mês, diagnósticos |
+| **Configurações** | Equipe, toggle de seed para meses novos, backup/restauração JSON, fechar mês, resetar mês, diagnósticos |
 
 ---
 
@@ -227,6 +228,9 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 {
   version: 4,
   activePeriod: "2026-04",
+  preferences: {
+    initializeMonthsWithTestData: false
+  },
   periods: {
     "2026-04": {
       settings: { receptionists, professors, team, addonTypes, monthDays },
@@ -412,5 +416,5 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
   - `requestRender()`
   - `lerSelectorMemorizado()` com limite de `120`
   - `queueStorageOperation()`
-- O seed determinístico funciona, mas o bootstrap padrão do app continua iniciando meses vazios em vez de usar `generatePeriodSeed()`.
+- O seed determinístico passou a ser usado no bootstrap de períodos novos quando o toggle `Inicializar meses com dados de teste` está ativo.
 - A modularização melhorou manutenção e testabilidade, mas o projeto continua dependente da ordem de `<script>` e de globais implícitos.

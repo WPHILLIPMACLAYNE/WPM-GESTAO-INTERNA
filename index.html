@@ -536,6 +536,17 @@
                   <div class="settings-field-help">Disponíveis nos cadastros e totais comerciais.</div>
                   <textarea id="addonTypeEditor"></textarea>
                 </div>
+                <div class="field-stack settings-field-card settings-field-card--full">
+                  <label for="settingsInitializeMonthsWithTestData">Inicialização de meses novos</label>
+                  <div class="settings-field-help">Controla se períodos criados sem dados usam a massa determinística do app. Padrão: ligado em localhost/dev e desligado em produção/file.</div>
+                  <label class="settings-toggle-row" for="settingsInitializeMonthsWithTestData">
+                    <input id="settingsInitializeMonthsWithTestData" type="checkbox" />
+                    <span class="settings-toggle-copy">
+                      <strong>Inicializar meses com dados de teste</strong>
+                      <span>Quando ativo, o bootstrap usa `generatePeriodSeed(periodKey)` para novos meses. Quando desativado, novos meses começam vazios.</span>
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
             <div class="settings-card-actions">

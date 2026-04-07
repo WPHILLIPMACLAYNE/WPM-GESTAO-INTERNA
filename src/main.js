@@ -7,9 +7,11 @@
         STORAGE_KEY,
         STORE_VERSION,
         APP_VERSION,
+        APP_RUNTIME,
         UI_KEY,
         MONTH_NAMES,
-        APP_DEFAULTS
+        APP_DEFAULTS,
+        DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA
       },
       persistence: {
         hydrateStorageCache,

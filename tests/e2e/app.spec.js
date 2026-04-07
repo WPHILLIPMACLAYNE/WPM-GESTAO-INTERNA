@@ -56,6 +56,16 @@ test.describe('App: Estrutura', () => {
     await expect(page.locator('#appLiveRegion')).toHaveAttribute('aria-live', 'polite');
     await expect(page.locator('#appLiveRegionUrgente')).toHaveAttribute('aria-live', 'assertive');
   });
+
+  test('deve iniciar com seed desativado por padrão em produção/file', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const appConfig = await page.evaluate(() => ({
+      runtime: window.__APP_INTERNALS__?.config?.APP_RUNTIME,
+      defaultSeed: window.__APP_INTERNALS__?.config?.DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA
+    }));
+    expect(appConfig.runtime).toBe('production');
+    expect(appConfig.defaultSeed).toBe(false);
+  });
 });
 
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {

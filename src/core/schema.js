@@ -6,6 +6,7 @@
       store.activePeriod = isValidPeriodKey(store.activePeriod) ? String(store.activePeriod) : getInitialPeriodKey();
       store.periods = store.periods && typeof store.periods === 'object' && !Array.isArray(store.periods) ? store.periods : {};
       store.archives = store.archives && typeof store.archives === 'object' && !Array.isArray(store.archives) ? store.archives : {};
+      store.preferences = normalizeStorePreferences(store.preferences);
 
       Object.keys(store.periods).forEach(key => {
         if (!isValidPeriodKey(key) || !store.periods[key] || typeof store.periods[key] !== 'object' || Array.isArray(store.periods[key])) {
@@ -17,7 +18,7 @@
 
       if (!store.periods[store.activePeriod]) {
         const source = Object.values(store.periods)[0] || demoData;
-        store.periods[store.activePeriod] = buildEmptyPeriodFromTemplate(source, store.activePeriod);
+        store.periods[store.activePeriod] = buildBootstrapPeriod(source, store.activePeriod, { storeRef: store });
       }
       return store;
     }
@@ -27,7 +28,10 @@
       return sanitizeStore({
         version: STORE_VERSION,
         activePeriod: initialKey,
-        periods: seedYear(String(initialKey).split('-')[0]),
+        preferences: normalizeStorePreferences(),
+        periods: seedYear(String(initialKey).split('-')[0], {
+          withTestData: APP_STORE_PREFERENCE_DEFAULTS.initializeMonthsWithTestData
+        }),
         archives: {}
       });
     }
@@ -106,14 +110,19 @@
         const archives = parsed.archives && typeof parsed.archives === 'object' && !Array.isArray(parsed.archives)
           ? cloneSerializable(parsed.archives)
           : {};
+        const preferences = parsed.preferences && typeof parsed.preferences === 'object' && !Array.isArray(parsed.preferences)
+          ? cloneSerializable(parsed.preferences)
+          : {};
         const store = normalizeStore({
           version: getStoreVersion(parsed),
           activePeriod: parsed.activePeriod,
           periods: rawPeriods,
-          archives
+          archives,
+          preferences
         });
         const currentYear = String(store.activePeriod || getInitialPeriodKey()).split('-')[0];
-        Object.entries(seedYear(currentYear)).forEach(([key, period]) => {
+        const template = store.periods[store.activePeriod] || Object.values(store.periods)[0] || demoData;
+        Object.entries(seedYear(currentYear, { storeRef: store, template })).forEach(([key, period]) => {
           if (!store.periods[key]) store.periods[key] = period;
         });
         return setStoreVersion(store, getStoreVersion(parsed));

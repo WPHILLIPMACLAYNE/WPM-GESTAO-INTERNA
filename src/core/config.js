@@ -13,6 +13,17 @@
     const STORE_VERSION = 4;
     const LEGACY_STORAGE_KEYS = ['recepcao-smartfit-dashboard-v33', 'recepcao-smartfit-dashboard-v24'];
     const APP_VERSION = 'v34';
+    const APP_RUNTIME = (() => {
+      try {
+        const protocol = String(window?.location?.protocol || '').toLowerCase();
+        const hostname = String(window?.location?.hostname || '').toLowerCase();
+        const isLocalhost = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(hostname);
+        return (protocol === 'http:' || protocol === 'https:') && isLocalhost ? 'development' : 'production';
+      } catch {
+        return 'production';
+      }
+    })();
+    const DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA = APP_RUNTIME === 'development';
     const LOCAL_SNAPSHOT_KEY = 'controle_recepcao_app_snapshot_v34';
     const SYSTEM_REPORT_KEY = 'controle_recepcao_app_report_v34';
     const FLOW_TEST_REPORT_KEY = 'controle_recepcao_app_flowtests_v34';
@@ -66,6 +77,10 @@
       scaleTimes: ['06h - 12h', '07h - 13h', '08h - 14h', '12h - 18h', '13h - 19h', '14h - 20h', '16h - 22h'],
       notes: ['Foco em retenção e relacionamento.', 'Fluxo alto esperado no período da tarde.', 'Reforçar abordagem comercial na recepção.', 'Cobertura planejada para horários críticos.', 'Monitorar retorno dos alunos com visita inicial.']
     };
+
+    const APP_STORE_PREFERENCE_DEFAULTS = Object.freeze({
+      initializeMonthsWithTestData: DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA
+    });
 
     function todayISO(offset = 0) {
       const d = new Date();

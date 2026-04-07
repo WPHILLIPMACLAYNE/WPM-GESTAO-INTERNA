@@ -3370,6 +3370,42 @@
       line-height: 1.55;
       color: #cfcfcf;
     }
+    #settings .settings-toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #settings .settings-toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 2px 0 0;
+      accent-color: var(--primary);
+      flex: 0 0 auto;
+    }
+    #settings .settings-toggle-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    #settings .settings-toggle-copy strong {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #f4f4f4;
+      font-weight: 800;
+    }
+    #settings .settings-toggle-copy span {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #cfcfcf;
+    }
     #settings textarea {
       min-height: 170px;
       max-height: 340px;

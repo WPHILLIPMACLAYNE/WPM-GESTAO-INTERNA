@@ -144,6 +144,7 @@ Registro de eventos, campanhas e treinamentos:
 Central de administração do sistema:
 
 - **Equipe:** Cadastro de recepcionistas, professores e tipos de addon (textarea com um nome por linha)
+- **Bootstrap de períodos:** Toggle para decidir se meses novos começam com massa determinística de teste ou vazios
 - **Barra de saúde:** Status do armazenamento, meses com dados, último backup, total de registros
 - **Backup/Restauração:**
   - Exportar backup JSON completo (todos os períodos)
@@ -352,7 +353,7 @@ APLICATIVO FINALIZADO/
 
 2. **Ou simplesmente dê duplo clique** no arquivo `SISTEMA_FINALIZADO.html`
 
-3. **Pronto.** O sistema inicia com dados de demonstração.
+3. **Pronto.** Em `localhost/dev`, o sistema inicia com massa determinística de teste por padrão. Em `file://` e produção, meses novos começam vazios até você ativar o toggle correspondente em **Configurações**.
 
 ### 6.2 Instalação das Dependências de Teste
 
@@ -615,6 +616,9 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 {
   version: 4,                          // Versão do schema
   activePeriod: "2026-04",             // Período ativo
+  preferences: {                       // Preferências globais do bootstrap
+    initializeMonthsWithTestData: false
+  },
   periods: {
     "2026-04": {                       // Dados do mês
       settings: { receptionists, professors, team, addonTypes, monthDays },

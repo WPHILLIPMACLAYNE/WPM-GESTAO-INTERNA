@@ -7,6 +7,8 @@
       document.getElementById('receptionistEditor').value = getReceptionists(state).join('\n');
       document.getElementById('professorEditor').value = getProfessors(state).join('\n');
       document.getElementById('addonTypeEditor').value = state.settings.addonTypes.join('\n');
+      const seedToggle = document.getElementById('settingsInitializeMonthsWithTestData');
+      if (seedToggle) seedToggle.checked = shouldInitializeMonthsWithTestData(storage);
       renderSettingsHealthBar();
       renderSettingsSupportPanels();
       renderBackupSummary();
@@ -18,13 +20,17 @@
 
     async function saveSettings() {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard', 'students', 'addons', 'pending', 'nps', 'settings'] })) return;
-      const { receptionists, professors, addonTypes } = getSettingsFormData();
+      const { receptionists, professors, addonTypes, initializeMonthsWithTestData } = getSettingsFormData();
       if (!receptionists.length || !addonTypes.length) { showToast('Informe ao menos uma recepcionista e um tipo de addon.', 'warning'); return; }
       const old = structuredClone(state);
       state.settings.receptionists = receptionists;
       state.settings.professors = professors;
       state.settings.team = [...new Set([...receptionists, ...professors])];
       state.settings.addonTypes = addonTypes;
+      storage.preferences = normalizeStorePreferences({
+        ...storage.preferences,
+        initializeMonthsWithTestData
+      });
       normalizeData(state);
       const removedNames = new Set(getReceptionists(old).filter(name => !getReceptionists(state).includes(name)));
       removedNames.forEach(oldName => {
@@ -37,7 +43,10 @@
       const saved = await saveData();
       populateStudentFilters();
       requestRender(['dashboard', 'students', 'addons', 'pending', 'nps', 'settings']);
-      if (saved) showToast('Configurações salvas com sucesso.');
+      if (saved) {
+        const nextMode = initializeMonthsWithTestData ? 'Novos meses usarão a massa de teste determinística.' : 'Novos meses começarão vazios.';
+        showToast(`Configurações salvas com sucesso. ${nextMode}`);
+      }
     }
 
     function resizeMonth(days) {
@@ -502,7 +511,12 @@
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja restaurar o exemplo inicial? Isso substituirá os dados atuais.', async () => {
         const initialKey = getInitialPeriodKey();
-        storage = normalizeStore({ activePeriod: initialKey, periods: seedYear(String(initialKey).split('-')[0]), archives: {} });
+        storage = normalizeStore({
+          activePeriod: initialKey,
+          preferences: normalizeStorePreferences(storage?.preferences),
+          periods: seedYear(String(initialKey).split('-')[0], { withTestData: true }),
+          archives: {}
+        });
         currentPeriodKey = storage.activePeriod;
         state = storage.periods[currentPeriodKey];
         await saveData();

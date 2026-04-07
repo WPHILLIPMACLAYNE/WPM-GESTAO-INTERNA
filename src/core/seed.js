@@ -23,24 +23,34 @@
       return rng() <= chance ? pick(list, rng) : '';
     }
 
-    function generatePeriodSeed(periodKey) {
+    function getSeedAddonTypes(template = null) {
+      const sourceTypes = Array.isArray(template?.settings?.addonTypes)
+        ? template.settings.addonTypes.filter(Boolean)
+        : [];
+      return [...new Set(sourceTypes.length ? sourceTypes : APP_DEFAULTS.addonTypes)];
+    }
+
+    function generatePeriodSeed(periodKey, template = null) {
       const [yearStr, monthStr] = String(periodKey).split('-');
       const year = Number(yearStr) || new Date().getFullYear();
       const month = Number(monthStr) || 1;
       const monthDays = new Date(year, month, 0).getDate();
       const rng = makeRng(`smartfit-${periodKey}`);
-      const receptionists = [...APP_DEFAULTS.receptionists];
-      const professors = [...APP_DEFAULTS.professors];
-      const addonTypes = [...APP_DEFAULTS.addonTypes];
+      const receptionists = getReceptionists(template);
+      const professors = getProfessors(template);
+      const addonTypes = getSeedAddonTypes(template);
+      const monthlyGoal = clamp(Number(template?.nps?.monthlyGoal ?? 75), 0, 100);
+      const semesterGoal = clamp(Number(template?.nps?.semesterGoal ?? 80), 0, 100);
       const base = {
         settings: {
-          team: [...receptionists],
+          team: [...new Set([...receptionists, ...professors])],
           receptionists: [...receptionists],
           professors: [...professors],
           addonTypes: [...addonTypes],
           monthDays
         },
         students: [],
+        recados: [],
         nps: { score: 0, monthlyGoal: 75, semesterGoal: 80, observations: '', mentions: [], rankSnapshot: {} },
         scale: [],
         events: [],
@@ -104,8 +114,8 @@
       const positiveStudents = base.students.filter(item => item.feedback === 'Respondeu').length;
       base.nps = {
         score: clamp(Math.round((positiveStudents / Math.max(1, base.students.length)) * 100), 35, 98),
-        monthlyGoal: 75,
-        semesterGoal: 80,
+        monthlyGoal,
+        semesterGoal,
         observations: `Mês ${MONTH_NAMES[month - 1]} com ${totalMentions} citações distribuídas entre recepção e professores. Reforçar retorno ativo em horários de pico e manter abordagem comercial padronizada.`,
         mentions,
         rankSnapshot: Object.fromEntries(mentions.map(item => [item.name, item.count]))

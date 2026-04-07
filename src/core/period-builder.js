@@ -52,6 +52,19 @@
       return next;
     }
 
+    function normalizeStorePreferences(preferences = null) {
+      const source = preferences && typeof preferences === 'object' && !Array.isArray(preferences) ? preferences : {};
+      return {
+        initializeMonthsWithTestData: source.initializeMonthsWithTestData == null
+          ? APP_STORE_PREFERENCE_DEFAULTS.initializeMonthsWithTestData
+          : Boolean(source.initializeMonthsWithTestData)
+      };
+    }
+
+    function shouldInitializeMonthsWithTestData(storeRef = storage) {
+      return normalizeStorePreferences(storeRef?.preferences).initializeMonthsWithTestData;
+    }
+
     function setActiveTab(tab, silent = false) {
       const target = document.getElementById(tab);
       if (!target) return;
@@ -197,6 +210,16 @@
       return clean;
     }
 
+    function buildBootstrapPeriod(template, key = currentPeriodKey, options = {}) {
+      const withTestData = typeof options?.withTestData === 'boolean'
+        ? options.withTestData
+        : shouldInitializeMonthsWithTestData(options?.storeRef);
+      if (!withTestData) {
+        return buildCleanPeriodFromTemplate(template, key);
+      }
+      return generatePeriodSeed(key, template);
+    }
+
     // Alias mantido para compatibilidade com seedYear e normalizeStore
     function buildEmptyPeriodFromTemplate(template, key = currentPeriodKey) {
       return buildCleanPeriodFromTemplate(template, key);
@@ -210,11 +233,11 @@
       return storage.periods[key];
     }
 
-    function seedYear(year) {
+    function seedYear(year, options = {}) {
       const periods = {};
       for (let month = 1; month <= 12; month++) {
         const key = `${year}-${String(month).padStart(2, '0')}`;
-        periods[key] = buildEmptyPeriodFromTemplate(null, key);
+        periods[key] = buildBootstrapPeriod(options?.template || null, key, options);
       }
       return periods;
     }

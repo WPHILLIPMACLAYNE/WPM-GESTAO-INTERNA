@@ -210,7 +210,8 @@
       return {
         receptionists: [...new Set(DOM.value('receptionistEditor').split('\n').map(v => v.trim()).filter(Boolean))],
         professors: [...new Set(DOM.value('professorEditor').split('\n').map(v => v.trim()).filter(Boolean))],
-        addonTypes: [...new Set(DOM.value('addonTypeEditor').split('\n').map(v => v.trim()).filter(Boolean))]
+        addonTypes: [...new Set(DOM.value('addonTypeEditor').split('\n').map(v => v.trim()).filter(Boolean))],
+        initializeMonthsWithTestData: Boolean(document.getElementById('settingsInitializeMonthsWithTestData')?.checked)
       };
     }
 

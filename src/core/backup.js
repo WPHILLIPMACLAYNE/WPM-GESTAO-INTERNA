@@ -157,6 +157,7 @@
         },
         version: storeSnapshot.version,
         activePeriod: storeSnapshot.activePeriod,
+        preferences: cloneSerializable(storeSnapshot.preferences),
         periods: cloneSerializable(storeSnapshot.periods),
         archives: cloneSerializable(storeSnapshot.archives)
       };

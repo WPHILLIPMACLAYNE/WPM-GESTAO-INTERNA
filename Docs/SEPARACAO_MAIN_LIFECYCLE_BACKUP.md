@@ -28,6 +28,7 @@ No `index.html`, os scripts agora carregam nesta sequência final:
 - Expõe `initializeApp()`
 - Registra o listener de `DOMContentLoaded`
 - Orquestra o bootstrap final sem concentrar regras de negócio de backup ou lifecycle
+- Passa a depender da política de inicialização de períodos definida em `storage.preferences.initializeMonthsWithTestData`
 
 ### `src/core/lifecycle.js`
 
@@ -40,6 +41,7 @@ No `index.html`, os scripts agora carregam nesta sequência final:
 - `resetPeriod()` / `resetSelectedMonth`
 - `duplicatePreviousMonthScale()`
 - Regras de bloqueio de mês fechado e navegação entre períodos
+- Criação de novos períodos via `buildBootstrapPeriod()`, respeitando o toggle de seed do usuário
 
 ### `src/core/backup.js`
 
@@ -49,6 +51,15 @@ No `index.html`, os scripts agora carregam nesta sequência final:
 - `exportBackup()` / `importBackup()`
 - `saveLocalSnapshot()` / `restoreLocalSnapshot()`
 - Coerção de backups legados e importação de arquivos de fechamento mensal
+- Persistência do objeto `preferences` no backup completo
+
+## Política de seed no bootstrap
+
+- Em ambiente de desenvolvimento (`http://localhost`, `127.0.0.1`), o default do toggle é `ON`.
+- Em produção/file (`file://` e demais hosts), o default do toggle é `OFF`.
+- Quando o toggle está ligado, períodos novos criados sem dados usam `generatePeriodSeed(periodKey)`.
+- Quando o toggle está desligado, períodos novos usam `buildEmptyPeriodFromTemplate()`.
+- O reset manual do mês continua vazio por definição, mesmo com o toggle ligado.
 
 ## Estratégia de compatibilidade
 

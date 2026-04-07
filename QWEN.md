@@ -46,11 +46,13 @@ APLICATIVOFINALIZADO/
 ├── vitest.config.js            # Configuração do Vitest
 ├── playwright.config.js        # Configuração do Playwright
 │
-├── src/                        # JavaScript modular (13 arquivos)
+├── src/                        # JavaScript modular (29 arquivos)
 │   ├── main.js                 # Bootstrap, persistência, inicialização
 │   ├── core/
 │   │   ├── config.js           # Constantes, estado global, DOM helper
+│   │   ├── period-builder.js   # Builders de período e templates
 │   │   ├── schema.js           # Migração, sanitização, validação
+│   │   ├── seed.js             # Seed determinístico de massa inicial
 │   │   └── storage.js          # IndexedDB, localStorage, broadcast
 │   ├── domain/
 │   │   └── selectors.js        # Selectors memoizados com cache
@@ -61,8 +63,21 @@ APLICATIVOFINALIZADO/
 │   │   ├── nps.js              # CRUD de menções NPS + observações
 │   │   └── diagnostics.js      # Smoke tests de fluxo
 │   ├── ui/
-│   │   ├── render.js           # Render scheduler, todas as funções render*
-│   │   └── events.js           # Delegação de eventos, DnD, tooltips, a11y
+│   │   ├── render-core.js      # Scheduler, patch DOM, filtros e bindings leves
+│   │   ├── render-dashboard.js # Dashboard e hero
+│   │   ├── render-students.js  # Alunos
+│   │   ├── render-pending.js   # Pendências
+│   │   ├── render-nps.js       # NPS
+│   │   ├── render-scale.js     # Escala
+│   │   ├── render-events.js    # Eventos e ações
+│   │   ├── render-settings.js  # Configurações
+│   │   ├── render-addons.js    # Grid de addons
+│   │   ├── events-core.js      # Delegação principal, modais, tooltips, a11y, atalhos
+│   │   ├── events-students.js  # Handlers de alunos
+│   │   ├── events-pending.js   # Handlers de pendências + DnD do Kanban
+│   │   ├── events-addons.js    # Handlers do grid de addons
+│   │   ├── events-scale.js     # Handlers da escala
+│   │   └── events-nps.js       # Handlers de NPS e autosave de observações
 │   └── utils/
 │       └── helpers.js          # Funções puras (format, date, esc, etc.)
 │
@@ -95,18 +110,40 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 1. dompurify (CDN)
 2. src/utils/helpers.js
 3. src/core/config.js       ← state, storage, currentPeriodKey, editing IDs, DOM helper
-4. src/core/schema.js
-5. src/core/storage.js
-6. src/domain/selectors.js
-7. src/features/forms.js
-8. src/features/nps.js
-9. src/features/csv.js
-10. src/features/diagnostics.js
-11. src/ui/render.js         ← render scheduler, render*, patch DOM
-12. src/features/crud.js     ← handlers CRUD (resolve collections via getter)
-13. src/ui/events.js         ← event delegation
-14. src/main.js              ← bootstrap, period lifecycle, APP_INTERNALS, initializeApp
+4. src/core/period-builder.js
+5. src/core/seed.js
+6. src/core/schema.js
+7. src/core/storage.js
+8. src/domain/selectors.js
+9. src/features/forms.js
+10. src/features/nps.js
+11. src/features/csv.js
+12. src/features/diagnostics.js
+13. src/ui/render-core.js
+14. src/ui/render-dashboard.js
+15. src/ui/render-students.js
+16. src/ui/render-pending.js
+17. src/ui/render-nps.js
+18. src/ui/render-scale.js
+19. src/ui/render-events.js
+20. src/ui/render-settings.js
+21. src/ui/render-addons.js
+22. src/features/crud.js     ← handlers CRUD (resolve collections via getter)
+23. src/ui/events-core.js    ← delegação principal, modais, tooltips, a11y
+24. src/ui/events-students.js
+25. src/ui/events-pending.js
+26. src/ui/events-addons.js
+27. src/ui/events-scale.js
+28. src/ui/events-nps.js
+29. src/main.js              ← bootstrap, period lifecycle, APP_INTERNALS, initializeApp
 ```
+
+### Camada de Eventos UI
+
+- `src/ui/events-core.js` centraliza a infraestrutura transversal: `bindUIEvents()`, atalhos de teclado, trap de foco em modais, tooltips, sincronização de storage e acessibilidade.
+- `bindUIEvents()` continua sendo a porta única da delegação global, mas agora monta registradores por domínio via `bindStudentEvents()`, `bindPendingEvents()`, `bindAddonEvents()`, `bindScaleEvents()` e `bindNpsEvents()`.
+- `src/ui/events-pending.js` mantém `bindPendingDnD()` e `updatePendingStatus()`, preservando o comportamento do Kanban.
+- O autosave de observações de NPS saiu de `src/main.js` e passou para `src/ui/events-nps.js`, sem alterar o debounce de `800ms`.
 
 ### Arquitetura em Camadas
 
@@ -298,6 +335,7 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 ## Documentação Adicional
 
 - `Docs/DOCUMENTACAO.md` — Documentação técnica completa (API, schema, migração, a11y)
+- `Docs/SEPARACAO_EVENTOS_UI.md` — Responsabilidades, ordem de carga e estratégia da nova camada de eventos
 - `Docs/ETAPA_5_FINALIZACAO.md` — Detalhes da refatoração modular
 - `Docs/CORRECOES_ETAPA_[1-4].md` — Histórico de correções por etapa
 
@@ -347,8 +385,8 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 - `src/features/csv.js` — `⚠ mantém utilidades duplicadas`
 - `src/features/diagnostics.js` — `✅ OK`
 - `src/features/nps.js` — `✅ OK`
-- `src/ui/render.js` — `⚠ arquivo muito grande / multi-responsabilidade`
-- `src/ui/events.js` — `⚠ alto acoplamento por globais`
+- `src/ui/render-*.js` — `⚠ render ainda depende de globais e ordem de carga`
+- `src/ui/events-*.js` — `✅ separados por domínio; core ainda depende de globais do app`
 - `src/main.js` — `⚠ orquestração centralizada`
 
 ### Observações Finais da Auditoria

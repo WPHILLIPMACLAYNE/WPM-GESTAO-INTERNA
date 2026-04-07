@@ -1,0 +1,152 @@
+Base
+  Relatório baseado apenas no histórico Git já commitado em origin/main. No momento da análise, HEAD e origin/main estavam no mesmo commit:
+  1a8f4389b23dc87010efc035338ec4f10ab64c91, em main.
+
+  1. Resumo Executivo
+  Em 6 de abril de 2026, o repositório foi efetivamente bootstrapado em main, limpo de dependências versionadas, auditado com documentação e testes adicionais, e depois
+  refatorado em três frentes estruturais: consolidação de helpers, separação de storage.js por responsabilidade e separação de render.js por domínio funcional. O
+  trabalho do dia foi majoritariamente arquitetural e de qualidade, com pouca evidência de mudança de regra de negócio.
+
+  2. Commits Realizados Hoje
+  | Hora | Commit | Mensagem | Delta |
+  |---|---|---|---|
+  | 16:13 | 4d557e0 | v1-pos-correcao-pills-131-testes-ok | 5.836 arquivos, +958.811 |
+  | 16:14 | 3b3da02 | remove node_modules do tracking, adiciona .gitignore | 5.782 arquivos, -918.530 |
+  | 16:16 | f1ab4ff | remove node_modules do tracking, adiciona .gitignore | 1 arquivo, +1 |
+  | 18:21 | 189e641 | v2-avaliacao-geral-158-testes-ok | 26 arquivos, +8.067 / -6 |
+  | 18:46 | 6f190a4 | refactor: consolida helpers duplicados em utils/helpers.js | 9 arquivos, +179 / -320 |
+  | 18:55 | 72764ff | refactor: separa storage.js em persistencia, seed e period-builder | 8 arquivos, +552 / -549 |
+  | 19:36 | 1a8f438 | refactor: separa render.js por dominio funcional | 31 arquivos, +3.302 / -3.262 |
+
+  3. Arquivos Alterados Por Commit
+
+  - 4d557e0: bootstrap do projeto com .github/workflows/ci.yml, Docs/**, Legacy/**, Scripts/**, index.html, styles.css, package.json, package-lock.json,
+    playwright.config.js, vitest.config.js, src/**, tests/**, QWEN.md, além de node_modules/**, playwright-report/index.html e test-results/.last-run.json.
+  - 3b3da02: remoção de node_modules/** do versionamento.
+  - f1ab4ff: inclusão de .gitignore.
+  - 189e641: MIGRATION_STATUS.md, MODULE_MAP.md, TECH_DEBT.md, QWEN.md, src/ui/render.js, tests/helpers/load-real-app.js, tests/unit/selectors-real.test.js, tests/e2e/
+    workflows.spec.js, tests/e2e/visual.spec.js, tests/e2e/visual.spec.js-snapshots/** e artefato em test-results/**.
+  - 6f190a4: src/utils/helpers.js, src/features/csv.js, src/ui/render.js, src/core/storage.js, src/core/schema.js, src/domain/selectors.js, src/main.js e artefatos de
+    teste.
+  - 72764ff: index.html, src/core/storage.js, src/core/seed.js, src/core/period-builder.js, src/core/schema.js, src/utils/helpers.js e artefatos de teste.
+  - 1a8f438: index.html, src/ui/render.js, src/ui/render-core.js, src/ui/render-dashboard.js, src/ui/render-students.js, src/ui/render-pending.js, src/ui/render-nps.js,
+    src/ui/render-scale.js, src/ui/render-events.js, src/ui/render-settings.js, src/ui/render-addons.js, tests/e2e/workflows.spec.js, tests/e2e/visual.spec.js, tests/
+    e2e/visual.spec.js-snapshots/** e artefatos de teste.
+
+  4. Principais Refatorações Feitas
+
+  - Centralização de funções duplicadas em src/utils/helpers.js.
+  - Separação de src/core/storage.js em persistência, seed determinístico e builders de período.
+  - Separação de src/ui/render.js em um núcleo de renderização e renderizadores por domínio.
+  - Ampliação da suíte de testes com E2E reais, testes visuais e testes unitários com o app carregado de forma real.
+  - Geração de documentação operacional da migração e da dívida técnica.
+
+  5. Impactos na Arquitetura
+
+  - A arquitetura ficou mais granular em core e ui, com responsabilidades melhor distribuídas.
+  - Houve avanço real na navegabilidade e testabilidade do código.
+  - A arquitetura continua browser-only com scripts clássicos e globais compartilhados; a ordem de carga em index.html segue sendo estruturalmente importante.
+  - O repositório passou de um bootstrap amplo para uma modularização mais fina no mesmo dia, sem migração para módulos ES.
+
+  6. Testes e Evidências Disponíveis
+
+  - O commit-base do dia já declara 131 testes ok no título.
+  - O commit 189e641 declara 158 testes ok no título e adiciona evidências concretas: tests/unit/selectors-real.test.js, tests/e2e/workflows.spec.js, tests/e2e/
+    visual.spec.js e snapshots.
+  - Os commits finais de refatoração em storage.js e render.js também versionam ajustes em testes visuais/E2E, sinalizando manutenção da cobertura durante o refactor.
+  - Há artefatos commitados de teste, como playwright-report/index.html, test-results/** e snapshots Playwright.
+  - Não há logs CI completos no Git além desses artefatos e das mensagens de commit.
+
+  7. Pendências e Riscos
+
+  - A documentação técnica commitada às 18:21 (MIGRATION_STATUS.md, TECH_DEBT.md, QWEN.md) ficou parcialmente desatualizada pelas refatorações posteriores de helpers,
+    storage e render.
+  - O acoplamento por globais e ordem de <script> permanece sendo o principal risco arquitetural.
+  - src/ui/events.js e src/main.js não foram repartidos no mesmo nível de granularidade que storage.js e render.js; continuam candidatos naturais para próxima rodada.
+  - Artefatos gerados de teste continuam sendo versionados e aparecem repetidamente nos commits, o que adiciona ruído ao histórico.
+  - O dia começou com node_modules versionado no bootstrap e só depois houve saneamento; isso sugere que a higiene do repositório ainda precisa de vigilância contínua.
+
+  8. Contexto Pronto Para a Próxima Sessão
+
+  - Branch atual: main.
+  - Ponto sincronizado com remoto: origin/main = 1a8f4389.
+  - Estado funcional ao fim do dia, segundo o histórico: helpers consolidados, storage particionado e render particionado por domínio.
+  - Próximo passo mais lógico: atualizar a documentação gerada no meio do dia para refletir o estado real após os commits 6f190a4, 72764ff e 1a8f438.
+  - Próximo foco técnico provável: reduzir acoplamento restante em src/ui/events.js e src/main.js, e revisar o versionamento de artefatos gerados.
+• Estado Final
+  Em 6 de abril de 2026, a branch main está alinhada com origin/main. O único desvio local fora do histórico sincronizado é um arquivo não rastreado:
+  Base%20Relat%C3%B3rio%20baseado%2006abril26.txt.
+
+  1. Resumo Executivo
+  O dia concentrou a estruturação do projeto em cima de uma base já pós-correção das pills. O repositório foi bootstrapado, saneado para parar de versionar
+  node_modules, auditado com documentação e testes adicionais, e depois refatorado em duas áreas centrais da arquitetura: núcleo de persistência e núcleo de
+  renderização. O resultado em origin/main ao fim do dia é um código mais modular, com melhor cobertura de testes e documentação técnica, mas ainda dependente de
+  scripts clássicos e globais compartilhados.
+
+  2. Commits Realizados Hoje
+
+  - 1a8f438 19:36:44 — refactor: separa render.js por dominio funcional
+  - 72764ff 18:55:07 — refactor: separa storage.js em persistencia, seed e period-builder
+  - 6f190a4 18:46:45 — refactor: consolida helpers duplicados em utils/helpers.js
+  - 189e641 18:21:56 — v2-avaliacao-geral-158-testes-ok
+  - f1ab4ff 16:16:09 — remove node_modules do tracking, adiciona .gitignore
+  - 3b3da02 16:14:38 — remove node_modules do tracking, adiciona .gitignore
+  - 4d557e0 16:13:56 — v1-pos-correcao-pills-131-testes-ok
+
+  3. Arquivos Alterados
+
+  - 4d557e0: bootstrap do projeto com src/**, tests/**, index.html, styles.css, package.json, QWEN.md, Docs/**, Legacy/**, Scripts/**, além de node_modules/**.
+  - 3b3da02: remoção massiva de node_modules/** do tracking.
+  - f1ab4ff: criação de .gitignore.
+  - 189e641: documentação e auditoria em MIGRATION_STATUS.md, MODULE_MAP.md, TECH_DEBT.md, QWEN.md, além de novos testes e snapshots.
+  - 6f190a4: consolidação em src/utils/helpers.js e remoção de duplicatas em src/core/storage.js, src/core/schema.js, src/domain/selectors.js, src/features/csv.js, src/
+    main.js, src/ui/render.js.
+  - 72764ff: criação de src/core/seed.js e src/core/period-builder.js, enxugando src/core/storage.js e ajustando index.html.
+  - 1a8f438: criação dos novos arquivos src/ui/render-*.js, mantendo src/ui/render.js como compatibilidade histórica, além de atualização de index.html e testes
+    visuais/E2E.
+
+  4. Refatorações Feitas
+
+  - Centralização de utilitários canônicos em src/utils/helpers.js.
+  - Separação do antigo src/core/storage.js em persistência, seed determinístico e builders de período.
+  - Separação do antigo src/ui/render.js em render-core e renderizadores por domínio.
+  - Expansão da documentação de auditoria e da suíte de testes reais do app.
+
+  5. Bugs Corrigidos
+
+  - O histórico do dia parte explicitamente de uma base “pós-correção das pills”, registrada no commit 4d557e0.
+  - Não há outros bugs nomeados de forma explícita nos títulos dos commits de hoje; o restante do trabalho foi predominantemente refatoração, documentação e
+    estabilização de testes.
+
+  6. Testes Executados e Evidências
+
+  - 4d557e0 registra no próprio título: 131 testes ok.
+  - 189e641 registra no próprio título: 158 testes ok.
+  - Evidências commitadas:
+      - tests/e2e/workflows.spec.js
+      - tests/e2e/visual.spec.js
+      - tests/unit/selectors-real.test.js
+      - tests/helpers/load-real-app.js
+      - snapshots em tests/e2e/visual.spec.js-snapshots/**
+      - artefatos em playwright-report/** e test-results/**
+
+  7. Pendências
+
+  - A documentação de auditoria gerada às 18:21 ficou potencialmente defasada pelas refatorações posteriores de helpers, storage e render.
+  - src/ui/events.js e src/main.js seguem como arquivos centrais e ainda não foram particionados no mesmo nível.
+  - O arquivo local não rastreado Base%20Relat%C3%B3rio%20baseado%2006abril26.txt precisa de decisão: versionar, mover ou remover.
+
+  8. Riscos
+
+  - A arquitetura continua dependente da ordem de carregamento de <script> e de globais implícitos.
+  - Há ruído histórico por versionamento de artefatos gerados de teste e, no começo do dia, de node_modules.
+  - A modularização avançou, mas ainda não elimina risco de regressão por acoplamento entre arquivos clássicos.
+
+  9. Contexto Para a Próxima Sessão
+
+  - Ponto de retomada: main sincronizada com origin/main no commit 1a8f438.
+  - Estado técnico: helpers consolidados, persistência separada por responsabilidade, renderização separada por domínio.
+  - Próximo passo lógico: atualizar a documentação de migração/dívida técnica para refletir exatamente o estado após 6f190a4, 72764ff e 1a8f438.
+  - Próximo foco arquitetural provável: quebrar src/ui/events.js e src/main.js, e revisar a política de versionamento de artefatos gerados.
+
+

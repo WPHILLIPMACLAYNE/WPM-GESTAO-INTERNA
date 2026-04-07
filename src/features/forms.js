@@ -277,8 +277,8 @@
     // VALIDAÇÃO UI — limparErrosValidacao, apresentarErroValidacao
     // ══════════════════════════════════════════
     // Dependências globais:
-    //   limparErroValidacaoCampo  — ui/events.js (helper de campo individual)
-    //   showToast                  — main.js
+    //   limparErroValidacaoCampo  — ui/events-core.js (helper de campo individual)
+    //   showToast                 — main.js
 
     function limparErrosValidacao(ids = []) {
       ids.forEach(id => {

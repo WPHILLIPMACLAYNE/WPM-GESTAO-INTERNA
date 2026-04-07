@@ -949,10 +949,6 @@
       clearPendingForm();
       clearScaleForm();
       clearEventForm();
-      document.getElementById('npsObservations').addEventListener('input', () => {
-        clearTimeout(npsObservationsDebounce);
-        npsObservationsDebounce = setTimeout(saveNpsObservations, 800);
-      });
       sincronizarLabelsComCampos();
     }
 

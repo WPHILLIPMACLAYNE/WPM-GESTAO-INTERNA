@@ -35,7 +35,13 @@
   <script src="src/ui/render-settings.js"></script>
   <script src="src/ui/render-addons.js"></script>
   <script src="src/features/crud.js"></script>
-  <script src="src/ui/events.js"></script>
+  <!-- Camada de eventos UI separada por domínio: core primeiro, depois bindings específicos -->
+  <script src="src/ui/events-core.js"></script>
+  <script src="src/ui/events-students.js"></script>
+  <script src="src/ui/events-pending.js"></script>
+  <script src="src/ui/events-addons.js"></script>
+  <script src="src/ui/events-scale.js"></script>
+  <script src="src/ui/events-nps.js"></script>
   <script src="src/main.js"></script>
 </head>
 <body>

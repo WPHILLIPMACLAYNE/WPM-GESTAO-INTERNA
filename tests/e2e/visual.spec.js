@@ -53,6 +53,14 @@ async function seedVisualStore(page, periodKey = '2026-04') {
     if (typeof storageCache !== 'undefined' && typeof storageCache.clear === 'function') {
       storageCache.clear();
     }
+    await removeStoredValues([
+      LOCAL_SNAPSHOT_KEY,
+      SYSTEM_REPORT_KEY,
+      FLOW_TEST_REPORT_KEY,
+      ...LEGACY_LOCAL_SNAPSHOT_KEYS,
+      ...LEGACY_SYSTEM_REPORT_KEYS,
+      ...LEGACY_FLOW_TEST_REPORT_KEYS
+    ]);
     const store = {
       version: window.__APP_INTERNALS__.config.STORE_VERSION,
       activePeriod: targetPeriod,

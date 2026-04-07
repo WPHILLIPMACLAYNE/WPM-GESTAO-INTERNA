@@ -174,7 +174,7 @@
       }
     });
 
-    // Aliases para compatibilidade com events.js
+    // Aliases para compatibilidade com a camada de eventos UI
     const saveStudent = handleSaveStudent;
     const savePending = handleSavePending;
     const saveEventItem = handleSaveEvent;

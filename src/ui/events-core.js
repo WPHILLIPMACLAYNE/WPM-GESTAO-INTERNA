@@ -1,3 +1,7 @@
+    // ══════════════════════════════════════════
+    // EVENTOS UI — CORE — delegação principal, modais, tooltips, a11y, atalhos
+    // ══════════════════════════════════════════
+
     const estadoEventos = {
       uiDelegadaInicializada: false,
       atalhosGlobaisInicializados: false,
@@ -8,7 +12,8 @@
       acessibilidadeInicializada: false,
       navegacaoAbasInicializada: false,
       modaisInicializados: false,
-      formulariosInicializados: false
+      formulariosInicializados: false,
+      npsObservacoesInicializadas: false
     };
     const estadoAcessibilidade = {
       focoRetornoModal: {},
@@ -16,7 +21,6 @@
       pendenciaFocoPendente: null
     };
     let tooltipAlvoAtual = null;
-
 
     function openModal(id) {
       const modal = document.getElementById(id);
@@ -43,12 +47,122 @@
         modalAberto.querySelector('.modal-content')?.focus({ preventScroll: true });
       }
     }
-    function openStudentModal() { clearStudentForm(); openModal('studentModal'); }
-    function openPendingModal() { clearPendingForm(); openModal('pendingModal'); }
+
+    function bindCoreEvents() {
+      return {
+        handleClick(actionEl) {
+          switch (actionEl.dataset.action) {
+            case 'reset-selected-month':
+              resetSelectedMonth();
+              return true;
+            case 'close-current-month':
+              closeCurrentMonth();
+              return true;
+            case 'download-data':
+              downloadData();
+              return true;
+            case 'reset-view-filters':
+              resetViewFilters(actionEl.dataset.view);
+              return true;
+            case 'save-settings':
+              saveSettings();
+              return true;
+            case 'reset-demo-data':
+              resetDemoData();
+              return true;
+            case 'save-local-snapshot':
+              saveLocalSnapshot();
+              return true;
+            case 'restore-local-snapshot':
+              restoreLocalSnapshot();
+              return true;
+            case 'clear-empty-months':
+              clearEmptyMonths();
+              return true;
+            case 'run-system-diagnostics':
+              runSystemDiagnostics(actionEl.dataset.silent === 'true');
+              return true;
+            case 'run-persistence-self-test':
+              runPersistenceSelfTest();
+              return true;
+            case 'run-flow-smoke-tests':
+              runFlowSmokeTests(actionEl.dataset.silent === 'true');
+              return true;
+            case 'clear-flow-smoke-tests':
+              clearFlowSmokeTests();
+              return true;
+            case 'confirm-ok':
+              _resolveConfirm(true);
+              return true;
+            case 'confirm-cancel':
+              _resolveConfirm(false);
+              return true;
+            case 'close-modal':
+              closeModal(actionEl.dataset.modalId);
+              return true;
+            case 'set-active-tab':
+              setActiveTab(actionEl.dataset.tabTarget);
+              return true;
+            default:
+              return false;
+          }
+        }
+      };
+    }
+
+    function bindEventAgendaEvents() {
+      return {
+        handleClick(actionEl) {
+          switch (actionEl.dataset.action) {
+            case 'export-events-csv':
+              exportEventsCsv();
+              return true;
+            case 'open-event-modal':
+              openEventModal();
+              return true;
+            case 'save-event-item':
+              saveEventItem();
+              return true;
+            case 'edit-event-item':
+              editEventItem(actionEl.dataset.id);
+              return true;
+            case 'duplicate-event-item':
+              duplicateEventItem(actionEl.dataset.id);
+              return true;
+            case 'remove-event-item':
+              removeEventItem(actionEl.dataset.id);
+              return true;
+            default:
+              return false;
+          }
+        }
+      };
+    }
+
+    function collectUiEventBindings() {
+      return [
+        bindCoreEvents(),
+        bindEventAgendaEvents(),
+        typeof bindStudentEvents === 'function' ? bindStudentEvents() : null,
+        typeof bindPendingEvents === 'function' ? bindPendingEvents() : null,
+        typeof bindAddonEvents === 'function' ? bindAddonEvents() : null,
+        typeof bindScaleEvents === 'function' ? bindScaleEvents() : null,
+        typeof bindNpsEvents === 'function' ? bindNpsEvents() : null
+      ].filter(Boolean);
+    }
+
+    function dispatchUiBinding(bindings, handlerName, ...args) {
+      for (const binding of bindings) {
+        if (binding?.[handlerName]?.(...args) === true) return true;
+      }
+      return false;
+    }
 
     function bindUIEvents() {
       if (estadoEventos.uiDelegadaInicializada) return;
       estadoEventos.uiDelegadaInicializada = true;
+
+      const bindings = collectUiEventBindings();
 
       document.addEventListener('click', e => {
         const tabButton = e.target.closest('.tab-btn');
@@ -59,210 +173,21 @@
 
         const actionEl = e.target.closest('[data-action]');
         if (!actionEl) return;
-
-        switch (actionEl.dataset.action) {
-          case 'reset-selected-month':
-            resetSelectedMonth();
-            break;
-          case 'close-current-month':
-            closeCurrentMonth();
-            break;
-          case 'open-student-modal':
-            openStudentModal();
-            break;
-          case 'open-pending-modal':
-            openPendingModal();
-            break;
-          case 'download-data':
-            downloadData();
-            break;
-          case 'add-person':
-            addPerson();
-            break;
-          case 'export-pending-csv':
-            exportPendingCsv();
-            break;
-          case 'register-mention':
-            registerMention();
-            break;
-          case 'save-nps-observations':
-            clearTimeout(npsObservationsDebounce);
-            saveNpsObservations();
-            break;
-          case 'reset-view-filters':
-            resetViewFilters(actionEl.dataset.view);
-            break;
-          case 'export-scale-csv':
-            exportScaleCsv();
-            break;
-          case 'open-scale-modal':
-            openScaleModal();
-            break;
-          case 'duplicate-previous-month-scale':
-            duplicatePreviousMonthScale();
-            break;
-          case 'export-events-csv':
-            exportEventsCsv();
-            break;
-          case 'open-event-modal':
-            openEventModal();
-            break;
-          case 'save-settings':
-            saveSettings();
-            break;
-          case 'reset-demo-data':
-            resetDemoData();
-            break;
-          case 'save-local-snapshot':
-            saveLocalSnapshot();
-            break;
-          case 'restore-local-snapshot':
-            restoreLocalSnapshot();
-            break;
-          case 'clear-empty-months':
-            clearEmptyMonths();
-            break;
-          case 'run-system-diagnostics':
-            runSystemDiagnostics(actionEl.dataset.silent === 'true');
-            break;
-          case 'run-persistence-self-test':
-            runPersistenceSelfTest();
-            break;
-          case 'run-flow-smoke-tests':
-            runFlowSmokeTests(actionEl.dataset.silent === 'true');
-            break;
-          case 'clear-flow-smoke-tests':
-            clearFlowSmokeTests();
-            break;
-          case 'confirm-ok':
-            _resolveConfirm(true);
-            break;
-          case 'confirm-cancel':
-            _resolveConfirm(false);
-            break;
-          case 'close-modal':
-            closeModal(actionEl.dataset.modalId);
-            break;
-          case 'save-student':
-            saveStudent();
-            break;
-          case 'save-pending':
-            savePending();
-            break;
-          case 'add-scale-shift-row':
-            addScaleShiftRow();
-            break;
-          case 'save-scale-day':
-            saveScaleDay();
-            break;
-          case 'save-event-item':
-            saveEventItem();
-            break;
-          case 'set-active-tab':
-            setActiveTab(actionEl.dataset.tabTarget);
-            break;
-          case 'edit-student':
-            editStudent(actionEl.dataset.id);
-            break;
-          case 'remove-student':
-            removeStudent(actionEl.dataset.id);
-            break;
-          case 'edit-pending':
-            editPending(actionEl.dataset.id);
-            break;
-          case 'remove-pending':
-            removePending(actionEl.dataset.id);
-            break;
-          case 'adjust-mention':
-            adjustMention(actionEl.dataset.id, Number(actionEl.dataset.delta || 0));
-            break;
-          case 'remove-mention':
-            removeMention(actionEl.dataset.id);
-            break;
-          case 'remove-scale-shift-row':
-            removeScaleShiftRow(Number(actionEl.dataset.index || -1));
-            break;
-          case 'edit-scale-day':
-            editScaleDay(actionEl.dataset.id);
-            break;
-          case 'remove-scale-day':
-            removeScaleDay(actionEl.dataset.id);
-            break;
-          case 'edit-event-item':
-            editEventItem(actionEl.dataset.id);
-            break;
-          case 'duplicate-event-item':
-            duplicateEventItem(actionEl.dataset.id);
-            break;
-          case 'remove-event-item':
-            removeEventItem(actionEl.dataset.id);
-            break;
-          default:
-            break;
-        }
+        dispatchUiBinding(bindings, 'handleClick', actionEl, e);
       });
 
       document.addEventListener('change', e => {
         limparErroValidacaoCampo(e.target);
-        const target = e.target.closest('[data-change-action]');
-        if (!target) return;
-
-        switch (target.dataset.changeAction) {
-          case 'update-student-inline':
-            updateStudentInline(target.dataset.id, target.dataset.field, e.target.value);
-            break;
-          case 'update-addon':
-            updateAddon(target.dataset.person, target.dataset.addonType, Number(target.dataset.index || 0), e.target.value);
-            break;
-          case 'set-mention-count':
-            setMentionCount(target.dataset.id, e.target.value);
-            break;
-          default:
-            break;
-        }
+        dispatchUiBinding(bindings, 'handleChange', e.target, e);
       });
 
       document.addEventListener('input', e => {
         limparErroValidacaoCampo(e.target);
-        const inputEscala = e.target.closest('[data-scale-shift]');
-        if (inputEscala) {
-          const idx = Number(inputEscala.dataset.index);
-          const field = inputEscala.dataset.scaleShift;
-          if (scaleShiftDrafts[idx]) {
-            scaleShiftDrafts[idx][field] = e.target.value;
-          }
-          return;
-        }
-
-        const target = e.target.closest('[data-input-action]');
-        if (!target) return;
-
-        switch (target.dataset.inputAction) {
-          case 'update-nps-score':
-            updateNpsScore(e.target.value, target.dataset.source);
-            break;
-          case 'update-nps-goal':
-            updateNpsGoal(target.dataset.field, e.target.value);
-            break;
-          default:
-            break;
-        }
+        dispatchUiBinding(bindings, 'handleInput', e.target, e);
       });
 
       document.addEventListener('focusout', e => {
-        const target = e.target.closest('[data-blur-action]');
-        if (!target) return;
-
-        switch (target.dataset.blurAction) {
-          case 'rename-person':
-            renamePerson(target.dataset.person, e.target.textContent);
-            break;
-          case 'rename-mention':
-            renameMention(target.dataset.id, e.target.value);
-            break;
-          default:
-            break;
-        }
+        dispatchUiBinding(bindings, 'handleBlur', e.target, e);
       });
     }
 
@@ -513,7 +438,7 @@
             return;
           }
         }
-        if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '')) {
+        if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
           e.preventDefault();
           const activeView = document.querySelector('.view.active')?.id;
           const targetId = activeView === 'pending'
@@ -544,5 +469,72 @@
         if (!getKnownStorageKeys().includes(e.key)) return;
         if (e.newValue === null) storageCache.delete(e.key);
         else storageCache.set(e.key, e.newValue);
+      });
+    }
+
+    function positionTooltip(e, el, tooltip) {
+      const offset = 16;
+      const clientX = e?.clientX ?? el.getBoundingClientRect().left;
+      const clientY = e?.clientY ?? el.getBoundingClientRect().bottom;
+      const maxX = window.innerWidth - tooltip.offsetWidth - 12;
+      const maxY = window.innerHeight - tooltip.offsetHeight - 12;
+      let x = clientX + offset;
+      let y = clientY + offset;
+      if (x > maxX) x = Math.max(12, clientX - tooltip.offsetWidth - offset);
+      if (y > maxY) y = Math.max(12, clientY - tooltip.offsetHeight - offset);
+      tooltip.style.left = `${Math.max(12, Math.min(maxX, x))}px`;
+      tooltip.style.top = `${Math.max(12, Math.min(maxY, y))}px`;
+    }
+
+    function bindTooltips() {
+      if (estadoEventos.tooltipInicializado) return;
+      estadoEventos.tooltipInicializado = true;
+
+      const tooltip = document.getElementById('appTooltip');
+      if (!tooltip) return;
+
+      const show = (el, e) => {
+        const text = String(el?.dataset?.tooltip || '').trim();
+        if (!text) return;
+        tooltipAlvoAtual = el;
+        tooltip.innerHTML = esc(text).replace(/\n/g, '<br>');
+        tooltip.classList.add('show');
+        positionTooltip(e, el, tooltip);
+      };
+
+      const hide = () => {
+        tooltipAlvoAtual = null;
+        tooltip.classList.remove('show');
+      };
+
+      document.addEventListener('mouseover', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el === tooltipAlvoAtual) return;
+        show(el, e);
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!tooltipAlvoAtual || !tooltip.classList.contains('show')) return;
+        positionTooltip(e, tooltipAlvoAtual, tooltip);
+      });
+
+      document.addEventListener('mouseout', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el !== tooltipAlvoAtual) return;
+        const relacionado = e.relatedTarget;
+        if (relacionado && el.contains(relacionado)) return;
+        hide();
+      });
+
+      document.addEventListener('focusin', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el) return;
+        show(el, { clientX: el.getBoundingClientRect().left, clientY: el.getBoundingClientRect().bottom });
+      });
+
+      document.addEventListener('focusout', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el || el !== tooltipAlvoAtual) return;
+        hide();
       });
     }

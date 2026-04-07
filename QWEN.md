@@ -46,14 +46,15 @@ APLICATIVOFINALIZADO/
 ├── vitest.config.js            # Configuração do Vitest
 ├── playwright.config.js        # Configuração do Playwright
 │
-├── src/                        # JavaScript modular (29 arquivos)
-│   ├── main.js                 # Bootstrap, persistência, inicialização
+├── src/                        # JavaScript modular (31 arquivos)
 │   ├── core/
 │   │   ├── config.js           # Constantes, estado global, DOM helper
 │   │   ├── period-builder.js   # Builders de período e templates
 │   │   ├── schema.js           # Migração, sanitização, validação
 │   │   ├── seed.js             # Seed determinístico de massa inicial
-│   │   └── storage.js          # IndexedDB, localStorage, broadcast
+│   │   ├── storage.js          # IndexedDB, localStorage, broadcast
+│   │   ├── backup.js           # Persistência de alto nível, import/export e snapshots
+│   │   └── lifecycle.js        # Ciclo mensal, troca/fechamento/reset de períodos
 │   ├── domain/
 │   │   └── selectors.js        # Selectors memoizados com cache
 │   ├── features/
@@ -78,6 +79,7 @@ APLICATIVOFINALIZADO/
 │   │   ├── events-addons.js    # Handlers do grid de addons
 │   │   ├── events-scale.js     # Handlers da escala
 │   │   └── events-nps.js       # Handlers de NPS e autosave de observações
+│   ├── main.js                 # Bootstrap final: initializeApp, APP_INTERNALS, DOMContentLoaded
 │   └── utils/
 │       └── helpers.js          # Funções puras (format, date, esc, etc.)
 │
@@ -93,6 +95,8 @@ APLICATIVOFINALIZADO/
 │   ├── CORRECOES_ETAPA_3..md   # Correções etapa 3
 │   ├── CORRECOES_ETAPA_4..md   # Correções etapa 4
 │   ├── ETAPA_5_FINALIZACAO.md  # Finalização e refatoração modular
+│   ├── SEPARACAO_EVENTOS_UI.md # Separação da camada de eventos UI
+│   ├── SEPARACAO_MAIN_LIFECYCLE_BACKUP.md # Separação entre bootstrap, lifecycle e backup
 │   └── QWEN.md                 # Contexto anterior
 │
 ├── Legacy/                     # Arquivos legados
@@ -135,7 +139,9 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 26. src/ui/events-addons.js
 27. src/ui/events-scale.js
 28. src/ui/events-nps.js
-29. src/main.js              ← bootstrap, period lifecycle, APP_INTERNALS, initializeApp
+29. src/core/backup.js       ← persistência de alto nível, import/export e snapshots
+30. src/core/lifecycle.js    ← ciclo mensal, navegação entre meses, sync do período ativo
+31. src/main.js              ← bootstrap final: initializeApp, APP_INTERNALS, DOMContentLoaded
 ```
 
 ### Camada de Eventos UI
@@ -144,6 +150,12 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 - `bindUIEvents()` continua sendo a porta única da delegação global, mas agora monta registradores por domínio via `bindStudentEvents()`, `bindPendingEvents()`, `bindAddonEvents()`, `bindScaleEvents()` e `bindNpsEvents()`.
 - `src/ui/events-pending.js` mantém `bindPendingDnD()` e `updatePendingStatus()`, preservando o comportamento do Kanban.
 - O autosave de observações de NPS saiu de `src/main.js` e passou para `src/ui/events-nps.js`, sem alterar o debounce de `800ms`.
+
+### Lifecycle & Backup
+
+- `src/core/lifecycle.js` centraliza o lifecycle mensal: `switchPeriod()`, `closePeriod()`, `resetPeriod()`, `changePeriodFromControls()`, `duplicatePreviousMonthScale()`, `syncPeriodControls()` e `syncAppState()`.
+- `src/core/backup.js` concentra persistência de alto nível e restauração: `loadStore()`, `saveStore()`, `saveData()`, snapshots commitados, `exportBackup()`, `importBackup()`, `saveLocalSnapshot()` e `restoreLocalSnapshot()`.
+- `src/main.js` deixou de carregar regras de lifecycle e backup. O arquivo agora só expõe `APP_INTERNALS`, executa `initializeApp()` e instala o listener de `DOMContentLoaded`.
 
 ### Arquitetura em Camadas
 
@@ -336,6 +348,7 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 
 - `Docs/DOCUMENTACAO.md` — Documentação técnica completa (API, schema, migração, a11y)
 - `Docs/SEPARACAO_EVENTOS_UI.md` — Responsabilidades, ordem de carga e estratégia da nova camada de eventos
+- `Docs/SEPARACAO_MAIN_LIFECYCLE_BACKUP.md` — Responsabilidades, ordem de carga e compatibilidade entre bootstrap, lifecycle e backup
 - `Docs/ETAPA_5_FINALIZACAO.md` — Detalhes da refatoração modular
 - `Docs/CORRECOES_ETAPA_[1-4].md` — Histórico de correções por etapa
 
@@ -377,6 +390,8 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 
 - `src/utils/helpers.js` — `✅ OK`
 - `src/core/config.js` — `✅ OK`
+- `src/core/backup.js` — `✅ persistência de alto nível, import/export e snapshots`
+- `src/core/lifecycle.js` — `✅ ciclo mensal e navegação de período`
 - `src/core/schema.js` — `⚠ depende de globais tardios`
 - `src/core/storage.js` — `⚠ mistura persistência, schema e UI state`
 - `src/domain/selectors.js` — `✅ OK`
@@ -387,7 +402,7 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 - `src/features/nps.js` — `✅ OK`
 - `src/ui/render-*.js` — `⚠ render ainda depende de globais e ordem de carga`
 - `src/ui/events-*.js` — `✅ separados por domínio; core ainda depende de globais do app`
-- `src/main.js` — `⚠ orquestração centralizada`
+- `src/main.js` — `✅ bootstrap mínimo; continua dependente da ordem de <script>`
 
 ### Observações Finais da Auditoria
 

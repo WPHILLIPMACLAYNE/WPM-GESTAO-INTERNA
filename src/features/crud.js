@@ -2,8 +2,10 @@
     // CRUD HANDLERS — factory genérica + handlers de save para student, pending e event
     // ══════════════════════════════════════════
     // Dependências globais (providas por scripts carregados antes):
-    //   assertWritableCurrentPeriod, saveData, showToast, showConfirm  — main.js
-    //   requestRender                                                  — render.js (scheduler)
+    //   assertWritableCurrentPeriod                                    — core/lifecycle.js
+    //   saveData                                                       — core/backup.js
+    //   showToast, showConfirm                                         — ui/events-core.js
+    //   requestRender                                                  — ui/render-core.js (scheduler)
     //   apresentarErroValidacao                                        — features/forms.js
     //   state                                                          — estado global
     //   getStudentFormData, getPendingFormData, getEventFormData       — features/forms.js
@@ -109,7 +111,7 @@
     }
 
     // Handlers CRUD específicos criados pelo módulo genérico
-    // Nota: collection é resolvida via getter porque state só é populado em runtime (main.js → syncAppState)
+    // Nota: collection é resolvida via getter porque state só é populado em runtime (bootstrap → syncAppState)
 
     const handleSaveStudent = createCrudHandler({
       name: 'atendimento',

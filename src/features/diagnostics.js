@@ -2,15 +2,19 @@
     // DIAGNOSTICS — smoke tests de fluxo (backup, CSV, reset)
     // ══════════════════════════════════════════
     // Dependências globais (providas por scripts carregados antes):
-    //   normalizeStore, getBackupSummary, buildEmptyPeriodFromTemplate,
-    //   normalizeData, getPeriodMetrics, getPeriodLabel  — core/schema + main.js
-    //   storage                                            — estado global
+    //   normalizeStore                                      — core/schema.js
+    //   getBackupSummary                                    — core/backup.js
+    //   buildEmptyPeriodFromTemplate                        — core/period-builder.js
+    //   normalizeData                                       — core/lifecycle.js
+    //   getPeriodMetrics                                    — ui/render-settings.js
+    //   getPeriodLabel, esc                                 — utils/helpers.js
+    //   storage                                             — estado global
     //   buildCsvContent, getPendingCsvRows, getScaleCsvRows,
-    //   getEventsCsvRows                                   — features/csv.js
+    //   getEventsCsvRows                                    — features/csv.js
     //   readStoredJsonWithFallback, writeStoredJson,
-    //   removeStoredValues                                 — core/storage.js
-    //   requestRender, showSaveToast, showToast            — render.js / main.js
-    //   esc                                                — utils/helpers.js
+    //   removeStoredValues                                  — core/storage.js
+    //   requestRender                                       — ui/render-core.js
+    //   showSaveToast, showToast                            — ui/events-core.js
 
     function loadFlowSmokeReport() {
       return readStoredJsonWithFallback(FLOW_TEST_REPORT_KEY, LEGACY_FLOW_TEST_REPORT_KEYS, []);

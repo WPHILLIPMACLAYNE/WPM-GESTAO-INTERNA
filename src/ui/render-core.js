@@ -173,6 +173,12 @@
       }
     }
 
+    function renderEllipsisCell(value, fallback = '-') {
+      const text = String(value ?? '').trim();
+      if (!text) return `<span class="muted">${esc(fallback)}</span>`;
+      return `<span class="cell-text multiline" data-tooltip="${esc(text)}">${esc(text)}</span>`;
+    }
+
     // ══════════════════════════════════════════
     // HELPERS DE PATCH DE DOM — patch explícito por chave, sem virtual DOM
     // ══════════════════════════════════════════

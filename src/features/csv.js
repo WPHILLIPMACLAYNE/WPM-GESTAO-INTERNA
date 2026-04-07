@@ -2,7 +2,7 @@
     // CSV EXPORT — escape, build, download + row builders para pending, scale e events
     // ══════════════════════════════════════════
     // Dependências globais (providas por scripts carregados antes):
-    //   state, currentPeriodKey      — estado global / main.js
+    //   state, currentPeriodKey      — estado global / core/config.js
     //   compareByDateTime            — utils/helpers.js (função pura)
 
     function downloadCsvFile(filename, rows) {

@@ -21,6 +21,9 @@
       pendenciaFocoPendente: null
     };
     let tooltipAlvoAtual = null;
+    let saveToastTimer = null;
+    let _confirmOk = null;
+    let _confirmCancel = null;
 
     function openModal(id) {
       const modal = document.getElementById(id);
@@ -46,6 +49,58 @@
       } else {
         modalAberto.querySelector('.modal-content')?.focus({ preventScroll: true });
       }
+    }
+
+    function anunciarAoLeitor(message, prioridade = 'polite') {
+      const id = prioridade === 'assertive' ? 'appLiveRegionUrgente' : 'appLiveRegion';
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = '';
+      requestAnimationFrame(() => {
+        el.textContent = message;
+      });
+    }
+
+    function showSaveToast(message = '✓ salvo automaticamente', duration = 1800) {
+      const toast = document.getElementById('saveToast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.setAttribute('aria-live', 'polite');
+      toast.classList.add('show');
+      anunciarAoLeitor(message, 'polite');
+      clearTimeout(saveToastTimer);
+      saveToastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function showToast(message, type = 'success', duration = 3200) {
+      const toast = document.getElementById('saveToast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.className = 'save-toast' + (type !== 'success' ? ` save-toast--${type}` : '');
+      toast.setAttribute('aria-live', type === 'danger' || type === 'warning' ? 'assertive' : 'polite');
+      toast.classList.add('show');
+      anunciarAoLeitor(message, type === 'danger' || type === 'warning' ? 'assertive' : 'polite');
+      clearTimeout(saveToastTimer);
+      saveToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        saveToastTimer = setTimeout(() => { toast.className = 'save-toast'; }, 220);
+      }, duration);
+    }
+
+    function showConfirm(message, onOk, onCancel) {
+      const el = document.getElementById('confirmModalMsg');
+      if (el) el.textContent = message;
+      _confirmOk = onOk || null;
+      _confirmCancel = onCancel || null;
+      openModal('confirmModal');
+    }
+
+    function _resolveConfirm(accepted) {
+      closeModal('confirmModal');
+      const cb = accepted ? _confirmOk : _confirmCancel;
+      _confirmOk = null;
+      _confirmCancel = null;
+      if (typeof cb === 'function') cb();
     }
 
     function bindCoreEvents() {

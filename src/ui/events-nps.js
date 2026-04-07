@@ -2,6 +2,8 @@
     // EVENTOS UI — NPS
     // ══════════════════════════════════════════
 
+    let npsObservationsDebounce = null;
+
     function bindNpsObservationsAutoSave() {
       if (estadoEventos.npsObservacoesInicializadas) return;
       estadoEventos.npsObservacoesInicializadas = true;

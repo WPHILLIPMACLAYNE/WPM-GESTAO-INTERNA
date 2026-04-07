@@ -2,11 +2,13 @@
     // NPS ACTIONS — registro, ajuste, rename, remoção de menções + observações
     // ══════════════════════════════════════════
     // Dependências globais (providas por scripts carregados antes):
-    //   assertWritableCurrentPeriod, saveData, requestRender  — main.js / render.js
-    //   showToast, showConfirm                                 — main.js
+    //   assertWritableCurrentPeriod                            — core/lifecycle.js
+    //   saveData                                               — core/backup.js
+    //   requestRender                                          — ui/render-core.js
+    //   showToast, showConfirm                                 — ui/events-core.js
     //   state, currentPeriodKey                                — estado global
     //   getMentionDraft, getNpsObservationsDraft               — features/forms.js
-    //   captureNpsRankSnapshot                                 — render.js
+    //   captureNpsRankSnapshot                                 — ui/render-nps.js
     //   DOM                                                    — core/config.js
 
     function registerMention() {

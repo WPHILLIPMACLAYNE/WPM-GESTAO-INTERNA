@@ -1,3 +1,18 @@
+    let scaleShiftDrafts = [];
+
+    function formatScaleBoardDay(dateStr) {
+      if (!dateStr) return { day: '—', month: getPeriodLabel(), weekday: '' };
+      const [y, m, d] = dateStr.split('-').map(Number);
+      if (!y || !m || !d) return { day: '—', month: getPeriodLabel(), weekday: '' };
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      if (Number.isNaN(dt.getTime())) return { day: '—', month: getPeriodLabel(), weekday: '' };
+      return {
+        day: String(dt.getDate()).padStart(2, '0'),
+        month: MONTH_NAMES[dt.getMonth()],
+        weekday: getWeekdayLabel(dateStr)
+      };
+    }
+
     function getScaleFilteredList() {
       const { query } = getScaleViewFilters();
       const list = Array.isArray(state.scale) ? state.scale.slice() : [];

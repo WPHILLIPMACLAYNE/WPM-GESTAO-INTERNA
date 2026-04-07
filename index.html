@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="WPM Gestão Interna — Controle de atendimentos, addons, pendências, NPS, escala e eventos. Criado por Wallace Phillip Maclayne." />
   <meta name="theme-color" content="#FFC20F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
   <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
@@ -960,5 +964,22 @@
       Engenharia assistida por Claude · Anthropic · v34
     </div>
   </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(function(reg) {
+        console.log('[PWA] Service worker registrado:', reg.scope);
+      }).catch(function() {
+        console.log('[PWA] Service worker indisponível (file:// ou sem suporte)');
+      });
+      window.addEventListener('online', function() {
+        var t = document.getElementById('saveToast');
+        if (t) { t.textContent = 'Conexão restaurada'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2000); }
+      });
+      window.addEventListener('offline', function() {
+        var t = document.getElementById('saveToast');
+        if (t) { t.textContent = 'Modo offline — dados locais'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 3000); }
+      });
+    }
+  </script>
 </body>
 </html>

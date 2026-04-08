@@ -1,3 +1,4 @@
+    /** @returns {EventItem[]} */
     function getEventsFilteredList() {
       const { query, typeFilter, statusFilter } = getEventViewFilters();
       const list = Array.isArray(state.events) ? state.events.slice() : [];
@@ -20,6 +21,7 @@
       return filtered.sort(compareByDateTime);
     }
 
+    /** @returns {{year:number, monthIndex:number, totalDays:number, firstWeekday:number}} */
     function getCurrentPeriodDateInfo() {
       const [yearStr, monthStr] = String(currentPeriodKey).split('-');
       const year = Number(yearStr);
@@ -29,6 +31,7 @@
       return { year, monthIndex, totalDays, firstWeekday };
     }
 
+    /** @param {Object} dadosEventos @returns {void} */
     function renderEventsCalendar(dadosEventos) {
       const holder = document.getElementById('eventsCalendar');
       if (!holder) return;
@@ -80,6 +83,7 @@
       aplicarPatchBlocosAgrupados(grid, blocos, bloco => bloco.chave, bloco => bloco.html);
     }
 
+    /** @returns {void} */
     function clearEventForm() {
       editingEventId = null;
       limparErrosValidacao(['event_date', 'event_title']);
@@ -94,20 +98,24 @@
       document.getElementById('event_description').value = '';
     }
 
+    /** @returns {void} */
     function finalizeEventSaveUI() {
       closeModal('eventModal');
       clearEventForm();
     }
 
+    /** @returns {void} */
     function renderEventSaveUI() {
       requestRender(['dashboard', 'events']);
     }
 
+    /** @returns {void} */
     function openEventModal() {
       clearEventForm();
       openModal('eventModal');
     }
 
+    /** @param {string} id @returns {void} */
     function editEventItem(id) {
       const item = state.events.find(entry => entry.id === id);
       if (!item) return;
@@ -124,6 +132,7 @@
       openModal('eventModal');
     }
 
+    /** @param {string} id @returns {void} */
     function removeEventItem(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja excluir este evento / ação?', async () => {
@@ -140,6 +149,7 @@
       });
     }
 
+    /** @param {string} id @returns {Promise<void>} */
     async function duplicateEventItem(id) {
       if (!assertWritableCurrentPeriod()) return;
       const item = state.events.find(entry => entry.id === id);
@@ -157,6 +167,7 @@
       if (saved) showSaveToast('✓ evento duplicado');
     }
 
+    /** @returns {void} */
     function renderEvents() {
       const dadosEventos = selecionarDadosEventosAgrupados();
       const list = dadosEventos.lista;

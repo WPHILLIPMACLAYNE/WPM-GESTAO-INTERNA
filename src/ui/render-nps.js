@@ -1,19 +1,24 @@
+    /** @returns {Array<NpsMention & {position:number, tendencia:{classe:string, rotulo:string}}>} */
     function getSortedMentions() {
       return selecionarRankingNps().ranking;
     }
 
+    /** @returns {Object<string, number>} */
     function getRankMap() {
       return { ...selecionarRankingNps().mapaRanking };
     }
 
+    /** @returns {void} */
     function captureNpsRankSnapshot() {
       state.nps.rankSnapshot = getRankMap();
     }
 
+    /** @param {Object} item @returns {string} */
     function trendBadge(item) {
       return `<span class="trend-badge ${item.tendencia?.classe || 'trend-stable'}">${item.tendencia?.rotulo || '— estável'}</span>`;
     }
 
+    /** @param {number} [limit] @returns {Array<{key:string, label:string, score:number, band:RiskBand}>} */
     function getNpsHistoryRows(limit = 6) {
       try {
         const periods = storage?.periods || {};
@@ -44,6 +49,7 @@
       }
     }
 
+    /** @returns {void} */
     function renderNps() {
       const score = clamp(Number(state.nps.score || 0), 0, 100);
       const band = getRiskBand(score);
@@ -210,6 +216,7 @@
       `);
     }
 
+    /** @param {number|string} value @param {string} source @returns {void} */
     function updateNpsScore(value, source) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'nps'] })) return;
       state.nps.score = clamp(Number(value || 0), 0, 100);
@@ -222,6 +229,7 @@
       }
     }
 
+    /** @param {string} field @param {number|string} value @returns {void} */
     function updateNpsGoal(field, value) {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard', 'nps'] })) return;
       state.nps[field] = clamp(Number(value || 0), 0, 100);

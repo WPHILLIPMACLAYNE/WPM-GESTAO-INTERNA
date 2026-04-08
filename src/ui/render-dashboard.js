@@ -1,5 +1,6 @@
     // Date/period helpers já existem em src/utils/helpers.js (cópias removidas)
 
+    /** @returns {ScaleEntry|null} */
     function getUpcomingScale() {
       const sorted = [...state.scale].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
       if (!sorted.length) return null;
@@ -7,6 +8,7 @@
       return sorted.find(item => String(item.date || '') >= today) || sorted[0];
     }
 
+    /** @param {EventItem[]} [source] @returns {EventItem|null} */
     function getUpcomingEvent(source = state.events) {
       const sorted = [...(Array.isArray(source) ? source : [])].sort(compareByDateTime);
       if (!sorted.length) return null;
@@ -14,6 +16,7 @@
       return sorted.find(item => `${item.date || ''}T${item.time || '00:00'}` >= nowKey && item.status !== 'Cancelado') || sorted[0];
     }
 
+    /** @param {ScaleEntry|null} item @returns {string} */
     function getScaleSummaryText(item) {
       if (!item) return 'Nenhuma escala cadastrada no período.';
       const profs = item.professorShifts.filter(shift => shift.name).map(shift => shift.name);
@@ -22,6 +25,7 @@
       return `Prof.: ${professorText} • Recepção: ${receptionText}`;
     }
 
+    /** @param {EventItem|null} item @returns {string} */
     function getEventSummaryText(item) {
       if (!item) return 'Nenhum evento ou ação programado neste período.';
       return `${item.type || 'Agenda'} • ${getPeriodDisplayDate(item.date)}${item.time ? ` • ${item.time}` : ''}`;
@@ -29,6 +33,7 @@
 
     // ══════════════════════════════════════════
 
+    /** @param {DashboardIndicators} indicadores @returns {void} */
     function renderDashboardInsights(indicadores) {
       const bestFeedback = indicadores.destaqueFeedback;
       const addonLeaderName = indicadores.liderAddonNome;
@@ -80,6 +85,7 @@
     // RENDERIZAÇÃO — DASHBOARD & HERO — renderHero, renderDashboard
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function renderHero() {
       syncPeriodControls();
       const indicadores = selecionarIndicadoresDashboard();
@@ -116,6 +122,7 @@
       `;
     }
 
+    /** @returns {void} */
     function renderDashboard() {
       const indicadores = selecionarIndicadoresDashboard();
       const summary = indicadores.resumoRecepcionistas;
@@ -223,15 +230,18 @@
     let recadosModuleBound = false;
     let dashboardEnhancementsInstalled = false;
 
+    /** @returns {string} */
     function createRecadoId() {
       return window.crypto?.randomUUID?.() || `recado-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
     }
 
+    /** @param {string} [periodKey] @returns {string} */
     function getRecadosStorageKey(periodKey = currentPeriodKey) {
       const [year = String(new Date().getFullYear()), month = '01'] = String(periodKey || '').split('-');
       return `${RECADOS_STORAGE_PREFIX}${year}-${String(month).padStart(2, '0')}`;
     }
 
+    /** @param {Object} item @returns {Recado|null} */
     function sanitizeRecado(item) {
       const text = String(item?.text ?? item?.message ?? '').trim();
       const from = String(item?.from ?? '').trim();
@@ -247,6 +257,7 @@
       };
     }
 
+    /** @param {*} recados @returns {Recado[]} */
     function normalizeRecadosCollection(recados) {
       return (Array.isArray(recados) ? recados : [])
         .map(sanitizeRecado)
@@ -254,6 +265,7 @@
         .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     }
 
+    /** @param {Recado[]} primary @param {Recado[]} fallback @returns {Recado[]} */
     function mergeRecadosCollections(primary, fallback) {
       const byId = new Map();
       const bySignature = new Map();
@@ -282,10 +294,12 @@
         .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     }
 
+    /** @param {Recado[]} left @param {Recado[]} right @returns {boolean} */
     function areRecadosCollectionsEqual(left, right) {
       return JSON.stringify(normalizeRecadosCollection(left)) === JSON.stringify(normalizeRecadosCollection(right));
     }
 
+    /** @param {string} [periodKey] @returns {Recado[]} */
     function readLegacyRecados(periodKey = currentPeriodKey) {
       try {
         const raw = localStorage.getItem(getRecadosStorageKey(periodKey));
@@ -297,6 +311,7 @@
       }
     }
 
+    /** @param {string} [periodKey] @returns {boolean} */
     function clearLegacyRecadosStorageKey(periodKey = currentPeriodKey) {
       try {
         localStorage.removeItem(getRecadosStorageKey(periodKey));
@@ -307,6 +322,7 @@
       }
     }
 
+    /** @returns {string[]} */
     function getLegacyRecadoPeriodKeys() {
       try {
         const keys = [];
@@ -323,6 +339,7 @@
       }
     }
 
+    /** @param {string} [periodKey] @param {AppStore} [storeRef] @returns {PeriodData|null} */
     function ensureRecadosPeriod(periodKey = currentPeriodKey, storeRef = storage) {
       const targetStore = storeRef && typeof storeRef === 'object' ? storeRef : storage;
       if (!targetStore?.periods) return null;
@@ -335,6 +352,7 @@
       return targetStore.periods[key];
     }
 
+    /** @param {string} [periodKey] @param {AppStore} [storeRef] @returns {Recado[]} */
     function getStoreRecados(periodKey = currentPeriodKey, storeRef = storage) {
       const targetStore = storeRef && typeof storeRef === 'object' ? storeRef : storage;
       const period = targetStore?.periods?.[String(periodKey || currentPeriodKey)];
@@ -343,6 +361,7 @@
       return normalizeRecadosCollection(period.recados);
     }
 
+    /** @param {AppStore} [storeRef] @param {Object} [options] @returns {Promise<boolean>} */
     async function migrateLegacyRecadosToStore(storeRef = storage, options = {}) {
       const targetStore = storeRef && typeof storeRef === 'object' ? storeRef : storage;
       if (!targetStore?.periods) return false;
@@ -384,11 +403,13 @@
       return changed;
     }
 
+    /** @param {string} [periodKey] @returns {Recado[]} */
     function loadRecados(periodKey = currentPeriodKey) {
       const key = String(periodKey || currentPeriodKey);
       return mergeRecadosCollections(getStoreRecados(key), readLegacyRecados(key));
     }
 
+    /** @param {Recado[]} recados @param {string} [periodKey] @returns {Promise<boolean>} */
     async function saveRecados(recados, periodKey = currentPeriodKey) {
       try {
         const key = String(periodKey || currentPeriodKey);
@@ -414,10 +435,12 @@
 
     // formatRecadoDateTime já existe em src/utils/helpers.js (duplicata removida)
 
+    /** @param {string} [periodKey] @returns {number} */
     function getUnreadRecadosCount(periodKey = currentPeriodKey) {
       return loadRecados(periodKey).filter(item => !item.read).length;
     }
 
+    /** @returns {void} */
     function syncRecadosSelects() {
       const fromSelect = document.getElementById('recadoFrom');
       const toSelect = document.getElementById('recadoTo');
@@ -434,6 +457,7 @@
       toSelect.value = currentTo === 'Todos' || recepcionistas.includes(currentTo) ? (currentTo || 'Todos') : 'Todos';
     }
 
+    /** @returns {void} */
     function renderFeedbackSummary() {
       const host = document.getElementById('feedbackSummary');
       if (!host) return;
@@ -453,6 +477,7 @@
       `);
     }
 
+    /** @param {number} [unreadCount] @returns {void} */
     function renderHeroRecadosBadge(unreadCount = getUnreadRecadosCount()) {
       const cards = [...document.querySelectorAll('#heroSummary .mini-stat')];
       if (!cards.length) return;
@@ -474,6 +499,7 @@
       badge.classList.toggle('is-active', unreadCount > 0);
     }
 
+    /** @returns {void} */
     function renderRecadosPanel() {
       const list = document.getElementById('recadosList');
       const counter = document.getElementById('recadosCounter');
@@ -517,6 +543,7 @@
       `);
     }
 
+    /** @returns {Promise<void>} */
     async function publishRecado() {
       if (!assertWritableCurrentPeriod()) return;
       const from = String(document.getElementById('recadoFrom')?.value || '').trim();
@@ -551,6 +578,7 @@
       showToast('✓ recado publicado para o próximo turno.', 'success');
     }
 
+    /** @param {string} id @returns {Promise<void>} */
     async function markRecadoAsRead(id) {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard'] })) return;
       const recados = loadRecados();
@@ -559,6 +587,7 @@
       renderRecadosPanel();
     }
 
+    /** @param {string} id @returns {void} */
     function removeRecado(id) {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard'] })) return;
       const recados = loadRecados();
@@ -573,6 +602,7 @@
       });
     }
 
+    /** @returns {void} */
     function bindRecadosModule() {
       if (recadosModuleBound) return;
       recadosModuleBound = true;
@@ -602,6 +632,7 @@
       });
     }
 
+    /** @returns {void} */
     function installDashboardEnhancements() {
       if (dashboardEnhancementsInstalled) return;
       dashboardEnhancementsInstalled = true;

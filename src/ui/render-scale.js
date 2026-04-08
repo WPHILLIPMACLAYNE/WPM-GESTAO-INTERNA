@@ -1,5 +1,6 @@
     let scaleShiftDrafts = [];
 
+    /** @param {string} dateStr @returns {{day:string, month:string, weekday:string}} */
     function formatScaleBoardDay(dateStr) {
       if (!dateStr) return { day: '—', month: getPeriodLabel(), weekday: '' };
       const [y, m, d] = dateStr.split('-').map(Number);
@@ -13,6 +14,7 @@
       };
     }
 
+    /** @returns {ScaleEntry[]} */
     function getScaleFilteredList() {
       const { query } = getScaleViewFilters();
       const list = Array.isArray(state.scale) ? state.scale.slice() : [];
@@ -34,6 +36,7 @@
       return filtered.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
     }
 
+    /** @returns {void} */
     function renderScaleShiftRows() {
       const box = document.getElementById('scaleShiftRows');
       if (!box) return;
@@ -47,16 +50,19 @@
       `).join('') : '<div class="empty">Adicione ao menos uma linha de professor para montar o dia.</div>';
     }
 
+    /** @param {Object} [values] @returns {void} */
     function addScaleShiftRow(values = {}) {
       scaleShiftDrafts.push({ time: values.time || '', name: values.name || '', swap: values.swap || '' });
       renderScaleShiftRows();
     }
 
+    /** @param {number} index @returns {void} */
     function removeScaleShiftRow(index) {
       scaleShiftDrafts.splice(index, 1);
       renderScaleShiftRows();
     }
 
+    /** @returns {void} */
     function clearScaleForm() {
       editingScaleId = null;
       limparErrosValidacao(['scale_date']);
@@ -72,11 +78,13 @@
       addScaleShiftRow({ time: '12h - 17h', name: '', swap: '' });
     }
 
+    /** @returns {void} */
     function openScaleModal() {
       clearScaleForm();
       openModal('scaleModal');
     }
 
+    /** @param {string} id @returns {void} */
     function editScaleDay(id) {
       const item = state.scale.find(entry => entry.id === id);
       if (!item) return;
@@ -94,6 +102,7 @@
       openModal('scaleModal');
     }
 
+    /** @returns {Promise<void>} */
     async function saveScaleDay() {
       if (!assertWritableCurrentPeriod()) return;
       const payload = getScaleFormData();
@@ -110,6 +119,7 @@
       requestRender(['dashboard', 'scale']);
     }
 
+    /** @param {string} id @returns {void} */
     function removeScaleDay(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja excluir este dia da escala?', async () => {
@@ -126,6 +136,7 @@
       });
     }
 
+    /** @returns {void} */
     function renderScale() {
       const resumoEscala = selecionarResumoEscala();
       const sorted = resumoEscala.lista;

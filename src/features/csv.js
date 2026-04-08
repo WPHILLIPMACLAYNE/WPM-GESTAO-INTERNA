@@ -5,6 +5,7 @@
     //   state, currentPeriodKey      — estado global / core/config.js
     //   compareByDateTime            — utils/helpers.js (função pura)
 
+    /** Triggers a CSV file download in the browser. @param {string} filename @param {string[][]} rows @returns {string} */
     function downloadCsvFile(filename, rows) {
       const csv = buildCsvContent(rows);
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -16,6 +17,7 @@
       return csv;
     }
 
+    /** Builds CSV rows for pending items. @param {PeriodData} [period] @returns {string[][]} */
     function getPendingCsvRows(period = state) {
       const list = (period.pending || []).slice().sort((a, b) => compareByDateTime(a, b));
       return [
@@ -24,6 +26,7 @@
       ];
     }
 
+    /** Builds CSV rows for scale entries. @param {PeriodData} [period] @returns {string[][]} */
     function getScaleCsvRows(period = state) {
       const rows = [['Data', 'Professor', 'Horário professor', 'Troca professor', 'Recepção', 'Horário recepção', 'Troca recepção', 'Tom da linha', 'Observação']];
       (period.scale || []).slice().sort((a, b) => compareByDateTime(a, b)).forEach(item => {
@@ -35,6 +38,7 @@
       return rows;
     }
 
+    /** Builds CSV rows for event items. @param {PeriodData} [period] @returns {string[][]} */
     function getEventsCsvRows(period = state) {
       const list = (period.events || []).slice().sort((a, b) => compareByDateTime(a, b));
       return [
@@ -43,14 +47,17 @@
       ];
     }
 
+    /** Exports pending items as a downloadable CSV. @returns {string} */
     function exportPendingCsv() {
       return downloadCsvFile(`pendencias-${currentPeriodKey}.csv`, getPendingCsvRows());
     }
 
+    /** Exports scale entries as a downloadable CSV. @returns {string} */
     function exportScaleCsv() {
       return downloadCsvFile(`escala-${currentPeriodKey}.csv`, getScaleCsvRows());
     }
 
+    /** Exports event items as a downloadable CSV. @returns {string} */
     function exportEventsCsv() {
       return downloadCsvFile(`eventos-${currentPeriodKey}.csv`, getEventsCsvRows());
     }

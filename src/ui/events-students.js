@@ -2,11 +2,13 @@
     // EVENTOS UI — STUDENTS
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function openStudentModal() {
       clearStudentForm();
       openModal('studentModal');
     }
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean, handleChange: function(HTMLElement): boolean }} */
     function bindStudentEvents() {
       return {
         handleClick(actionEl) {

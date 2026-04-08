@@ -4,6 +4,7 @@
 
     let npsObservationsDebounce = null;
 
+    /** @returns {void} */
     function bindNpsObservationsAutoSave() {
       if (estadoEventos.npsObservacoesInicializadas) return;
       estadoEventos.npsObservacoesInicializadas = true;
@@ -16,6 +17,7 @@
       });
     }
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean, handleChange: function(HTMLElement): boolean, handleInput: function(HTMLElement): boolean, handleBlur: function(HTMLElement): boolean }} */
     function bindNpsEvents() {
       bindNpsObservationsAutoSave();
 

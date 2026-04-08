@@ -25,6 +25,7 @@
     let _confirmOk = null;
     let _confirmCancel = null;
 
+    /** @param {string} id @returns {void} */
     function openModal(id) {
       const modal = document.getElementById(id);
       if (!modal) return;
@@ -36,6 +37,7 @@
       destino?.focus({ preventScroll: true });
     }
 
+    /** @param {string} id @returns {void} */
     function closeModal(id) {
       const modal = document.getElementById(id);
       if (!modal) return;
@@ -51,6 +53,7 @@
       }
     }
 
+    /** @param {string} message @param {'polite'|'assertive'} [prioridade] @returns {void} */
     function anunciarAoLeitor(message, prioridade = 'polite') {
       const id = prioridade === 'assertive' ? 'appLiveRegionUrgente' : 'appLiveRegion';
       const el = document.getElementById(id);
@@ -61,6 +64,7 @@
       });
     }
 
+    /** @param {string} [message] @param {number} [duration] @returns {void} */
     function showSaveToast(message = '✓ salvo automaticamente', duration = 1800) {
       const toast = document.getElementById('saveToast');
       if (!toast) return;
@@ -72,6 +76,7 @@
       saveToastTimer = setTimeout(() => toast.classList.remove('show'), duration);
     }
 
+    /** @param {string} message @param {string} [type] @param {number} [duration] @returns {void} */
     function showToast(message, type = 'success', duration = 3200) {
       const toast = document.getElementById('saveToast');
       if (!toast) return;
@@ -87,6 +92,7 @@
       }, duration);
     }
 
+    /** @param {string} message @param {function(): void} [onOk] @param {function(): void} [onCancel] @returns {void} */
     function showConfirm(message, onOk, onCancel) {
       const el = document.getElementById('confirmModalMsg');
       if (el) el.textContent = message;
@@ -95,6 +101,7 @@
       openModal('confirmModal');
     }
 
+    /** @param {boolean} accepted @returns {void} */
     function _resolveConfirm(accepted) {
       closeModal('confirmModal');
       const cb = accepted ? _confirmOk : _confirmCancel;
@@ -103,6 +110,7 @@
       if (typeof cb === 'function') cb();
     }
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean }} */
     function bindCoreEvents() {
       return {
         handleClick(actionEl) {
@@ -165,6 +173,7 @@
       };
     }
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean }} */
     function bindEventAgendaEvents() {
       return {
         handleClick(actionEl) {
@@ -194,6 +203,7 @@
       };
     }
 
+    /** @returns {Array<Object>} */
     function collectUiEventBindings() {
       return [
         bindCoreEvents(),
@@ -206,6 +216,7 @@
       ].filter(Boolean);
     }
 
+    /** @param {Array<Object>} bindings @param {string} handlerName @param {...*} args @returns {boolean} */
     function dispatchUiBinding(bindings, handlerName, ...args) {
       for (const binding of bindings) {
         if (binding?.[handlerName]?.(...args) === true) return true;
@@ -213,6 +224,7 @@
       return false;
     }
 
+    /** @returns {void} */
     function bindUIEvents() {
       if (estadoEventos.uiDelegadaInicializada) return;
       estadoEventos.uiDelegadaInicializada = true;
@@ -246,17 +258,20 @@
       });
     }
 
+    /** @param {HTMLElement|null} raiz @returns {HTMLElement[]} */
     function obterElementosFocaveis(raiz) {
       if (!raiz) return [];
       return [...raiz.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
         .filter(el => !el.hidden && !el.closest('[hidden]'));
     }
 
+    /** @returns {HTMLElement|null} */
     function obterModalAtivo() {
       const modais = [...document.querySelectorAll('.modal.show')];
       return modais[modais.length - 1] || null;
     }
 
+    /** @param {HTMLElement} elemento @returns {void} */
     function limparErroValidacaoCampo(elemento) {
       if (!(elemento instanceof HTMLElement)) return;
       elemento.removeAttribute('aria-invalid');
@@ -268,6 +283,7 @@
       }
     }
 
+    /** @returns {void} */
     function sincronizarLabelsComCampos() {
       document.querySelectorAll('.field, .field-stack').forEach(bloco => {
         const label = bloco.querySelector('label');
@@ -277,6 +293,7 @@
       });
     }
 
+    /** @returns {void} */
     function configurarRotulosAcessiveisEstaticos() {
       const mapa = {
         summaryList: 'Resumo de desempenho por atendente',
@@ -299,10 +316,12 @@
       });
     }
 
+    /** @returns {HTMLElement[]} */
     function obterTicketsPendencia() {
       return [...document.querySelectorAll('#pendingKanban [data-pending-id]')];
     }
 
+    /** @returns {void} */
     function atualizarRovingPendencias() {
       const tickets = obterTicketsPendencia();
       if (!tickets.length) return;
@@ -315,6 +334,7 @@
       estadoAcessibilidade.pendenciaFocadaId = alvoId;
     }
 
+    /** @param {number} indice @returns {void} */
     function focarPendenciaPorIndice(indice) {
       const tickets = obterTicketsPendencia();
       if (!tickets.length) return;
@@ -326,10 +346,12 @@
       alvo.focus({ preventScroll: true });
     }
 
+    /** @param {string} id @returns {void} */
     function agendarRetornoFocoPendencia(id) {
       estadoAcessibilidade.pendenciaFocoPendente = id;
     }
 
+    /** @returns {void} */
     function restaurarFocoPendenteSeNecessario() {
       if (!estadoAcessibilidade.pendenciaFocoPendente) {
         atualizarRovingPendencias();
@@ -349,6 +371,7 @@
       });
     }
 
+    /** @param {string} id @param {number} direcao @returns {void} */
     function moverPendenciaPorTeclado(id, direcao) {
       const ordem = ['aberto', 'respondido', 'concluido'];
       const item = state.pending.find(entry => entry.id === id);
@@ -362,6 +385,7 @@
       anunciarAoLeitor(`Pendência movida para ${proximoStatus}.`, 'polite');
     }
 
+    /** @returns {void} */
     function bindAcessibilidade() {
       if (estadoEventos.acessibilidadeInicializada) return;
       estadoEventos.acessibilidadeInicializada = true;
@@ -427,6 +451,7 @@
       });
     }
 
+    /** @returns {void} */
     function initializeStaticControls() {
       if (estadoEventos.controlesEstaticosInicializados) return;
       estadoEventos.controlesEstaticosInicializados = true;
@@ -444,6 +469,7 @@
       });
     }
 
+    /** @returns {void} */
     function bindTabKeyboardNavigation() {
       if (estadoEventos.navegacaoAbasInicializada) return;
       estadoEventos.navegacaoAbasInicializada = true;
@@ -469,6 +495,7 @@
       });
     }
 
+    /** @returns {void} */
     function bindModalBackdropClose() {
       if (estadoEventos.modaisInicializados) return;
       estadoEventos.modaisInicializados = true;
@@ -480,6 +507,7 @@
       });
     }
 
+    /** @returns {void} */
     function bindGlobalKeyboardShortcuts() {
       if (estadoEventos.atalhosGlobaisInicializados) return;
       estadoEventos.atalhosGlobaisInicializados = true;
@@ -511,6 +539,7 @@
       });
     }
 
+    /** @returns {void} */
     function bindStorageSync() {
       if (estadoEventos.sincronizacaoStorageInicializada) return;
       estadoEventos.sincronizacaoStorageInicializada = true;
@@ -527,6 +556,7 @@
       });
     }
 
+    /** @param {MouseEvent|{clientX:number,clientY:number}} e @param {HTMLElement} el @param {HTMLElement} tooltip @returns {void} */
     function positionTooltip(e, el, tooltip) {
       const offset = 16;
       const clientX = e?.clientX ?? el.getBoundingClientRect().left;
@@ -541,6 +571,7 @@
       tooltip.style.top = `${Math.max(12, Math.min(maxY, y))}px`;
     }
 
+    /** @returns {void} */
     function bindTooltips() {
       if (estadoEventos.tooltipInicializado) return;
       estadoEventos.tooltipInicializado = true;

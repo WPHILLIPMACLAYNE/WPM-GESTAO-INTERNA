@@ -1,6 +1,10 @@
     // PIPELINE DE MIGRAÇÃO — normalizeStore, getDefaultStore, migrateStoreToV1..V4, migrateStore, sanitizeStore, saveData
     // ══════════════════════════════════════════
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore}
+     */
     function normalizeStore(store) {
       store = store && typeof store === 'object' ? store : {};
       store.activePeriod = isValidPeriodKey(store.activePeriod) ? String(store.activePeriod) : getInitialPeriodKey();
@@ -23,6 +27,7 @@
       return store;
     }
 
+    /** @returns {AppStore} */
     function getDefaultStore() {
       const initialKey = getInitialPeriodKey();
       return sanitizeStore({
@@ -42,24 +47,40 @@
     // V3: adição de nps.mentions; normalizeData já preenche com [] quando ausente.
     // V4: reservado para a próxima migração real de schema.
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore|null}
+     */
     function migrateStoreToV1(store) {
       if (!store || typeof store !== 'object') return null;
       // V0 → V1: baseline inicial do store versionado; sem transformação de schema.
       return setStoreVersion(store, 1);
     }
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore|null}
+     */
     function migrateStoreToV2(store) {
       if (!store || typeof store !== 'object') return null;
       // V1 → V2: nenhuma transformação de schema necessária; apenas bump de versão.
       return setStoreVersion(store, 2);
     }
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore|null}
+     */
     function migrateStoreToV3(store) {
       if (!store || typeof store !== 'object') return null;
       // V2 → V3: nenhuma transformação de schema necessária; normalizeData já completa nps.mentions.
       return setStoreVersion(store, 3);
     }
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore|null}
+     */
     function migrateStoreToV4(store) {
       if (!store || typeof store !== 'object') return null;
       // V3 → V4: placeholder para a próxima migração real de schema.
@@ -67,6 +88,10 @@
       return setStoreVersion(store, 4);
     }
 
+    /**
+     * @param {Object} store
+     * @returns {AppStore|null}
+     */
     function migrateStore(store) {
       if (!store || typeof store !== 'object') return null;
       let nextStore = store;
@@ -89,6 +114,10 @@
       return nextStore;
     }
 
+    /**
+     * @param {Object} parsed
+     * @returns {AppStore|null}
+     */
     function sanitizeStore(parsed) {
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
       if (parsed && parsed.settings && parsed.students) {

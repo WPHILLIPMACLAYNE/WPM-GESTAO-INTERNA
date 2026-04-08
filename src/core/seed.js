@@ -1,6 +1,10 @@
     // CAMADA DE SEED — massa determinística por período e helpers de geração
     // ══════════════════════════════════════════
 
+    /**
+     * @param {string|number} seed
+     * @returns {function(): number}
+     */
     function makeRng(seed) {
       let h = 1779033703 ^ String(seed).length;
       for (let i = 0; i < String(seed).length; i++) {
@@ -15,14 +19,29 @@
       };
     }
 
+    /**
+     * @param {any[]} list
+     * @param {function(): number} rng
+     * @returns {*}
+     */
     function pick(list, rng) {
       return list[Math.floor(rng() * list.length)] || '';
     }
 
+    /**
+     * @param {any[]} list
+     * @param {function(): number} rng
+     * @param {number} [chance]
+     * @returns {*}
+     */
     function maybe(list, rng, chance = 0.5) {
       return rng() <= chance ? pick(list, rng) : '';
     }
 
+    /**
+     * @param {PeriodData} [template]
+     * @returns {string[]}
+     */
     function getSeedAddonTypes(template = null) {
       const sourceTypes = Array.isArray(template?.settings?.addonTypes)
         ? template.settings.addonTypes.filter(Boolean)
@@ -30,6 +49,11 @@
       return [...new Set(sourceTypes.length ? sourceTypes : APP_DEFAULTS.addonTypes)];
     }
 
+    /**
+     * @param {string} periodKey
+     * @param {PeriodData} [template]
+     * @returns {PeriodData}
+     */
     function generatePeriodSeed(periodKey, template = null) {
       const [yearStr, monthStr] = String(periodKey).split('-');
       const year = Number(yearStr) || new Date().getFullYear();
@@ -162,4 +186,5 @@
       return base;
     }
 
+    /** @type {PeriodData} */
     const demoData = generatePeriodSeed(getInitialPeriodKey());

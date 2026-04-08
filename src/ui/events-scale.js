@@ -2,6 +2,7 @@
     // EVENTOS UI — SCALE
     // ══════════════════════════════════════════
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean, handleInput: function(HTMLElement): boolean }} */
     function bindScaleEvents() {
       return {
         handleClick(actionEl) {

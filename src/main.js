@@ -2,6 +2,7 @@
     // BOOTSTRAP — initializeApp, APP_INTERNALS, DOMContentLoaded
     // ══════════════════════════════════════════
 
+    /** @type {Readonly<Object>} Frozen map of all internal modules exposed for testing/diagnostics. */
     const APP_INTERNALS = Object.freeze({
       config: {
         STORAGE_KEY,
@@ -125,6 +126,10 @@
 
     window.__APP_INTERNALS__ = APP_INTERNALS;
 
+    /**
+     * Bootstraps the entire application: hydrates storage, syncs state, binds UI and renders.
+     * @returns {Promise<void>}
+     */
     async function initializeApp() {
       try {
         await hydrateStorageCache();

@@ -16,22 +16,26 @@
     //   requestRender                                       — ui/render-core.js
     //   showSaveToast, showToast                            — ui/events-core.js
 
+    /** Loads the saved flow smoke test report from storage. @returns {FlowSmokeReportItem[]} */
     function loadFlowSmokeReport() {
       return readStoredJsonWithFallback(FLOW_TEST_REPORT_KEY, LEGACY_FLOW_TEST_REPORT_KEYS, []);
     }
 
+    /** Persists a flow smoke test report to storage. @param {FlowSmokeReportItem[]} report @returns {FlowSmokeReportItem[]} */
     function saveFlowSmokeReport(report) {
       writeStoredJson(FLOW_TEST_REPORT_KEY, report);
       removeStoredValues(LEGACY_FLOW_TEST_REPORT_KEYS);
       return report;
     }
 
+    /** Removes all stored smoke test data. @returns {void} */
     function clearFlowSmokeTests() {
       removeStoredValues([FLOW_TEST_REPORT_KEY, ...LEGACY_FLOW_TEST_REPORT_KEYS]);
       requestRender('settings');
       showSaveToast('✓ relatório de autotestes limpo');
     }
 
+    /** Renders the smoke test results panel in the DOM. @returns {void} */
     function renderFlowSmokePanel() {
       const host = document.getElementById('flowSmokeList');
       if (!host) return;
@@ -51,6 +55,7 @@
       `).join('');
     }
 
+    /** Executes all flow smoke tests and saves the report. @param {boolean} [silent] @returns {FlowSmokeReportItem[]} */
     function runFlowSmokeTests(silent = false) {
       const clonedStore = normalizeStore(structuredClone(storage));
       const originalSummary = getBackupSummary(clonedStore);

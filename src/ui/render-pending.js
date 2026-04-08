@@ -1,3 +1,4 @@
+    /** @param {PendingItem} item @returns {string} */
     function buildPendingMeta(item) {
       const parts = [];
       if (item.status === 'aberto') parts.push('<span class="pulse-dot"></span>');
@@ -7,6 +8,7 @@
       return parts.join('') || '<span class="meta-item">Sem dados</span>';
     }
 
+    /** @param {string} value @returns {string} */
     function pendingPill(value) {
       const map = {
         aberto: ['open-pill', '<span class="pulse-dot"></span>Aberto'],
@@ -21,6 +23,7 @@
     // RENDERIZAÇÃO — PENDING — renderPending, savePending, removePending
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function renderPending() {
       const { linhas: rows, grupos } = selecionarPendenciasFiltradas();
       aplicarHtmlSeMudou(document.getElementById('pendingStatusStrip'), `
@@ -99,6 +102,7 @@
       restaurarFocoPendenteSeNecessario();
     }
 
+    /** @returns {void} */
     function clearPendingForm() {
       editingPendingId = null;
       limparErrosValidacao(['pending_nome', 'pending_matricula', 'pending_desc', 'pending_data']);
@@ -108,15 +112,18 @@
       document.getElementById('pending_status').value = 'aberto';
     }
 
+    /** @returns {void} */
     function finalizePendingSaveUI() {
       closeModal('pendingModal');
       clearPendingForm();
     }
 
+    /** @returns {void} */
     function renderPendingSaveUI() {
       requestRender(['hero', 'dashboard', 'pending']);
     }
 
+    /** @param {string} id @returns {void} */
     function editPending(id) {
       const p = state.pending.find(x => x.id === id);
       if (!p) return;
@@ -132,6 +139,7 @@
       openModal('pendingModal');
     }
 
+    /** @param {string} id @returns {void} */
     function removePending(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja excluir esta pendência?', async () => {

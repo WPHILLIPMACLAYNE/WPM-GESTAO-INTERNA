@@ -2,6 +2,7 @@
     // RENDERIZAÇÃO — SETTINGS & DIAGNOSTICS — renderSettings, saveSettings, resizeMonth, renderBackupSummary, runSystemDiagnostics
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function renderSettings() {
       if (!state?.settings) return;
       document.getElementById('receptionistEditor').value = getReceptionists(state).join('\n');
@@ -18,6 +19,7 @@
       renderFlowSmokePanel();
     }
 
+    /** @returns {Promise<void>} */
     async function saveSettings() {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard', 'students', 'addons', 'pending', 'nps', 'settings'] })) return;
       const { receptionists, professors, addonTypes, initializeMonthsWithTestData } = getSettingsFormData();
@@ -49,6 +51,7 @@
       }
     }
 
+    /** @param {number|string} days @returns {void} */
     function resizeMonth(days) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'addons'] })) return;
       const newDays = Number(days);
@@ -72,6 +75,7 @@
       doResizeMonth(newDays);
     }
 
+    /** @param {number} days @returns {void} */
     function doResizeMonth(days) {
       state.settings.monthDays = days;
       Object.keys(state.addons || {}).forEach(person => {
@@ -85,6 +89,7 @@
       requestRender(['hero', 'dashboard', 'addons']);
     }
 
+    /** @param {PeriodData} period @returns {PeriodMetrics} */
     function getPeriodMetrics(period) {
       normalizeData(period);
       return {
@@ -98,6 +103,7 @@
       };
     }
 
+    /** @returns {{ bytes: number, quotaBytes: number, ratio: number, keyCount: number, status: string, error?: boolean }} */
     function getSettingsStorageUsage() {
       const quotaBytes = 5 * 1024 * 1024;
       try {
@@ -144,6 +150,7 @@
       }
     }
 
+    /** @returns {{ summary: BackupSummary, monthsWithData: number, totalRecords: number, emptyMonths: number, storageUsage: Object, lastBackupLabel: string }} */
     function getSettingsMetaSnapshot() {
       const summary = getBackupSummary(storage);
       const periodEntries = Object.entries(storage.periods || {});
@@ -171,6 +178,7 @@
       };
     }
 
+    /** @returns {void} */
     function renderSettingsHealthBar() {
       const host = document.getElementById('settingsHealthBar');
       if (!host) return;
@@ -196,6 +204,7 @@
       `);
     }
 
+    /** @returns {void} */
     function renderSettingsSupportPanels() {
       const meta = getSettingsMetaSnapshot();
       const aboutHost = document.getElementById('settingsAboutPanel');
@@ -270,16 +279,19 @@
 
     // Smoke tests de fluxo movidos para src/features/diagnostics.js
 
+    /** @returns {FlowSmokeReportItem[]} */
     function loadSystemReport() {
       return readStoredJsonWithFallback(SYSTEM_REPORT_KEY, LEGACY_SYSTEM_REPORT_KEYS, []);
     }
 
+    /** @param {FlowSmokeReportItem[]} report @returns {FlowSmokeReportItem[]} */
     function saveSystemReport(report) {
       writeStoredJson(SYSTEM_REPORT_KEY, report);
       removeStoredValues(LEGACY_SYSTEM_REPORT_KEYS);
       return report;
     }
 
+    /** @param {boolean} [silent] @returns {FlowSmokeReportItem[]} */
     function runSystemDiagnostics(silent = false) {
       const periodEntries = Object.entries(storage.periods || {});
       const currentMetrics = getPeriodMetrics(state);
@@ -334,6 +346,7 @@
       return report;
     }
 
+    /** @returns {void} */
     function renderBackupSummary() {
       const host = document.getElementById('backupSummaryList');
       if (!host) return;
@@ -363,6 +376,7 @@
       `;
     }
 
+    /** @returns {void} */
     function renderDiagnosticsPanel() {
       const host = document.getElementById('diagnosticSummaryList');
       if (!host) return;
@@ -382,6 +396,7 @@
       `).join('');
     }
 
+    /** @returns {void} */
     function renderPersistenceTechPanel() {
       const host = document.getElementById('persistenceTechList');
       if (!host) return;
@@ -453,6 +468,7 @@
       `;
     }
 
+    /** @returns {void} */
     function renderPeriodAudit() {
       const host = document.getElementById('periodAuditList');
       if (!host) return;
@@ -489,6 +505,7 @@
       }).join('');
     }
 
+    /** @returns {Promise<void>} */
     async function clearEmptyMonths() {
       const removable = Object.entries(storage.periods || {})
         .filter(([key, period]) => key !== currentPeriodKey && !periodHasMeaningfulData(period) && loadRecados(key).length === 0)
@@ -507,6 +524,7 @@
       });
     }
 
+    /** @returns {void} */
     function resetDemoData() {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja restaurar o exemplo inicial? Isso substituirá os dados atuais.', async () => {

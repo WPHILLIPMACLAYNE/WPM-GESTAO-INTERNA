@@ -3,14 +3,17 @@
 
     const cacheSelectores = new Map();
 
+    /** Clears the selector memoization cache. @returns {void} */
     function limparCacheSelectores() {
       cacheSelectores.clear();
     }
 
+    /** Builds a JSON signature from the given parts. @param {...*} partes @returns {string} */
     function criarAssinaturaSelector(...partes) {
       return JSON.stringify(partes);
     }
 
+    /** Returns a memoized selector value, computing it if stale. @param {string} chave @param {string} assinatura @param {function(): *} calcular @returns {*} */
     function lerSelectorMemorizado(chave, assinatura, calcular) {
       const chaveCompleta = `${currentPeriodKey}::${chave}::${assinatura}`;
       if (cacheSelectores.has(chaveCompleta)) return cacheSelectores.get(chaveCompleta);
@@ -23,6 +26,7 @@
       return valor;
     }
 
+    /** Computes addon totals per person and type. @returns {AddonTotals} */
     function selecionarTotaisAddons() {
       const pessoasAddon = getAddonPeople(state);
       const assinatura = criarAssinaturaSelector(pessoasAddon, state.settings.addonTypes, state.addons);
@@ -49,6 +53,7 @@
       });
     }
 
+    /** Computes summary stats for each receptionist. @returns {ReceptionistSummary[]} */
     function selecionarResumoRecepcionistas() {
       const recepcionistas = getReceptionists(state);
       const assinatura = criarAssinaturaSelector(recepcionistas, state.students, state.addons, state.settings.addonTypes);
@@ -83,10 +88,12 @@
       });
     }
 
+    /** Counts students that have responded to feedback. @param {Student[]} itens @returns {number} */
     function itemsComFeedback(itens) {
       return itens.filter(item => item.feedback !== 'Pendente').length;
     }
 
+    /** Returns top addon/NPS leaders from past periods. @param {number} [limite] @returns {Array} */
     function selecionarLideresHistoricos(limite = 6) {
       const periods = storage?.periods || {};
       const keys = Object.keys(periods).filter(k => k && k !== currentPeriodKey);
@@ -146,6 +153,7 @@
       });
     }
 
+    /** Computes pending items summary with counts and oldest open. @returns {PendingSummary} */
     function selecionarResumoPendencias() {
       const assinatura = criarAssinaturaSelector(state.pending);
       return lerSelectorMemorizado('resumo_pendencias', assinatura, () => {
@@ -175,6 +183,7 @@
       });
     }
 
+    /** Returns filtered pending items grouped by status. @returns {{linhas: PendingItem[], grupos: {aberto: PendingItem[], respondido: PendingItem[], concluido: PendingItem[]}}} */
     function selecionarPendenciasFiltradas() {
       const { query } = getPendingViewFilters();
       const assinatura = criarAssinaturaSelector(state.pending, query);
@@ -191,6 +200,7 @@
       });
     }
 
+    /** Computes NPS mention ranking with trends. @returns {NpsRankingResult} */
     function selecionarRankingNps() {
       const assinatura = criarAssinaturaSelector(state.nps.mentions, state.nps.rankSnapshot, state.nps.score, state.nps.monthlyGoal, state.nps.semesterGoal);
       return lerSelectorMemorizado('ranking_nps', assinatura, () => {
@@ -223,6 +233,7 @@
       });
     }
 
+    /** Returns events filtered and grouped by day. @returns {Object} */
     function selecionarDadosEventosAgrupados() {
       const filtros = getEventViewFilters();
       const assinatura = criarAssinaturaSelector(state.events, filtros, currentPeriodKey);
@@ -248,6 +259,7 @@
       });
     }
 
+    /** Computes scale overview with coverage stats. @returns {Object} */
     function selecionarResumoEscala() {
       const filtros = getScaleViewFilters();
       const assinatura = criarAssinaturaSelector(state.scale, filtros, currentPeriodKey);
@@ -271,6 +283,7 @@
       });
     }
 
+    /** Aggregates all dashboard KPIs into a single object. @returns {DashboardIndicators} */
     function selecionarIndicadoresDashboard() {
       const assinatura = criarAssinaturaSelector(
         state.students,
@@ -328,22 +341,27 @@
       });
     }
 
+    /** Returns total addon count for a given person. @param {string} person @returns {number} */
     function totalAddonByPerson(person) {
       return selecionarTotaisAddons().porPessoa[person] || 0;
     }
 
+    /** Returns the total number of NPS mentions. @returns {number} */
     function totalNpsMentions() {
       return selecionarRankingNps().totalCitacoes;
     }
 
+    /** Alias for selecionarResumoRecepcionistas. @returns {ReceptionistSummary[]} */
     function computeSummary() {
       return selecionarResumoRecepcionistas();
     }
 
+    /** Returns the oldest open pending item or null. @returns {PendingItem|null} */
     function getOldestOpenPending() {
       return selecionarResumoPendencias().maisAntigaAberta;
     }
 
+    /** Calculates days elapsed since the given date string. @param {string} dateStr @returns {number} */
     function diffInDays(dateStr) {
       if (!dateStr) return 0;
       const base = new Date(dateStr + 'T00:00:00');

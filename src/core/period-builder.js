@@ -1,21 +1,35 @@
     // CAMADA DE PERÍODOS E ESTADO — versionamento, estado de UI, equipes e builders de período
     // ══════════════════════════════════════════
 
+    /**
+     * @param {Object} store
+     * @returns {number}
+     */
     function getStoreVersion(store) {
       const version = Number(store?.version);
       return Number.isInteger(version) && version > 0 ? version : 0;
     }
 
+    /**
+     * @param {Object} store
+     * @param {number} version
+     * @returns {Object}
+     */
     function setStoreVersion(store, version) {
       if (!store || typeof store !== 'object') return store;
       store.version = Number(version) || 0;
       return store;
     }
 
+    /** @returns {AppUIState} */
     function getUIState() {
       return readStoredJsonWithFallback(UI_KEY, LEGACY_UI_KEYS, {});
     }
 
+    /**
+     * @param {Partial<AppUIState>} [patch]
+     * @returns {AppUIState}
+     */
     function saveUIState(patch = {}) {
       const next = sanitizeUIState({ ...getUIState(), ...patch });
       writeStoredJson(UI_KEY, next);
@@ -23,6 +37,10 @@
       return next;
     }
 
+    /**
+     * @param {AppUIState} [ui]
+     * @returns {AppUIState}
+     */
     function sanitizeUIState(ui = getUIState()) {
       const next = { ...ui };
       const validEventTypes = new Set(['', 'evento', 'acao', 'campanha', 'treinamento', 'feriado', 'outro']);
@@ -52,6 +70,10 @@
       return next;
     }
 
+    /**
+     * @param {Object} [preferences]
+     * @returns {StorePreferences}
+     */
     function normalizeStorePreferences(preferences = null) {
       const source = preferences && typeof preferences === 'object' && !Array.isArray(preferences) ? preferences : {};
       return {
@@ -61,10 +83,19 @@
       };
     }
 
+    /**
+     * @param {AppStore} [storeRef]
+     * @returns {boolean}
+     */
     function shouldInitializeMonthsWithTestData(storeRef = storage) {
       return normalizeStorePreferences(storeRef?.preferences).initializeMonthsWithTestData;
     }
 
+    /**
+     * @param {string} tab
+     * @param {boolean} [silent]
+     * @returns {void}
+     */
     function setActiveTab(tab, silent = false) {
       const target = document.getElementById(tab);
       if (!target) return;
@@ -89,20 +120,37 @@
       }
     }
 
+    /**
+     * @param {PeriodData} [source]
+     * @returns {string[]}
+     */
     function getReceptionists(source = state) {
       const list = source?.settings?.receptionists || source?.settings?.team || APP_DEFAULTS.receptionists;
       return [...new Set((Array.isArray(list) ? list : []).filter(Boolean))];
     }
 
+    /**
+     * @param {PeriodData} [source]
+     * @returns {string[]}
+     */
     function getProfessors(source = state) {
       const list = source?.settings?.professors || APP_DEFAULTS.professors;
       return [...new Set((Array.isArray(list) ? list : []).filter(Boolean))];
     }
 
+    /**
+     * @param {PeriodData} [source]
+     * @returns {string[]}
+     */
     function getAllEmployees(source = state) {
       return [...new Set([...getReceptionists(source), ...getProfessors(source)])];
     }
 
+    /**
+     * @param {string} person
+     * @param {PeriodData} [source]
+     * @returns {number}
+     */
     function totalAddonVolumeForPerson(person, source = state) {
       const group = source?.addons?.[person] || {};
       const knownTypes = [...new Set([...(source?.settings?.addonTypes || []), ...Object.keys(group)])];
@@ -112,6 +160,10 @@
       }, 0);
     }
 
+    /**
+     * @param {PeriodData} [source]
+     * @returns {string[]}
+     */
     function getAddonPeople(source = state) {
       const activeReceptionists = getReceptionists(source);
       const historicalPeople = Object.keys(source?.addons || {}).filter(person => (
@@ -121,12 +173,20 @@
       return [...new Set([...activeReceptionists, ...historicalPeople])];
     }
 
+    /**
+     * @param {PeriodData} [source]
+     * @returns {number}
+     */
     function getTotalAddonVolume(source = state) {
       return Object.keys(source?.addons || {}).reduce((total, person) => {
         return total + totalAddonVolumeForPerson(person, source);
       }, 0);
     }
 
+    /**
+     * @param {PeriodData} data
+     * @returns {void}
+     */
     function hydrateLegacyAddonsFromStudents(data) {
       if (!data || getTotalAddonVolume(data) > 0) return;
       data.students.forEach(student => {
@@ -146,6 +206,10 @@
       });
     }
 
+    /**
+     * @param {PeriodData} data
+     * @returns {void}
+     */
     function seedAddons(data) {
       data.addons = {};
       getReceptionists(data).forEach(name => {
@@ -159,6 +223,11 @@
     // ─── buildCleanPeriodFromTemplate: cria período limpo herdando settings ──────
     // Unifica a criação de períodos vazios e resets. Valida cada campo com
     // clamp(), structuredClone e deduplicação via Set para evitar dados sujos.
+    /**
+     * @param {PeriodData} [template]
+     * @param {string} [key]
+     * @returns {PeriodData}
+     */
     function buildCleanPeriodFromTemplate(template, key = currentPeriodKey) {
       const normalizedKey = String(key || getInitialPeriodKey());
       const [yearStr, monthStr] = normalizedKey.split('-');
@@ -210,6 +279,12 @@
       return clean;
     }
 
+    /**
+     * @param {PeriodData} [template]
+     * @param {string} [key]
+     * @param {Object} [options]
+     * @returns {PeriodData}
+     */
     function buildBootstrapPeriod(template, key = currentPeriodKey, options = {}) {
       const withTestData = typeof options?.withTestData === 'boolean'
         ? options.withTestData
@@ -221,11 +296,21 @@
     }
 
     // Alias mantido para compatibilidade com seedYear e normalizeStore
+    /**
+     * @param {PeriodData} [template]
+     * @param {string} [key]
+     * @returns {PeriodData}
+     */
     function buildEmptyPeriodFromTemplate(template, key = currentPeriodKey) {
       return buildCleanPeriodFromTemplate(template, key);
     }
 
     // ─── resetPeriodData: wrapper limpo para reset de período ───────────────────
+    /**
+     * @param {string} key
+     * @param {PeriodData} [template]
+     * @returns {PeriodData}
+     */
     function resetPeriodData(key, template = state) {
       storage.periods[key] = buildCleanPeriodFromTemplate(template || state, key);
       normalizeData(storage.periods[key]);
@@ -233,6 +318,11 @@
       return storage.periods[key];
     }
 
+    /**
+     * @param {string|number} year
+     * @param {Object} [options]
+     * @returns {Object<string, PeriodData>}
+     */
     function seedYear(year, options = {}) {
       const periods = {};
       for (let month = 1; month <= 12; month++) {

@@ -2,6 +2,7 @@
     // EVENTOS UI — ADDONS
     // ══════════════════════════════════════════
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean, handleChange: function(HTMLElement): boolean, handleBlur: function(HTMLElement): boolean }} */
     function bindAddonEvents() {
       return {
         handleClick(actionEl) {

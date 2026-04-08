@@ -22,6 +22,7 @@
       controlesUiInicializados: false
     };
 
+    /** @param {AppUIState} [ui] @returns {{query:string, person:string, feedback:string}} */
     function getStudentViewFilters(ui = sanitizeUIState(getUIState())) {
       return {
         query: normalizeSearchText(ui.studentSearch || ''),
@@ -30,12 +31,14 @@
       };
     }
 
+    /** @param {AppUIState} [ui] @returns {{query:string}} */
     function getPendingViewFilters(ui = sanitizeUIState(getUIState())) {
       return {
         query: normalizeSearchText(ui.pendingSearch || '')
       };
     }
 
+    /** @param {AppUIState} [ui] @returns {{query:string, typeFilter:string, statusFilter:string}} */
     function getEventViewFilters(ui = sanitizeUIState(getUIState())) {
       return {
         query: normalizeSearchText(ui.eventSearch || ''),
@@ -44,6 +47,7 @@
       };
     }
 
+    /** @param {AppUIState} [ui] @returns {{query:string}} */
     function getScaleViewFilters(ui = sanitizeUIState(getUIState())) {
       return {
         query: normalizeSearchText(ui.scaleSearch || '')
@@ -63,20 +67,24 @@
       settings: () => renderSettings()
     };
 
+    /** @param {string} section @returns {void} */
     function renderSection(section) {
       RENDER_MAP[section]?.();
     }
 
+    /** @param {...string} sections @returns {void} */
     function renderSections(...sections) {
       [...new Set(sections.flat().filter(Boolean))].forEach(renderSection);
     }
 
+    /** @param {string|string[]} [alvos] @returns {string[]} */
     function normalizarAlvosRender(alvos = []) {
       const lista = Array.isArray(alvos) ? alvos.flat() : [alvos];
       const normalizados = lista.filter(Boolean).flatMap(alvo => alvo === 'all' || alvo === 'tudo' ? AREAS_RENDERIZACAO : [alvo]);
       return [...new Set(normalizados.filter(alvo => AREAS_RENDERIZACAO.includes(alvo)))];
     }
 
+    /** @param {string|string[]} [alvos] @returns {void} */
     function requestRender(alvos = []) {
       const normalizados = normalizarAlvosRender(alvos);
       if (!normalizados.length) return;
@@ -86,6 +94,7 @@
       estadoRenderizacao.idQuadro = window.requestAnimationFrame(executarRenderAgendado);
     }
 
+    /** @returns {void} */
     function limparFilaRender() {
       if (estadoRenderizacao.idQuadro) {
         window.cancelAnimationFrame(estadoRenderizacao.idQuadro);
@@ -96,6 +105,7 @@
       estadoRenderizacao.ultimoLote = [];
     }
 
+    /** @returns {void} */
     function executarRenderAgendado() {
       estadoRenderizacao.agendado = false;
       estadoRenderizacao.idQuadro = 0;
@@ -119,10 +129,12 @@
       }
     }
 
+    /** @returns {void} */
     function renderScheduler() {
       return executarRenderAgendado();
     }
 
+    /** @param {AppUIState} [ui] @returns {void} */
     function applyUIStateToControls(ui = sanitizeUIState(getUIState())) {
       UI_CONTROL_IDS.forEach(id => {
         const el = document.getElementById(id);
@@ -132,6 +144,7 @@
       });
     }
 
+    /** @returns {void} */
     function initUIBindings() {
       if (estadoRenderizacao.controlesUiInicializados) return;
       estadoRenderizacao.controlesUiInicializados = true;
@@ -152,6 +165,7 @@
       });
     }
 
+    /** @param {string} view @returns {void} */
     function resetViewFilters(view) {
       const nextState = {};
       if (view === 'events') {
@@ -173,6 +187,7 @@
       }
     }
 
+    /** @param {*} value @param {string} [fallback] @returns {string} */
     function renderEllipsisCell(value, fallback = '-') {
       const text = String(value ?? '').trim();
       if (!text) return `<span class="muted">${esc(fallback)}</span>`;
@@ -183,6 +198,7 @@
     // HELPERS DE PATCH DE DOM — patch explícito por chave, sem virtual DOM
     // ══════════════════════════════════════════
 
+    /** @param {string} html @returns {string} */
     function criarAssinaturaHtml(html) {
       let hash = 5381;
       for (let i = 0; i < html.length; i++) {
@@ -191,6 +207,7 @@
       return String(hash >>> 0);
     }
 
+    /** @param {string} html @param {string} chave @param {string} assinatura @returns {Element} */
     function criarNoRenderizado(html, chave, assinatura) {
       const template = document.createElement('template');
       const markup = sanitizeHtml(html.trim());
@@ -208,11 +225,13 @@
       return no;
     }
 
+    /** @param {string} valor @returns {string} */
     function escaparSeletorCss(valor) {
       if (window.CSS?.escape) return window.CSS.escape(String(valor));
       return String(valor).replace(/["\\]/g, '\\$&');
     }
 
+    /** @param {Element} el @returns {string|null} */
     function obterSeletorFoco(el) {
       if (!el) return null;
       if (el.id) return `#${escaparSeletorCss(el.id)}`;
@@ -225,6 +244,7 @@
       return partes.length > 1 ? partes.join('') : null;
     }
 
+    /** @param {Element} container @returns {Object|null} */
     function capturarEstadoFoco(container) {
       const ativo = document.activeElement;
       if (!ativo || !container?.contains(ativo)) return null;
@@ -236,6 +256,7 @@
       };
     }
 
+    /** @param {Element} container @param {Object} estado @returns {void} */
     function restaurarEstadoFoco(container, estado) {
       if (!container || !estado?.seletor) return;
       const alvo = container.querySelector(estado.seletor);
@@ -248,6 +269,7 @@
       }
     }
 
+    /** @param {Element} el @param {string} html @returns {void} */
     function aplicarHtmlSeMudou(el, html) {
       if (!el) return;
       const assinatura = criarAssinaturaHtml(html);
@@ -256,6 +278,7 @@
       el.dataset.assinaturaRender = assinatura;
     }
 
+    /** @param {Element} container @param {Array<{chave:string, html:string}>} descritores @returns {void} */
     function aplicarPatchPorChave(container, descritores = []) {
       if (!container) return;
       const foco = capturarEstadoFoco(container);
@@ -287,6 +310,7 @@
       restaurarEstadoFoco(container, foco);
     }
 
+    /** @param {Element} container @param {Array} itens @param {Function} obterChave @param {Function} renderizarLinha @returns {void} */
     function aplicarPatchLinhas(container, itens, obterChave, renderizarLinha) {
       if (!container) return;
       const foco = capturarEstadoFoco(container);
@@ -301,6 +325,7 @@
       restaurarEstadoFoco(container, foco);
     }
 
+    /** @param {Element} container @param {Array} itens @param {Function} obterChave @param {Function} renderizarCard @returns {void} */
     function aplicarPatchCards(container, itens, obterChave, renderizarCard) {
       aplicarPatchPorChave(container, itens.map(item => ({
         chave: obterChave(item),
@@ -308,10 +333,12 @@
       })));
     }
 
+    /** @param {Element} container @param {Array} itens @param {Function} obterChave @param {Function} renderizarCard @returns {void} */
     function aplicarPatchItensKanban(container, itens, obterChave, renderizarCard) {
       aplicarPatchCards(container, itens, obterChave, renderizarCard);
     }
 
+    /** @param {Element} container @param {Array} itens @param {Function} obterChave @param {Function} renderizarBloco @returns {void} */
     function aplicarPatchBlocosAgrupados(container, itens, obterChave, renderizarBloco) {
       aplicarPatchPorChave(container, itens.map(item => ({
         chave: obterChave(item),
@@ -319,6 +346,7 @@
       })));
     }
 
+    /** @returns {void} */
     function renderAll() {
       limparFilaRender();
       normalizeData(state);

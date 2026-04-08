@@ -1,22 +1,27 @@
+    /** Checks if value is a non-empty trimmed string. @param {*} value @returns {boolean} */
     function isNonEmptyString(value) {
       return String(value ?? '').trim().length > 0;
     }
 
+    /** Checks if value is a finite number. @param {*} value @returns {boolean} */
     function isValidNumber(value) {
       const normalized = Number(value);
       return Number.isFinite(normalized);
     }
 
+    /** Checks if value is a positive finite number. @param {*} value @returns {boolean} */
     function isPositiveNumber(value) {
       return isValidNumber(value) && Number(value) > 0;
     }
 
+    /** Checks if value parses into a valid date. @param {*} value @returns {boolean} */
     function isValidDateValue(value) {
       if (!isNonEmptyString(value)) return false;
       const timestamp = new Date(`${String(value).trim()}T00:00:00`).getTime();
       return Number.isFinite(timestamp);
     }
 
+    /** Creates a fresh valid ValidationResult. @returns {ValidationResult} */
     function createValidationResult() {
       return {
         isValid: true,
@@ -24,10 +29,12 @@
       };
     }
 
+    /** Strips non-digit characters from a value. @param {*} value @returns {string} */
     function normalizeNumericId(value) {
       return String(value ?? '').replace(/\D+/g, '');
     }
 
+    /** Validates student form data. @param {Object} data @returns {ValidationResult} */
     function validateStudent(data) {
       const result = createValidationResult();
       if (isNonEmptyString(data.rawMatricula) && data.matricula !== data.rawMatricula) {
@@ -41,6 +48,7 @@
       return result;
     }
 
+    /** Validates pending item form data. @param {Object} data @returns {ValidationResult} */
     function validatePending(data) {
       const result = createValidationResult();
       if (isNonEmptyString(data.rawMatricula) && data.matricula !== data.rawMatricula) {
@@ -58,6 +66,7 @@
       return result;
     }
 
+    /** Reads student form fields from the DOM. @returns {Student} */
     function getStudentFormData() {
       const rawMatricula = DOM.value('student_matricula').trim();
       const matricula = normalizeNumericId(rawMatricula);
@@ -77,6 +86,7 @@
       };
     }
 
+    /** Reads pending form fields from the DOM. @returns {PendingItem} */
     function getPendingFormData() {
       const rawMatricula = DOM.value('pending_matricula').trim();
       const matricula = normalizeNumericId(rawMatricula);
@@ -93,6 +103,7 @@
       };
     }
 
+    /** Builds a Student entity from form data. @param {Object} formData @param {Student} [existingStudent] @returns {Student} */
     function buildStudentEntity(formData, existingStudent) {
       return {
         id: existingStudent?.id || formData.id,
@@ -109,6 +120,7 @@
       };
     }
 
+    /** Builds a PendingItem entity from form data. @param {Object} formData @param {PendingItem} [existingPending] @returns {PendingItem} */
     function buildPendingEntity(formData, existingPending) {
       return {
         id: existingPending?.id || formData.id,
@@ -122,6 +134,7 @@
       };
     }
 
+    /** Inserts or replaces a student in the period data. @param {PeriodData} store @param {Student} student @returns {PeriodData} */
     function upsertStudent(store, student) {
       const idx = store.students.findIndex(item => item.id === student.id);
       const students = idx >= 0
@@ -133,6 +146,7 @@
       };
     }
 
+    /** Inserts or replaces a pending item in the period data. @param {PeriodData} store @param {PendingItem} pending @returns {PeriodData} */
     function upsertPending(store, pending) {
       const idx = store.pending.findIndex(item => item.id === pending.id);
       const pendingItems = idx >= 0
@@ -144,14 +158,17 @@
       };
     }
 
+    /** Wraps a failed validation into a SaveResult. @param {ValidationResult} validation @returns {SaveResult} */
     function createValidationFailureResult(validation) {
       return { ok: false, validation };
     }
 
+    /** Wraps a successful save into a SaveResult. @param {PeriodData} nextState @param {Student|PendingItem|EventItem} entity @returns {SaveResult} */
     function createSaveSuccessResult(nextState, entity) {
       return { ok: true, nextState, entity };
     }
 
+    /** Validates and saves a student, returning the result. @param {PeriodData} store @param {Object} formData @param {Student} [existingStudent] @returns {SaveResult} */
     function applyStudentSave(store, formData, existingStudent) {
       const validation = validateStudent(formData);
       if (!validation.isValid) {
@@ -162,6 +179,7 @@
       return createSaveSuccessResult(nextState, entity);
     }
 
+    /** Validates and saves a pending item, returning the result. @param {PeriodData} store @param {Object} formData @param {PendingItem} [existingPending] @returns {SaveResult} */
     function applyPendingSave(store, formData, existingPending) {
       const validation = validatePending(formData);
       if (!validation.isValid) {
@@ -172,6 +190,7 @@
       return createSaveSuccessResult(nextState, entity);
     }
 
+    /** Reads event form fields from the DOM. @returns {EventItem} */
     function getEventFormData() {
       return {
         id: editingEventId || crypto.randomUUID(),
@@ -186,6 +205,7 @@
       };
     }
 
+    /** Reads scale form fields from the DOM. @returns {ScaleEntry} */
     function getScaleFormData() {
       return {
         id: editingScaleId || crypto.randomUUID(),
@@ -206,6 +226,7 @@
       };
     }
 
+    /** Reads settings form fields from the DOM. @returns {Object} */
     function getSettingsFormData() {
       return {
         receptionists: [...new Set(DOM.value('receptionistEditor').split('\n').map(v => v.trim()).filter(Boolean))],
@@ -215,6 +236,7 @@
       };
     }
 
+    /** Reads the NPS mention draft from the DOM. @returns {{name: string, count: number}} */
     function getMentionDraft() {
       return {
         name: DOM.value('npsMentionName').trim(),
@@ -222,10 +244,12 @@
       };
     }
 
+    /** Reads the NPS observations text from the DOM. @returns {string} */
     function getNpsObservationsDraft() {
       return DOM.value('npsObservations').trim();
     }
 
+    /** Validates event form data. @param {Object} data @returns {ValidationResult} */
     function validateEvent(data) {
       const result = createValidationResult();
       if (!isNonEmptyString(data.date) || !isNonEmptyString(data.title)) {
@@ -239,6 +263,7 @@
       return result;
     }
 
+    /** Builds an EventItem entity from form data. @param {Object} formData @param {EventItem} [existingEvent] @returns {EventItem} */
     function buildEventEntity(formData, existingEvent) {
       return {
         id: existingEvent?.id || formData.id,
@@ -253,6 +278,7 @@
       };
     }
 
+    /** Inserts or replaces an event in the period data. @param {PeriodData} store @param {EventItem} eventItem @returns {PeriodData} */
     function upsertEvent(store, eventItem) {
       const idx = store.events.findIndex(item => item.id === eventItem.id);
       const events = idx >= 0
@@ -264,6 +290,7 @@
       };
     }
 
+    /** Validates and saves an event, returning the result. @param {PeriodData} store @param {Object} formData @param {EventItem} [existingEvent] @returns {SaveResult} */
     function applyEventSave(store, formData, existingEvent) {
       const validation = validateEvent(formData);
       if (!validation.isValid) {
@@ -281,6 +308,7 @@
     //   limparErroValidacaoCampo  — ui/events-core.js (helper de campo individual)
     //   showToast                 — ui/events-core.js
 
+    /** Clears validation error states on the given DOM element IDs. @param {string[]} ids @returns {void} */
     function limparErrosValidacao(ids = []) {
       ids.forEach(id => {
         const el = document.getElementById(id);
@@ -290,6 +318,7 @@
       if (feedback) feedback.textContent = '';
     }
 
+    /** Displays validation errors on the UI and focuses the first invalid field. @param {Array<{id: string, message: string}>} erros @returns {void} */
     function apresentarErroValidacao(erros = []) {
       const feedback = document.getElementById('appValidationFeedback');
       if (!erros.length) return;

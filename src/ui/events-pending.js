@@ -4,6 +4,7 @@
 
     let draggingPendingId = null;
 
+    /** @param {string} id @param {string} status @returns {void} */
     function updatePendingStatus(id, status) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'pending'] })) return;
       const item = state.pending.find(x => x.id === id);
@@ -14,15 +15,18 @@
       requestRender(['hero', 'dashboard', 'pending']);
     }
 
+    /** @returns {void} */
     function limparEstadoDropPendencias() {
       document.querySelectorAll('.kanban-col.drop-target').forEach(col => col.classList.remove('drop-target'));
     }
 
+    /** @returns {void} */
     function openPendingModal() {
       clearPendingForm();
       openModal('pendingModal');
     }
 
+    /** @returns {{ handleClick: function(HTMLElement): boolean }} */
     function bindPendingEvents() {
       return {
         handleClick(actionEl) {
@@ -49,6 +53,7 @@
       };
     }
 
+    /** @returns {void} */
     function bindPendingDnD() {
       if (estadoEventos.dndPendenciasInicializado) return;
       estadoEventos.dndPendenciasInicializado = true;

@@ -2,6 +2,7 @@
     // LIFECYCLE DE PERÍODOS
     // ══════════════════════════════════════════
 
+    /** @type {Set<string>} Actions blocked when the current period is locked. */
     const LOCKED_CURRENT_PERIOD_ACTIONS = new Set([
       'close-current-month',
       'reset-selected-month',
@@ -32,9 +33,13 @@
       'duplicate-event-item',
       'remove-event-item'
     ]);
+    /** @type {Set<string>} Change actions blocked when locked. */
     const LOCKED_CURRENT_PERIOD_CHANGE_ACTIONS = new Set(['update-student-inline', 'update-addon', 'set-mention-count']);
+    /** @type {Set<string>} Input actions blocked when locked. */
     const LOCKED_CURRENT_PERIOD_INPUT_ACTIONS = new Set(['update-nps-score', 'update-nps-goal']);
+    /** @type {Set<string>} Blur actions blocked when locked. */
     const LOCKED_CURRENT_PERIOD_BLUR_ACTIONS = new Set(['rename-person', 'rename-mention']);
+    /** @type {string[]} Control IDs disabled when the period is locked. */
     const LOCKED_CURRENT_PERIOD_CONTROL_IDS = [
       'monthDaysSelector',
       'importFile',
@@ -81,6 +86,11 @@
       'settingsInitializeMonthsWithTestData'
     ];
 
+    /**
+     * Normalizes and fills defaults for a period data object in-place.
+     * @param {PeriodData} data
+     * @returns {void}
+     */
     function normalizeData(data) {
       data.settings ||= { team: [], addonTypes: [], monthDays: 31, receptionists: [], professors: [] };
       data.settings.receptionists ||= data.settings.team || [];
@@ -180,18 +190,37 @@
       });
     }
 
+    /**
+     * Returns whether a period is archived (locked).
+     * @param {string} [key]
+     * @returns {boolean}
+     */
     function isPeriodLocked(key = currentPeriodKey) {
       return Boolean(storage?.archives?.[String(key || '')]);
     }
 
+    /**
+     * Returns whether the active period is locked.
+     * @returns {boolean}
+     */
     function isCurrentPeriodLocked() {
       return isPeriodLocked(currentPeriodKey);
     }
 
+    /**
+     * Returns the user-facing lock message for a period.
+     * @param {string} [key]
+     * @returns {string}
+     */
     function getCurrentPeriodLockMessage(key = currentPeriodKey) {
       return `${getPeriodLabel(key)} está fechado. Ação bloqueada.`;
     }
 
+    /**
+     * Checks if the current period is writable; shows a toast if locked.
+     * @param {Object} [options]
+     * @returns {boolean}
+     */
     function canMutateCurrentPeriod(options = {}) {
       if (!isCurrentPeriodLocked()) return true;
       const rerenderTargets = normalizarAlvosRender(options?.rerender || []);
@@ -202,10 +231,19 @@
       return false;
     }
 
+    /**
+     * Asserts the current period is writable; alias for canMutateCurrentPeriod.
+     * @param {Object} [options]
+     * @returns {boolean}
+     */
     function assertWritableCurrentPeriod(options = {}) {
       return canMutateCurrentPeriod(options);
     }
 
+    /**
+     * Syncs the disabled/aria state of all lockable UI controls.
+     * @returns {void}
+     */
     function syncCurrentPeriodLockUI() {
       const locked = isCurrentPeriodLocked();
       const hint = locked ? `${getPeriodLabel()} fechado. Somente leitura.` : '';
@@ -289,6 +327,11 @@
       });
     }
 
+    /**
+     * Returns true if the period contains any non-empty data.
+     * @param {PeriodData} period
+     * @returns {boolean}
+     */
     function periodHasMeaningfulData(period) {
       if (!period) return false;
       return Boolean(
@@ -304,6 +347,12 @@
       );
     }
 
+    /**
+     * Ensures a period exists in the store, bootstrapping from a template if needed.
+     * @param {string} key
+     * @param {PeriodData} [template]
+     * @returns {PeriodData}
+     */
     function ensurePeriod(key, template = state) {
       if (!storage.periods[key]) {
         storage.periods[key] = buildBootstrapPeriod(template || demoData, key, { storeRef: storage });
@@ -312,6 +361,10 @@
       return storage.periods[key];
     }
 
+    /**
+     * Updates the period selector UI and lock badge to match current state.
+     * @returns {void}
+     */
     function syncPeriodControls() {
       const monthSelect = document.getElementById('periodMonthSelect');
       const yearInput = document.getElementById('periodYearInput');
@@ -329,6 +382,12 @@
       syncCurrentPeriodLockUI();
     }
 
+    /**
+     * Switches the active period and re-renders the UI.
+     * @param {string} key
+     * @param {Object} [options]
+     * @returns {Promise<void>}
+     */
     async function switchPeriod(key, options = {}) {
       const normalizedKey = String(key);
       ensurePeriod(normalizedKey);
@@ -341,12 +400,20 @@
       if (!options.silent && saved) showSaveToast(`✓ período ativo: ${getPeriodLabel(normalizedKey)}`);
     }
 
+    /**
+     * Reads the period selector controls and switches to the chosen period.
+     * @returns {void}
+     */
     function changePeriodFromControls() {
       const month = String(document.getElementById('periodMonthSelect').value || '1').padStart(2, '0');
       const year = String(document.getElementById('periodYearInput').value || new Date().getFullYear());
       switchPeriod(`${year}-${month}`);
     }
 
+    /**
+     * Archives the current period and advances to the next month.
+     * @returns {void}
+     */
     function closePeriod() {
       if (!assertWritableCurrentPeriod({ message: `${getPeriodLabel()} já está fechado.` })) return;
       const currentLabel = getPeriodLabel(currentPeriodKey);
@@ -411,6 +478,10 @@
 
     const closeCurrentMonth = closePeriod;
 
+    /**
+     * Resets the current period data after exporting a backup.
+     * @returns {Promise<void>}
+     */
     async function resetPeriod() {
       if (!assertWritableCurrentPeriod({ message: `${getPeriodLabel()} está fechado e não pode ser resetado.` })) return;
       const label = getPeriodLabel(currentPeriodKey);
@@ -427,6 +498,10 @@
 
     const resetSelectedMonth = resetPeriod;
 
+    /**
+     * Copies the previous month's scale entries into the current period.
+     * @returns {void}
+     */
     function duplicatePreviousMonthScale() {
       if (!assertWritableCurrentPeriod()) return;
       const previousKey = getPreviousPeriodKey(currentPeriodKey);
@@ -471,6 +546,11 @@
       }
     }
 
+    /**
+     * Syncs in-memory app state from a store-like object or storage.
+     * @param {Object} [storeLike]
+     * @returns {Promise<PeriodData>}
+     */
     async function syncAppState(storeLike = null) {
       const sourceStore = storeLike || storage || await loadStore();
       storage = prepareStoreCandidate(sourceStore) || getDefaultStore();

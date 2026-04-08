@@ -2,6 +2,7 @@
     // RENDERIZAÇÃO — ADDONS — renderAddons, updateAddon, addPerson, renamePerson
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function renderAddons() {
       const days = state.settings.monthDays;
       const activeReceptionists = getReceptionists(state);
@@ -71,6 +72,7 @@
       );
     }
 
+    /** @param {string} person @param {string} type @param {number} idx @param {string|number} value @returns {void} */
     function updateAddon(person, type, idx, value) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'addons'] })) return;
       if (!getReceptionists(state).includes(person)) {
@@ -83,6 +85,7 @@
       requestRender(['hero', 'dashboard', 'addons']);
     }
 
+    /** @returns {void} */
     function addPerson() {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard', 'addons', 'settings'] })) return;
       const base = `Recepcionista ${getReceptionists(state).length + 1}`;
@@ -95,6 +98,7 @@
       requestRender(['dashboard', 'addons', 'settings']);
     }
 
+    /** @param {string} oldName @param {string} newNameRaw @returns {Promise<void>} */
     async function renamePerson(oldName, newNameRaw) {
       if (!assertWritableCurrentPeriod({ rerender: ['dashboard', 'students', 'addons', 'pending', 'nps', 'settings'] })) return;
       const newName = newNameRaw.trim();

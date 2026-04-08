@@ -26,6 +26,7 @@
     // RENDERIZAÇÃO — STUDENTS — renderStudents, saveStudent, removeStudent
     // ══════════════════════════════════════════
 
+    /** @returns {void} */
     function renderStudents() {
       const tbody = document.getElementById('studentTableBody');
       const { query, person, feedback } = getStudentViewFilters();
@@ -91,6 +92,7 @@
       `);
     }
 
+    /** @param {string} id @param {string} field @param {string} value @returns {void} */
     function updateStudentInline(id, field, value) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'students'] })) return;
       const target = state.students.find(s => s.id === id);
@@ -100,6 +102,7 @@
       requestRender(['hero', 'dashboard', 'students']);
     }
 
+    /** @returns {void} */
     function populateStudentFilters() {
       const options = `<option value="">Todos os atendentes</option>` + getReceptionists(state).map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('');
       document.getElementById('studentFilterAtendente').innerHTML = options;
@@ -111,6 +114,7 @@
 
     // Student-addon link movido para src/features/crud.js
 
+    /** @returns {void} */
     function clearStudentForm() {
       editingStudentId = null;
       limparErrosValidacao(['student_nome', 'student_matricula']);
@@ -122,15 +126,18 @@
       document.getElementById('student_addon').value = '';
     }
 
+    /** @returns {void} */
     function finalizeStudentSaveUI() {
       closeModal('studentModal');
       clearStudentForm();
     }
 
+    /** @returns {void} */
     function renderStudentSaveUI() {
       requestRender(['hero', 'dashboard', 'students', 'addons']);
     }
 
+    /** @param {string} id @returns {void} */
     function editStudent(id) {
       const s = state.students.find(x => x.id === id);
       if (!s) return;
@@ -149,6 +156,7 @@
       openModal('studentModal');
     }
 
+    /** @param {string} id @returns {void} */
     function removeStudent(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja excluir este atendimento?', async () => {
@@ -171,11 +179,13 @@
     // PILLS — renderização de status visual
     // ══════════════════════════════════════════
 
+    /** @param {string} value @returns {string} */
     function studentStatusPill(value) {
       const cls = value === 'Respondeu' ? 'ok' : value === 'Não respondeu' ? 'bad' : 'warn';
       return `<span class="pill ${cls}">${esc(value)}</span>`;
     }
 
+    /** @param {string} value @returns {string} */
     function npsPill(value) {
       const cls = value === 'Sim' ? 'ok' : value === 'Não' ? 'bad' : 'warn';
       return `<span class="pill ${cls}">${esc(value)}</span>`;

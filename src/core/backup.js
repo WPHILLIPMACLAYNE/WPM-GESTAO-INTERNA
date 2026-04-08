@@ -2,6 +2,11 @@
     // BACKUP & PERSISTÊNCIA DE ALTO NÍVEL
     // ══════════════════════════════════════════
 
+    /**
+     * Validates, migrates and sanitizes a store-like object.
+     * @param {Object} storeLike
+     * @returns {AppStore|null}
+     */
     function prepareStoreCandidate(storeLike) {
       if (!storeLike || typeof storeLike !== 'object' || Array.isArray(storeLike)) return null;
       const migrated = migrateStore(cloneSerializable(storeLike));
@@ -10,6 +15,11 @@
       return setStoreVersion(sanitized, STORE_VERSION);
     }
 
+    /**
+     * Reads and prepares a stored store from persistence by key.
+     * @param {string} key
+     * @returns {Promise<AppStore|null>}
+     */
     async function readStoredStore(key) {
       const raw = await readPrimaryStoredValue(key);
       if (!raw) return null;
@@ -22,6 +32,10 @@
       }
     }
 
+    /**
+     * Loads the store from primary or legacy keys, falling back to defaults.
+     * @returns {Promise<AppStore>}
+     */
     async function loadStore() {
       const currentStore = await readStoredStore(STORAGE_KEY);
       if (currentStore) {
@@ -42,6 +56,12 @@
       return defaultStore;
     }
 
+    /**
+     * Persists a store-like object to storage with optional broadcast.
+     * @param {Object} storeLike
+     * @param {boolean|Object} [options]
+     * @returns {Promise<boolean>}
+     */
     async function saveStore(storeLike, options = false) {
       const { silent, eventType, broadcast } = normalizePersistenceOptions(options, 'save');
       updatePersistenceTechState({
@@ -84,6 +104,11 @@
       }
     }
 
+    /**
+     * Saves the current period state into the store and persists it.
+     * @param {boolean|Object} [options]
+     * @returns {Promise<boolean>}
+     */
     async function saveData(options = false) {
       try {
         storage.activePeriod = currentPeriodKey;
@@ -97,6 +122,11 @@
       }
     }
 
+    /**
+     * Handles a storage broadcast event from another tab.
+     * @param {string} rawValue
+     * @returns {Promise<void>}
+     */
     async function consumeStorageBroadcast(rawValue) {
       if (!rawValue) return;
       updatePersistenceTechState({
@@ -130,6 +160,11 @@
       showSaveToast('✓ dados sincronizados de outra aba');
     }
 
+    /**
+     * Returns a committed store snapshot, optionally persisting current state first.
+     * @param {Object} [options]
+     * @returns {Promise<AppStore>}
+     */
     async function getCommittedStoreSnapshot(options = {}) {
       const persistCurrent = options?.persistCurrent === true;
       const eventType = String(options?.eventType || 'save');
@@ -148,6 +183,11 @@
       return await readStoredStore(STORAGE_KEY) || candidate;
     }
 
+    /**
+     * Builds an exportable backup payload from a store snapshot.
+     * @param {AppStore} storeSnapshot
+     * @returns {Object}
+     */
     function buildBackupPayloadFromStore(storeSnapshot) {
       return {
         meta: {
@@ -163,6 +203,13 @@
       };
     }
 
+    /**
+     * Builds a single-month archive payload for export.
+     * @param {AppStore} storeSnapshot
+     * @param {string} periodKey
+     * @param {string} periodLabel
+     * @returns {Object}
+     */
     function buildMonthArchivePayload(storeSnapshot, periodKey, periodLabel) {
       const period = cloneSerializable(storeSnapshot?.periods?.[periodKey] || state);
       normalizeData(period);
@@ -179,6 +226,10 @@
       };
     }
 
+    /**
+     * Runs a write/read/delete round-trip to verify persistence is working.
+     * @returns {Promise<boolean>}
+     */
     async function runPersistenceSelfTest() {
       const tempKey = `${STORAGE_KEY}__selftest__${Date.now()}`;
       const tempValue = JSON.stringify({ probe: true, ts: Date.now() });
@@ -226,6 +277,11 @@
       }
     }
 
+    /**
+     * Computes aggregate metrics across all periods in a store.
+     * @param {AppStore} [storeRef]
+     * @returns {BackupSummary}
+     */
     function getBackupSummary(storeRef = storage) {
       const periods = Object.entries(storeRef.periods || {});
       const totals = periods.reduce((acc, [_, period]) => {
@@ -246,11 +302,21 @@
       };
     }
 
+    /**
+     * Checks if a payload matches the legacy single-period format.
+     * @param {Object} payload
+     * @returns {boolean}
+     */
     function isLegacyPeriodPayload(payload) {
       if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
       return ['settings', 'students', 'pending', 'recados', 'nps', 'scale', 'events', 'addons', 'escala', 'eventos'].some(key => key in payload);
     }
 
+    /**
+     * Extracts and sanitizes a payload from an imported source object.
+     * @param {Object} source
+     * @returns {Object|null}
+     */
     function extractImportedPayload(source) {
       const cleanedRoot = sanitizeDeep(cloneSerializable(source));
       const payload = cleanedRoot?.payload && typeof cleanedRoot.payload === 'object' && !Array.isArray(cleanedRoot.payload)
@@ -259,6 +325,11 @@
       return payload && typeof payload === 'object' && !Array.isArray(payload) ? payload : null;
     }
 
+    /**
+     * Checks if a payload is a valid month-archive structure.
+     * @param {Object} payload
+     * @returns {boolean}
+     */
     function isMonthArchivePayload(payload) {
       return Boolean(
         payload &&
@@ -271,6 +342,11 @@
       );
     }
 
+    /**
+     * Extracts import metadata from a month-archive payload.
+     * @param {Object} payload
+     * @returns {Object|null}
+     */
     function getMonthArchiveImportMeta(payload) {
       if (!isMonthArchivePayload(payload)) return null;
       const periodKey = String(payload.periodKey);
@@ -281,6 +357,12 @@
       };
     }
 
+    /**
+     * Builds an archive entry from a month-archive payload.
+     * @param {Object} payload
+     * @param {ArchiveEntry|null} [existingArchive]
+     * @returns {ArchiveEntry|null}
+     */
     function buildArchiveEntryFromMonthArchivePayload(payload, existingArchive = null) {
       const meta = getMonthArchiveImportMeta(payload);
       if (!meta) return existingArchive || null;
@@ -296,6 +378,12 @@
       };
     }
 
+    /**
+     * Merges a month-archive payload into a base store, returning a new store.
+     * @param {Object} payload
+     * @param {AppStore} [baseStore]
+     * @returns {AppStore|null}
+     */
     function buildStoreFromMonthArchivePayload(payload, baseStore = storage) {
       const meta = getMonthArchiveImportMeta(payload);
       if (!meta) return null;
@@ -310,6 +398,11 @@
       return prepareStoreCandidate(nextStore);
     }
 
+    /**
+     * Determines the kind and metadata of an imported payload.
+     * @param {Object} source
+     * @returns {{kind: string, periodKey?: string, periodLabel?: string, periodCount?: number}}
+     */
     function getImportedPayloadDescriptor(source) {
       const payload = extractImportedPayload(source);
       if (!payload) return { kind: 'unknown' };
@@ -333,6 +426,11 @@
       return { kind: 'unknown' };
     }
 
+    /**
+     * Coerces any recognized import format into a valid AppStore.
+     * @param {Object} source
+     * @returns {AppStore|null}
+     */
     function coerceImportedStore(source) {
       const payload = extractImportedPayload(source);
       if (!payload) return null;
@@ -354,6 +452,11 @@
       return null;
     }
 
+    /**
+     * Builds a full backup payload, persisting current state by default.
+     * @param {Object} [options]
+     * @returns {Promise<Object>}
+     */
     async function buildBackupPayload(options = {}) {
       const storeSnapshot = await getCommittedStoreSnapshot({
         persistCurrent: options?.persistCurrent !== false,
@@ -363,6 +466,12 @@
       return buildBackupPayloadFromStore(storeSnapshot);
     }
 
+    /**
+     * Applies an imported store, persisting and syncing the app state.
+     * @param {Object} parsed
+     * @param {Object} [options]
+     * @returns {Promise<BackupSummary>}
+     */
     async function applyImportedStore(parsed, options = {}) {
       const normalized = coerceImportedStore(parsed);
       if (!normalized) throw new Error('Estrutura inválida ou incompatível com o schema atual.');
@@ -380,6 +489,11 @@
       return getBackupSummary(storage);
     }
 
+    /**
+     * Saves a local snapshot for quick restore.
+     * @param {Object} [payload]
+     * @returns {Promise<Object|null>}
+     */
     async function saveLocalSnapshot(payload = null) {
       const snapshotPayload = payload || await buildBackupPayload({
         persistCurrent: true,
@@ -400,6 +514,10 @@
       return result.ok ? snapshot : null;
     }
 
+    /**
+     * Prompts the user to restore the last saved local snapshot.
+     * @returns {void}
+     */
     function restoreLocalSnapshot() {
       if (!assertWritableCurrentPeriod()) return;
       const snapshot = readStoredJsonWithFallback(LOCAL_SNAPSHOT_KEY, LEGACY_LOCAL_SNAPSHOT_KEYS, null);
@@ -414,6 +532,10 @@
       });
     }
 
+    /**
+     * Exports a full backup as a downloadable JSON file.
+     * @returns {Promise<void>}
+     */
     async function exportBackup() {
       const payload = await buildBackupPayload({
         persistCurrent: true,
@@ -434,6 +556,11 @@
 
     const downloadData = exportBackup;
 
+    /**
+     * Reads and imports a backup JSON file selected by the user.
+     * @param {File} file
+     * @returns {void}
+     */
     function importBackup(file) {
       if (!assertWritableCurrentPeriod()) return;
       if (!file) return;

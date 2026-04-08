@@ -19,6 +19,7 @@
     // STUDENT-ADDON LINK — resolve e aplica delta no addon vinculado a um student
     // ══════════════════════════════════════════
 
+    /** Resolves the addon array link for a student. @param {Student} student @returns {{person: string, type: string, index: number}|null} */
     function getStudentAddonLink(student) {
       if (!student || !student.addon || !student.atendimento) return null;
       const rawDate = student.inicio || student.ultimaVisita || getActivePeriodFallbackDate();
@@ -29,6 +30,7 @@
       return { person: student.atendimento, type: student.addon, index: idx };
     }
 
+    /** Applies a delta to the addon counter linked to a student. @param {Student} student @param {number} delta @returns {void} */
     function applyStudentAddonLink(student, delta) {
       const link = getStudentAddonLink(student);
       if (!link) return;
@@ -36,6 +38,7 @@
       arr[link.index] = Math.max(0, Number(arr[link.index] || 0) + delta);
     }
 
+    /** Creates an async save handler from a CRUD config object. @param {CrudHandlerConfig} config @returns {function(): Promise<void>} */
     function createCrudHandler(config) {
       const {
         name,

@@ -8,10 +8,15 @@
     // CONSTANTES & CONFIGURAÇÃO
     // ══════════════════════════════════════════
 
+    /** @type {string} Primary localStorage key. */
     const STORAGE_KEY = 'recepcao-smartfit-dashboard-v34';
+    /** @type {string} Broadcast sync key for cross-tab communication. */
     const STORAGE_BROADCAST_KEY = 'recepcao-smartfit-dashboard-sync-v34';
+    /** @type {number} Current store schema version. */
     const STORE_VERSION = 4;
+    /** @type {string[]} Keys from previous app versions for migration. */
     const LEGACY_STORAGE_KEYS = ['recepcao-smartfit-dashboard-v33', 'recepcao-smartfit-dashboard-v24'];
+    /** @type {string} Human-readable app version label. */
     const APP_VERSION = 'v34';
     const APP_RUNTIME = (() => {
       try {
@@ -37,23 +42,52 @@
     const LEGACY_UI_KEYS = ['controle_recepcao_app_ui_v33'];
 
     const DOM = {
+      /**
+       * Find element by id.
+       * @param {string} id - Element id.
+       * @returns {HTMLElement|null}
+       */
       byId(id) {
         return document.getElementById(id);
       },
+      /**
+       * Set innerHTML of element by id.
+       * @param {string} id - Element id.
+       * @param {string} markup - HTML content.
+       * @returns {HTMLElement|null}
+       */
       html(id, markup) {
         const el = DOM.byId(id);
         if (el) el.innerHTML = markup;
         return el;
       },
+      /**
+       * Set textContent of element by id.
+       * @param {string} id - Element id.
+       * @param {string} value - Text content.
+       * @returns {HTMLElement|null}
+       */
       text(id, value) {
         const el = DOM.byId(id);
         if (el) el.textContent = value;
         return el;
       },
+      /**
+       * Read value from input element by id.
+       * @param {string} id - Element id.
+       * @param {string} [fallback=''] - Default when element is missing.
+       * @returns {string}
+       */
       value(id, fallback = '') {
         const el = DOM.byId(id);
         return el ? el.value : fallback;
       },
+      /**
+       * Set value on input element by id.
+       * @param {string} id - Element id.
+       * @param {string} value - Value to set.
+       * @returns {HTMLElement|null}
+       */
       setValue(id, value) {
         const el = DOM.byId(id);
         if (el) el.value = value;
@@ -82,12 +116,22 @@
       initializeMonthsWithTestData: DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA
     });
 
+    /**
+     * Return today's date (or offset) as ISO string YYYY-MM-DD.
+     * @param {number} [offset=0] - Days to shift from today.
+     * @returns {string} ISO date string.
+     */
     function todayISO(offset = 0) {
       const d = new Date();
       d.setDate(d.getDate() + offset);
       return d.toISOString().slice(0, 10);
     }
 
+    /**
+     * Return a specific day of the current month as ISO string YYYY-MM-DD.
+     * @param {number} [day=1] - Day of month.
+     * @returns {string} ISO date string.
+     */
     function currentMonthDayISO(day = 1) {
       const d = new Date();
       d.setHours(12, 0, 0, 0);
@@ -100,12 +144,19 @@
     // ESTADO GLOBAL — declarado aqui para estar disponível antes de qualquer módulo
     // ══════════════════════════════════════════
 
+    /** @type {AppStore} */
     let storage;
+    /** @type {string} */
     let currentPeriodKey;
+    /** @type {PeriodData} */
     let state;
 
     // Estado de edição de formulários
+    /** @type {string|null} */
     let editingStudentId = null;
+    /** @type {string|null} */
     let editingPendingId = null;
+    /** @type {string|null} */
     let editingScaleId = null;
+    /** @type {string|null} */
     let editingEventId = null;

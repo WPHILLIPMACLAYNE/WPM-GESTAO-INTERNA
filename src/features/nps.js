@@ -11,6 +11,7 @@
     //   captureNpsRankSnapshot                                 — ui/render-nps.js
     //   DOM                                                    — core/config.js
 
+    /** Registers a new NPS mention or increments an existing one. @returns {void} */
     function registerMention() {
       if (!assertWritableCurrentPeriod()) return;
       const { name, count } = getMentionDraft();
@@ -28,6 +29,7 @@
       requestRender(['hero', 'dashboard', 'nps']);
     }
 
+    /** Adjusts a mention count by a delta value. @param {string} id @param {number} delta @returns {void} */
     function adjustMention(id, delta) {
       if (!assertWritableCurrentPeriod()) return;
       const item = state.nps.mentions.find(x => x.id === id);
@@ -38,6 +40,7 @@
       requestRender(['hero', 'dashboard', 'nps']);
     }
 
+    /** Sets the absolute count for a mention. @param {string} id @param {number} value @returns {void} */
     function setMentionCount(id, value) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'nps'] })) return;
       const item = state.nps.mentions.find(x => x.id === id);
@@ -48,6 +51,7 @@
       requestRender(['hero', 'dashboard', 'nps']);
     }
 
+    /** Renames an NPS mention entry. @param {string} id @param {string} newNameRaw @returns {void} */
     function renameMention(id, newNameRaw) {
       if (!assertWritableCurrentPeriod({ rerender: ['hero', 'dashboard', 'nps'] })) return;
       const item = state.nps.mentions.find(x => x.id === id);
@@ -60,6 +64,7 @@
       requestRender(['hero', 'dashboard', 'nps']);
     }
 
+    /** Removes an NPS mention after user confirmation. @param {string} id @returns {void} */
     function removeMention(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja remover este nome do ranking de NPS?', () => {
@@ -70,6 +75,7 @@
       });
     }
 
+    /** Persists NPS observations text to storage. @returns {Promise<void>} */
     async function saveNpsObservations() {
       if (!assertWritableCurrentPeriod({ rerender: ['nps'] })) return;
       state.nps.observations = getNpsObservationsDraft();

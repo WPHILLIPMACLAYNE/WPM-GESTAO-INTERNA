@@ -4983,14 +4983,29 @@
         padding: 10px 8px;
         font-size: 13px;
       }
-      /* Pending kanban on mobile: smaller cards */
+      /* Pending layout on mobile: stack table above kanban */
+      #pending > .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      /* Pending kanban on mobile: vertical columns */
+      #pending #pendingKanban.kanban {
+        grid-template-columns: 1fr;
+        min-width: 0;
+      }
       #pending .kanban-scroll {
-        max-height: 40vh;
+        max-height: none;
+        overflow-y: visible;
         padding: 0 2px 4px 0;
       }
       #pending .kanban-col {
         padding: 10px;
         min-height: 0;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      #pending .kanban-list {
+        max-height: 240px;
+        overflow-y: auto;
       }
       /* Modal on mobile: smaller width and padding */
       .modal {

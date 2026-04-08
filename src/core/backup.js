@@ -438,7 +438,7 @@
       if (!assertWritableCurrentPeriod()) return;
       if (!file) return;
       if (file.size > 50 * 1024 * 1024) { showToast('Arquivo muito grande (máximo: 50MB).', 'danger'); return; }
-      if (!file.name.endsWith('.json')) { showToast('Formato inválido. Selecione um arquivo .json.', 'warning'); return; }
+      if (file.type !== 'application/json' && !file.name.endsWith('.json')) { showToast('Formato inválido. Selecione um arquivo .json.', 'warning'); return; }
       const reader = new FileReader();
       reader.onerror = () => showToast('Erro ao ler o arquivo. Tente novamente.', 'danger');
       reader.onload = async () => {

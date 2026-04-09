@@ -31,6 +31,371 @@
       return `${item.type || 'Agenda'} • ${getPeriodDisplayDate(item.date)}${item.time ? ` • ${item.time}` : ''}`;
     }
 
+    const DASHBOARD_CHART_IDS = Object.freeze([
+      'dashboardStudentsEvolutionChart',
+      'dashboardReceptionistsChart',
+      'dashboardFeedbackDistributionChart',
+      'dashboardNpsTrendChart',
+      'dashboardAddonRankingChart'
+    ]);
+    const dashboardChartInstances = new Map();
+    let dashboardChartsThemeConfigured = false;
+
+    /** @param {string} name @param {string} fallback @returns {string} */
+    function getDashboardChartToken(name, fallback) {
+      const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || fallback;
+    }
+
+    /** @returns {{ label: string, grid: string, primary: string, success: string, blue: string, purple: string, tooltipBg: string, tooltipText: string }} */
+    function getDashboardChartTheme() {
+      return {
+        label: getDashboardChartToken('--text-muted', '#8a8998'),
+        grid: 'rgba(255,255,255,0.06)',
+        primary: getDashboardChartToken('--primary', '#FFC20F'),
+        success: getDashboardChartToken('--ok', '#22c55e'),
+        blue: getDashboardChartToken('--chart-blue', '#38bdf8'),
+        purple: getDashboardChartToken('--chart-purple', '#8b5cf6'),
+        tooltipBg: 'rgba(10, 10, 10, 0.94)',
+        tooltipText: '#f5f5f5'
+      };
+    }
+
+    /** @returns {void} */
+    function ensureDashboardChartDefaults() {
+      if (!window.Chart || dashboardChartsThemeConfigured) return;
+      const theme = getDashboardChartTheme();
+      const fontFamily = window.getComputedStyle(document.body).fontFamily || "'Montserrat', system-ui, sans-serif";
+      window.Chart.defaults.color = theme.label;
+      window.Chart.defaults.borderColor = theme.grid;
+      window.Chart.defaults.font.family = fontFamily;
+      window.Chart.defaults.font.size = 12;
+      window.Chart.defaults.responsive = true;
+      window.Chart.defaults.maintainAspectRatio = false;
+      window.Chart.defaults.animation = false;
+      window.Chart.defaults.plugins.legend.labels.color = theme.label;
+      window.Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      window.Chart.defaults.plugins.legend.labels.boxWidth = 10;
+      window.Chart.defaults.plugins.legend.labels.boxHeight = 10;
+      window.Chart.defaults.plugins.tooltip.backgroundColor = theme.tooltipBg;
+      window.Chart.defaults.plugins.tooltip.titleColor = theme.tooltipText;
+      window.Chart.defaults.plugins.tooltip.bodyColor = theme.tooltipText;
+      dashboardChartsThemeConfigured = true;
+    }
+
+    /** @param {string} chartId @returns {void} */
+    function destroyDashboardChart(chartId) {
+      const instance = dashboardChartInstances.get(chartId);
+      if (!instance) return;
+      instance.destroy();
+      dashboardChartInstances.delete(chartId);
+    }
+
+    /** @returns {void} */
+    function destroyDashboardCharts() {
+      DASHBOARD_CHART_IDS.forEach(destroyDashboardChart);
+    }
+
+    /** @param {string} chartId @returns {{ canvas: HTMLCanvasElement|null, empty: HTMLElement|null }} */
+    function getDashboardChartNodes(chartId) {
+      const canvas = document.getElementById(chartId);
+      const shell = canvas?.closest('.dashboard-chart-shell') || null;
+      const empty = shell?.querySelector('.dashboard-chart-empty') || null;
+      return {
+        canvas: canvas && typeof canvas.getContext === 'function' ? canvas : null,
+        empty
+      };
+    }
+
+    /** @param {string} chartId @param {string} message @returns {void} */
+    function setDashboardChartFallback(chartId, message) {
+      const { canvas, empty } = getDashboardChartNodes(chartId);
+      destroyDashboardChart(chartId);
+      if (canvas) canvas.hidden = true;
+      if (empty) {
+        empty.hidden = false;
+        empty.textContent = message;
+      }
+    }
+
+    /** @param {string} chartId @returns {HTMLCanvasElement|null} */
+    function prepareDashboardChartCanvas(chartId) {
+      const { canvas, empty } = getDashboardChartNodes(chartId);
+      if (!canvas) return null;
+      canvas.hidden = false;
+      if (empty) {
+        empty.hidden = true;
+        empty.textContent = '';
+      }
+      return canvas;
+    }
+
+    /** @returns {boolean} */
+    function isDashboardVisible() {
+      const dashboardView = document.getElementById('dashboard');
+      return Boolean(dashboardView && !dashboardView.hidden);
+    }
+
+    /**
+     * @param {{ label: string, grid: string }} theme
+     * @param {Object} [yOverrides]
+     * @param {Object} [xOverrides]
+     * @returns {Object}
+     */
+    function buildDashboardCartesianScales(theme, yOverrides = {}, xOverrides = {}) {
+      return {
+        x: {
+          ticks: { color: theme.label, maxRotation: 0, minRotation: 0 },
+          grid: { color: theme.grid, drawBorder: false },
+          border: { display: false },
+          ...xOverrides
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: theme.label, precision: 0 },
+          grid: { color: theme.grid, drawBorder: false },
+          border: { display: false },
+          ...yOverrides
+        }
+      };
+    }
+
+    /** @param {*} context @returns {CanvasGradient|string} */
+    function getAddonRankingGradient(context) {
+      const { chart } = context;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return 'rgba(255,194,15,0.85)';
+      const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+      gradient.addColorStop(0, 'rgba(255,194,15,0.24)');
+      gradient.addColorStop(0.45, 'rgba(255,194,15,0.56)');
+      gradient.addColorStop(1, 'rgba(255,194,15,0.96)');
+      return gradient;
+    }
+
+    /**
+     * @param {string} chartId
+     * @param {Object} config
+     * @returns {void}
+     */
+    function mountDashboardChart(chartId, config) {
+      const canvas = prepareDashboardChartCanvas(chartId);
+      if (!canvas) return;
+      if (!window.Chart) {
+        setDashboardChartFallback(chartId, 'Chart.js indisponível no momento.');
+        return;
+      }
+      ensureDashboardChartDefaults();
+      destroyDashboardChart(chartId);
+      const context = canvas.getContext('2d');
+      if (!context) {
+        setDashboardChartFallback(chartId, 'Canvas indisponível neste navegador.');
+        return;
+      }
+      dashboardChartInstances.set(chartId, new window.Chart(context, config));
+    }
+
+    /** @returns {void} */
+    function renderDashboardCharts() {
+      const visualSection = document.getElementById('dashboardVisualSection');
+      if (!visualSection) {
+        destroyDashboardCharts();
+        return;
+      }
+
+      const chartData = selecionarDadosGraficosDashboard(6);
+      visualSection.dataset.periodKey = currentPeriodKey;
+      visualSection.dataset.historyWindow = chartData.historico.map(item => item.key).join(',');
+      if (!isDashboardVisible()) return;
+
+      const theme = getDashboardChartTheme();
+      const historyLabels = chartData.historico.map(item => item.shortLabel);
+      const historyTitles = chartData.historico.map(item => item.label);
+
+      mountDashboardChart('dashboardStudentsEvolutionChart', {
+        type: 'line',
+        data: {
+          labels: historyLabels,
+          datasets: [{
+            label: 'Alunos novos',
+            data: chartData.historico.map(item => item.totalAlunos),
+            borderColor: theme.primary,
+            backgroundColor: 'rgba(255,194,15,0.14)',
+            tension: 0.32,
+            borderWidth: 3,
+            pointRadius: 4,
+            pointHoverRadius: 5,
+            pointBackgroundColor: theme.primary,
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 1.5,
+            fill: false
+          }]
+        },
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          scales: buildDashboardCartesianScales(theme),
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: items => historyTitles[items[0]?.dataIndex] || '',
+                label: context => `${context.parsed.y} aluno${context.parsed.y === 1 ? '' : 's'}`
+              }
+            }
+          }
+        }
+      });
+
+      mountDashboardChart('dashboardReceptionistsChart', {
+        type: 'bar',
+        data: {
+          labels: chartData.atendimentosPorRecepcionista.map(item => item.label),
+          datasets: [{
+            label: 'Atendimentos',
+            data: chartData.atendimentosPorRecepcionista.map(item => item.value),
+            backgroundColor: chartData.atendimentosPorRecepcionista.map((_, index) => {
+              const palette = [theme.primary, theme.success, theme.blue, theme.purple];
+              return palette[index % palette.length];
+            }),
+            borderRadius: 10,
+            borderSkipped: false,
+            maxBarThickness: 46
+          }]
+        },
+        options: {
+          scales: buildDashboardCartesianScales(theme),
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => `${context.parsed.y} atendimento${context.parsed.y === 1 ? '' : 's'}`
+              }
+            }
+          }
+        }
+      });
+
+      const totalFeedback = chartData.feedbackDistribuicao.reduce((acc, item) => acc + item.value, 0);
+      if (!totalFeedback) {
+        setDashboardChartFallback('dashboardFeedbackDistributionChart', 'Sem feedbacks registrados neste período.');
+      } else {
+        mountDashboardChart('dashboardFeedbackDistributionChart', {
+          type: 'doughnut',
+          data: {
+            labels: chartData.feedbackDistribuicao.map(item => item.label),
+            datasets: [{
+              data: chartData.feedbackDistribuicao.map(item => item.value),
+              backgroundColor: chartData.feedbackDistribuicao.map(item => item.color),
+              borderColor: 'rgba(0,0,0,0)',
+              hoverOffset: 6,
+              cutout: '64%'
+            }]
+          },
+          options: {
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: context => `${context.label}: ${context.parsed} (${formatPct(context.parsed / totalFeedback)})`
+                }
+              }
+            }
+          }
+        });
+      }
+
+      mountDashboardChart('dashboardNpsTrendChart', {
+        type: 'line',
+        data: {
+          labels: historyLabels,
+          datasets: [
+            {
+              label: 'NPS',
+              data: chartData.historico.map(item => item.npsAtual),
+              borderColor: theme.primary,
+              backgroundColor: 'rgba(255,194,15,0.18)',
+              tension: 0.34,
+              borderWidth: 3,
+              pointRadius: 4,
+              pointHoverRadius: 5,
+              pointBackgroundColor: theme.primary,
+              fill: true
+            },
+            {
+              label: 'Meta mensal',
+              data: historyLabels.map(() => chartData.metaMensalAtual),
+              borderColor: 'rgba(255,255,255,0.55)',
+              borderDash: [6, 6],
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          scales: buildDashboardCartesianScales(theme, { min: 0, max: 100, ticks: { color: theme.label, stepSize: 20 } }),
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'start'
+            },
+            tooltip: {
+              callbacks: {
+                title: items => historyTitles[items[0]?.dataIndex] || '',
+                label: context => `${context.dataset.label}: ${context.parsed.y} pts`
+              }
+            }
+          }
+        }
+      });
+
+      const hasAddonSales = chartData.addonRanking.some(item => item.value > 0);
+      if (!chartData.addonRanking.length || !hasAddonSales) {
+        setDashboardChartFallback('dashboardAddonRankingChart', 'Nenhuma venda de addon registrada no período.');
+      } else {
+        mountDashboardChart('dashboardAddonRankingChart', {
+          type: 'bar',
+          data: {
+            labels: chartData.addonRanking.map(item => item.label),
+            datasets: [{
+              label: 'Addons vendidos',
+              data: chartData.addonRanking.map(item => item.value),
+              backgroundColor: getAddonRankingGradient,
+              borderRadius: 10,
+              borderSkipped: false,
+              maxBarThickness: 28
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            scales: buildDashboardCartesianScales(
+              theme,
+              {
+                ticks: { color: theme.label, precision: 0 },
+                grid: { display: false },
+                border: { display: false }
+              },
+              {
+                beginAtZero: true,
+                ticks: { color: theme.label, precision: 0 },
+                grid: { color: theme.grid, drawBorder: false },
+                border: { display: false }
+              }
+            ),
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: context => `${context.parsed.x} addon${context.parsed.x === 1 ? '' : 's'}`
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
     // ══════════════════════════════════════════
 
     /** @param {DashboardIndicators} indicadores @returns {void} */
@@ -146,6 +511,7 @@
         </div>
       `);
 
+      renderDashboardCharts();
       renderDashboardInsights(indicadores);
 
       const summaryList = document.getElementById('summaryList');

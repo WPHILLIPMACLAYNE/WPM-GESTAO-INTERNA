@@ -271,6 +271,17 @@
  */
 
 /**
+ * @typedef {Object} DashboardHistoryPoint
+ * @property {string} key
+ * @property {string} label
+ * @property {string} shortLabel
+ * @property {number} totalAlunos
+ * @property {number} npsAtual
+ * @property {number} metaMensal
+ * @property {boolean} hasData
+ */
+
+/**
  * @typedef {Object} DashboardIndicators
  * @property {number} totalAlunos
  * @property {number} mediaFeedback

@@ -113,6 +113,9 @@
         v.hidden = !isActive;
         v.setAttribute('aria-hidden', String(!isActive));
       });
+      if (typeof requestRender === 'function') {
+        requestRender(tab);
+      }
       if (!silent) {
         saveUIState({ activeTab: tab });
         target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

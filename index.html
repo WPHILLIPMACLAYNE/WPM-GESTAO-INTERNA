@@ -17,6 +17,7 @@
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
           crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
   <script src="src/utils/helpers.js"></script>
   <script src="src/core/config.js"></script>
@@ -122,6 +123,50 @@
 
     <section class="view active" id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard" tabindex="0">
       <div class="stats-grid" id="dashboardCards"></div>
+      <section class="dashboard-visual-section" id="dashboardVisualSection" aria-labelledby="dashboardVisualTitle">
+        <div class="toolbar-title">
+          <span class="section-kicker">Indicadores Visuais</span>
+          <h2 id="dashboardVisualTitle">Indicadores visuais</h2>
+          <p>Leitura gráfica da operação atual e da evolução recente sem sair do Dashboard.</p>
+        </div>
+        <div class="dashboard-visual-grid">
+          <article class="dashboard-chart-card">
+            <div class="dashboard-chart-title">Evolução de alunos novos</div>
+            <div class="dashboard-chart-shell">
+              <canvas id="dashboardStudentsEvolutionChart"></canvas>
+              <div class="dashboard-chart-empty" hidden></div>
+            </div>
+          </article>
+          <article class="dashboard-chart-card">
+            <div class="dashboard-chart-title">Atendimentos por recepcionista</div>
+            <div class="dashboard-chart-shell">
+              <canvas id="dashboardReceptionistsChart"></canvas>
+              <div class="dashboard-chart-empty" hidden></div>
+            </div>
+          </article>
+          <article class="dashboard-chart-card">
+            <div class="dashboard-chart-title">Distribuição de feedbacks</div>
+            <div class="dashboard-chart-shell">
+              <canvas id="dashboardFeedbackDistributionChart"></canvas>
+              <div class="dashboard-chart-empty" hidden></div>
+            </div>
+          </article>
+          <article class="dashboard-chart-card">
+            <div class="dashboard-chart-title">Tendência NPS</div>
+            <div class="dashboard-chart-shell">
+              <canvas id="dashboardNpsTrendChart"></canvas>
+              <div class="dashboard-chart-empty" hidden></div>
+            </div>
+          </article>
+          <article class="dashboard-chart-card dashboard-chart-card--wide">
+            <div class="dashboard-chart-title">Top vendedores de addons</div>
+            <div class="dashboard-chart-shell">
+              <canvas id="dashboardAddonRankingChart"></canvas>
+              <div class="dashboard-chart-empty" hidden></div>
+            </div>
+          </article>
+        </div>
+      </section>
       <div class="insight-grid" id="dashboardInsights"></div>
       <div class="grid-2 dashboard-balance-row">
         <div class="section glass dashboard-section">

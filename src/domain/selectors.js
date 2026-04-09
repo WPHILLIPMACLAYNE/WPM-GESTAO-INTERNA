@@ -283,6 +283,120 @@
       });
     }
 
+    /** @param {string} key @returns {string} */
+    function getShortPeriodLabel(key) {
+      const [_, month] = String(key || '').split('-');
+      const monthIndex = Math.max(0, Number(month || 1) - 1);
+      return String(MONTH_NAMES[monthIndex] || month || '').slice(0, 3);
+    }
+
+    /** @param {number} [limite=6] @returns {string[]} */
+    function getDashboardHistoryPeriodKeys(limite = 6) {
+      const safeLimit = clamp(Number(limite || 6), 1, 12);
+      const keys = [];
+      let cursor = currentPeriodKey;
+      while (keys.length < safeLimit && isValidPeriodKey(cursor)) {
+        keys.push(cursor);
+        cursor = getPreviousPeriodKey(cursor);
+      }
+      return keys.reverse();
+    }
+
+    /**
+     * @param {string} key
+     * @param {PeriodData|null|undefined} period
+     * @returns {DashboardHistoryPoint}
+     */
+    function buildDashboardHistoryPoint(key, period) {
+      const fallbackGoal = clamp(Number(state?.nps?.monthlyGoal ?? 75), 0, 100);
+      return {
+        key,
+        label: getPeriodLabel(key),
+        shortLabel: getShortPeriodLabel(key),
+        totalAlunos: Array.isArray(period?.students) ? period.students.length : 0,
+        npsAtual: clamp(Number(period?.nps?.score ?? 0), 0, 100),
+        metaMensal: clamp(Number(period?.nps?.monthlyGoal ?? fallbackGoal), 0, 100),
+        hasData: Boolean(period)
+      };
+    }
+
+    /**
+     * Retorna a série histórica dos últimos meses do dashboard.
+     * @param {number} [limite=6]
+     * @returns {DashboardHistoryPoint[]}
+     */
+    function selecionarHistoricoDashboard(limite = 6) {
+      const keys = getDashboardHistoryPeriodKeys(limite);
+      const assinatura = criarAssinaturaSelector(
+        'dashboard_historico',
+        keys.map(key => {
+          const period = storage?.periods?.[key];
+          return [
+            key,
+            Array.isArray(period?.students) ? period.students.length : 0,
+            Number(period?.nps?.score ?? 0),
+            Number(period?.nps?.monthlyGoal ?? state?.nps?.monthlyGoal ?? 75)
+          ];
+        })
+      );
+      return lerSelectorMemorizado(`dashboard_historico_${limite}`, assinatura, () => (
+        keys.map(key => buildDashboardHistoryPoint(key, storage?.periods?.[key] || null))
+      ));
+    }
+
+    /**
+     * Retorna os datasets consolidados para os gráficos do dashboard.
+     * @param {number} [limite=6]
+     * @returns {{
+     *   historico: DashboardHistoryPoint[],
+     *   atendimentosPorRecepcionista: Array<{label: string, value: number}>,
+     *   feedbackDistribuicao: Array<{label: string, value: number, color: string}>,
+     *   addonRanking: Array<{label: string, value: number}>,
+     *   metaMensalAtual: number
+     * }}
+     */
+    function selecionarDadosGraficosDashboard(limite = 6) {
+      const historico = selecionarHistoricoDashboard(limite);
+      const resumoRecepcionistas = selecionarResumoRecepcionistas();
+      const totaisAddons = selecionarTotaisAddons();
+      const assinatura = criarAssinaturaSelector(
+        'dashboard_graficos',
+        historico,
+        resumoRecepcionistas.map(item => [item.nome, item.total]),
+        totaisAddons.porPessoa,
+        state.students.map(item => item.feedback),
+        state.nps.monthlyGoal
+      );
+      return lerSelectorMemorizado(`dashboard_graficos_${limite}`, assinatura, () => {
+        const feedbackDistribuicao = [
+          { label: 'Respondeu', value: state.students.filter(item => item.feedback === 'Respondeu').length, color: '#22c55e' },
+          { label: 'Pendente', value: state.students.filter(item => item.feedback === 'Pendente').length, color: '#FFC20F' },
+          { label: 'Não respondeu', value: state.students.filter(item => item.feedback === 'Não respondeu').length, color: '#ef4444' }
+        ];
+
+        const addonRankingBase = Object.entries(totaisAddons.porPessoa || {})
+          .filter(([nome]) => nome)
+          .sort((a, b) => (b[1] || 0) - (a[1] || 0) || a[0].localeCompare(b[0], 'pt-BR'));
+
+        const addonRanking = (addonRankingBase.some(([, total]) => Number(total || 0) > 0)
+          ? addonRankingBase
+          : getAddonPeople(state).map(nome => [nome, totaisAddons.porPessoa?.[nome] || 0]))
+          .slice(0, 5)
+          .map(([label, value]) => ({ label, value: Number(value || 0) }));
+
+        return {
+          historico,
+          atendimentosPorRecepcionista: resumoRecepcionistas.map(item => ({
+            label: item.nome,
+            value: item.total
+          })),
+          feedbackDistribuicao,
+          addonRanking,
+          metaMensalAtual: clamp(Number(state.nps.monthlyGoal ?? 75), 0, 100)
+        };
+      });
+    }
+
     /** Aggregates all dashboard KPIs into a single object. @returns {DashboardIndicators} */
     function selecionarIndicadoresDashboard() {
       const assinatura = criarAssinaturaSelector(

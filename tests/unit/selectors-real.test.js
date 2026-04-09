@@ -116,6 +116,37 @@ describe('Seletores reais do app modularizado', () => {
     expect(Object.keys(totais.porPessoa)).toHaveLength(period.settings.receptionists.length);
   });
 
+  it('selecionarHistoricoDashboard() consolida a janela cronológica dos últimos 6 meses', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+
+    await app.setStore({
+      version: app.window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: '2026-07',
+      periods: {
+        '2026-05': app.window.generatePeriodSeed('2026-05'),
+        '2026-07': app.window.generatePeriodSeed('2026-07')
+      },
+      archives: {}
+    });
+    await app.window.__APP_INTERNALS__.actions.switchPeriod('2026-07', { silent: true });
+
+    const historico = app.window.__APP_INTERNALS__.domain.selecionarHistoricoDashboard();
+
+    expect(historico).toHaveLength(6);
+    expect(historico.map(item => item.key)).toEqual([
+      '2026-02',
+      '2026-03',
+      '2026-04',
+      '2026-05',
+      '2026-06',
+      '2026-07'
+    ]);
+    expect(historico.at(-1).key).toBe('2026-07');
+    expect(historico.find(item => item.key === '2026-05')?.totalAlunos).toBe(30);
+    expect(historico.find(item => item.key === '2026-07')?.totalAlunos).toBe(30);
+  });
+
   it('selecionarPendenciasFiltradas() usa o estado de UI real para filtrar por busca', async () => {
     const app = await createSeededApp('2026-07');
     const period = app.window.__APP_INTERNALS__.persistence

@@ -77,6 +77,13 @@ Painel central com indicadores em tempo real do mês ativo:
 - Urgência operacional (pendência aberta mais antiga)
 - Progresso das metas mensal e semestral de NPS
 
+**Indicadores visuais (Chart.js via CDN):**
+- **Linha:** Evolução de alunos novos nos últimos 6 meses, lendo o storage por período
+- **Barra:** Atendimentos por recepcionista no mês ativo
+- **Doughnut:** Distribuição dos feedbacks do mês ativo entre Respondeu, Pendente e Não respondeu
+- **Linha com área:** Tendência de NPS dos últimos 6 meses com linha de meta mensal tracejada
+- **Barra horizontal:** Ranking dos top vendedores de addons do mês ativo
+
 **Painel de Recados:** Sistema de comunicação entre turnos com status de leitura (lido/não lido).
 
 ### 2.2 Alunos (Atendimentos)

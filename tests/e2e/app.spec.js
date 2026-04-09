@@ -143,6 +143,27 @@ test.describe('Funcionalidade', () => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#saveToast')).toBeAttached();
   });
+
+  test('dashboard deve exibir a seção de indicadores visuais com 5 canvases', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#dashboardVisualSection')).toBeVisible();
+    await expect(page.locator('#dashboardVisualSection canvas')).toHaveCount(5);
+  });
+
+  test('dashboard deve atualizar os indicadores visuais ao trocar de período', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => Boolean(document.getElementById('dashboardVisualSection')?.dataset.periodKey));
+    const initialPeriod = await page.locator('#dashboardVisualSection').getAttribute('data-period-key');
+
+    await page.evaluate(async () => {
+      const section = document.getElementById('dashboardVisualSection');
+      const currentKey = section?.dataset.periodKey || '2026-04';
+      const nextKey = window.getNextPeriodKey(currentKey);
+      await window.__APP_INTERNALS__.actions.switchPeriod(nextKey, { silent: true });
+    });
+
+    await expect(page.locator('#dashboardVisualSection')).not.toHaveAttribute('data-period-key', initialPeriod || '');
+  });
 });
 
 test.describe('Segurança: CSP', () => {
@@ -160,6 +181,12 @@ test.describe('Segurança: CSP', () => {
   test('deve carregar main.js via tag script src', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     const scriptTag = page.locator('script[src="src/main.js"]');
+    await expect(scriptTag).toHaveCount(1);
+  });
+
+  test('deve carregar Chart.js via CDN', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const scriptTag = page.locator('script[src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"]');
     await expect(scriptTag).toHaveCount(1);
   });
 

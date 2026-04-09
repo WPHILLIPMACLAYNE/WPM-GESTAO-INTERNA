@@ -298,6 +298,11 @@
       const mapa = {
         summaryList: 'Resumo de desempenho por atendente',
         feedbackChart: 'Gráfico de feedback positivo por atendente',
+        dashboardStudentsEvolutionChart: 'Gráfico da evolução de alunos novos nos últimos seis meses',
+        dashboardReceptionistsChart: 'Gráfico de atendimentos por recepcionista no mês atual',
+        dashboardFeedbackDistributionChart: 'Gráfico de distribuição de feedbacks do mês atual',
+        dashboardNpsTrendChart: 'Gráfico da tendência do NPS nos últimos seis meses',
+        dashboardAddonRankingChart: 'Gráfico dos principais vendedores de addons do mês atual',
         addonsOverview: 'Resumo de vendas de addons do período',
         pendingOverview: 'Resumo de pendências do período',
         scaleBoard: 'Quadro visual da escala do período',

@@ -1,8 +1,12 @@
 // visual-check.mjs — Take full-page screenshots per viewport/tab
 import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const FILE = 'file:///home/acewallthemac/storage/APP%20SPA%20GESTAO%20WPM/APLICATIVO%20FINALIZADO/SISTEMA_FINALIZADO.html';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const FILE = pathToFileURL(path.resolve(__dirname, '../index.html')).href;
 
 const VIEWPORTS = [
   { name: 'desktop-1440',   width: 1440, height: 900  },

@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      include: ['app.js'],
+      include: ['src/**/*.js'],
       exclude: ['node_modules/', 'tests/']
     },
     reporters: ['verbose'],

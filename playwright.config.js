@@ -1,4 +1,10 @@
 import { defineConfig } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const baseURL = `file://${path.join(__dirname, 'index.html')}`;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -8,7 +14,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
   use: {
-    baseURL: 'file:///home/acewallthemac/storage/APP%20SPA%20GESTAO%20WPM/APLICATIVO%20FINALIZADO/index.html',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure'
   },

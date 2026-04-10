@@ -58,6 +58,7 @@
 
         // Acessa collection via config para suportar getters (state só existe em runtime)
         const currentCollection = config.collection;
+        const previousState = cloneSerializable(state);
 
         const formData = getFormData();
         const existing = currentCollection.find(item => item.id === formData.id);
@@ -71,21 +72,16 @@
           return;
         }
 
+        state = cloneSerializable(result.nextState);
+
         // Hooks pré-salvamento (ex: decrementar contador de addon)
         if (onBeforeSave) onBeforeSave(result.entity, previous, state);
-
-        state = result.nextState;
         const saved = await saveData();
 
         if (!saved) {
-          // Rollback
-          if (previous && existing) {
-            const idx = currentCollection.findIndex(item => item.id === previous.id);
-            if (idx >= 0) currentCollection[idx] = previous;
-            else currentCollection.push(previous);
-          } else if (existing) {
-            currentCollection.push(existing);
-          }
+          state = previousState;
+          storage.activePeriod = currentPeriodKey;
+          storage.periods[currentPeriodKey] = state;
           if (onAfterSave) onAfterSave(result.entity, previous, state, 'rollback');
           showToast(`Falha ao salvar ${name}. Tente novamente.`, 'danger');
           return;
@@ -172,8 +168,8 @@
         const dup = collection.find(entry =>
           entry.id !== entity.id &&
           String(entry.date || '') === String(entity.date || '') &&
-          String(entry.time || '') === String(entry.time || '') &&
-          String(entry.title || '').trim().toLowerCase() === entity.title.toLowerCase()
+          String(entry.time || '') === String(entity.time || '') &&
+          String(entry.title || '').trim().toLowerCase() === String(entity.title || '').trim().toLowerCase()
         );
         return dup ? 'Já existe um evento com o mesmo título, data e horário. Deseja salvar mesmo assim?' : null;
       }

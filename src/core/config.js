@@ -117,14 +117,27 @@
     });
 
     /**
+     * Format a Date instance as local YYYY-MM-DD without UTC drift.
+     * @param {Date} date
+     * @returns {string}
+     */
+    function formatDateToLocalISO(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
      * Return today's date (or offset) as ISO string YYYY-MM-DD.
      * @param {number} [offset=0] - Days to shift from today.
      * @returns {string} ISO date string.
      */
     function todayISO(offset = 0) {
       const d = new Date();
+      d.setHours(12, 0, 0, 0);
       d.setDate(d.getDate() + offset);
-      return d.toISOString().slice(0, 10);
+      return formatDateToLocalISO(d);
     }
 
     /**
@@ -137,7 +150,7 @@
       d.setHours(12, 0, 0, 0);
       d.setDate(1);
       d.setDate(Math.max(1, Number(day || 1)));
-      return d.toISOString().slice(0, 10);
+      return formatDateToLocalISO(d);
     }
 
     // ══════════════════════════════════════════

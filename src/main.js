@@ -4,6 +4,7 @@
 
     /** @type {Readonly<Object>} Frozen map of all internal modules exposed for testing/diagnostics. */
     const APP_INTERNALS = Object.freeze({
+      runtime: APP_RUNTIME,
       config: {
         STORAGE_KEY,
         STORE_VERSION,
@@ -127,7 +128,13 @@
       }
     });
 
-    window.__APP_INTERNALS__ = APP_INTERNALS;
+    /** @returns {Readonly<Object>} */
+    function exposeAppInternals() {
+      window.__APP_INTERNALS__ = APP_INTERNALS;
+      return APP_INTERNALS;
+    }
+
+    exposeAppInternals();
 
     /**
      * Bootstraps the entire application: hydrates storage, syncs state, binds UI and renders.
@@ -180,6 +187,8 @@
         } catch (recoveryErr) {
           console.error('Recovery falhou:', recoveryErr);
         }
+      } finally {
+        exposeAppInternals();
       }
     }
 

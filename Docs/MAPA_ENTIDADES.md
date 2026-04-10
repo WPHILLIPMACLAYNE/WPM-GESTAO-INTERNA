@@ -1,16 +1,47 @@
-# MAPA_ENTIDADES — Preparação para Backend
+# MAPA_ENTIDADES — WPM Gestão Interna
 
 Data: 2026-04-10
-Base auditada: commit `f6f08ea`
+Base local auditada: commit `865586c`
+Objetivo: documentar o modelo atual localStorage/IndexedDB e orientar a futura modelagem backend.
+
+## Persistência atual
+
+Backend local primário:
+
+- IndexedDB database: `wpm-gestao-interna-db`
+- Object store: `app_kv`
+
+Espelho/fallback:
+
+- localStorage
+
+Chaves:
+
+| Chave | Tipo | Conteúdo |
+|---|---|---|
+| `recepcao-smartfit-dashboard-v34` | atual | Store principal completo. |
+| `recepcao-smartfit-dashboard-sync-v34` | atual | Evento de broadcast cross-tab. |
+| `controle_recepcao_app_snapshot_v34` | atual | Snapshot local para restauração rápida. |
+| `controle_recepcao_app_report_v34` | atual | Relatório de diagnóstico estrutural. |
+| `controle_recepcao_app_flowtests_v34` | atual | Relatório de autotestes de fluxo. |
+| `controle_recepcao_app_ui_v34` | atual | Estado de UI/filtros/aba ativa. |
+| `wpm_recados_${YYYY-MM}` | legado | Recados por período antes da migração para store. |
+| `recepcao-smartfit-dashboard-v33` | legado | Store antigo. |
+| `recepcao-smartfit-dashboard-v24` | legado | Store antigo. |
+| `controle_recepcao_app_snapshot_v33` | legado | Snapshot antigo. |
+| `controle_recepcao_app_report_v33` | legado | Relatório antigo. |
+| `controle_recepcao_app_flowtests_v33` | legado | Autotestes antigos. |
+| `controle_recepcao_app_ui_v33` | legado | UI state antigo. |
+
+Chaves dinâmicas:
+
+- `${STORAGE_KEY}__probe__`
+- `${STORAGE_KEY}__selftest__${Date.now()}`
+- `${STORAGE_KEY}_corrompido_${Date.now()}`
 
 ## Store principal
 
-Persistência atual:
-
-- IndexedDB: database `wpm-gestao-interna-db`, store `app_kv`.
-- localStorage espelho: `recepcao-smartfit-dashboard-v34`.
-
-Estrutura macro:
+Chave: `recepcao-smartfit-dashboard-v34`
 
 ```json
 {
@@ -24,19 +55,75 @@ Estrutura macro:
   },
   "archives": {
     "2026-03": {
-      "closedAt": "ISO datetime",
-      "closedAtLabel": "string",
+      "closedAt": "2026-04-10T12:00:00.000Z",
+      "closedAtLabel": "10/04/2026, 09:00:00",
       "label": "Março/2026"
     }
   }
 }
 ```
 
+Backend sugerido:
+
+- `units`
+- `periods`
+- `period_archives`
+- `app_preferences`
+- `audit_events`
+
+Autenticação: todo acesso a dados operacionais deve exigir usuário autenticado e vínculo com unidade.
+
+## Entidade: Unidade
+
+Status atual: implícita. O app assume uma única unidade/local.
+
+Backend sugerido:
+
+```json
+{
+  "id": "uuid",
+  "name": "string",
+  "timezone": "America/Sao_Paulo",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+Volume esperado: 1 ou poucas unidades.
+
+Operações com autenticação:
+
+- Criar/editar unidade: admin.
+- Ler unidade: usuários vinculados.
+
+## Entidade: Usuário / membro da equipe
+
+Status atual: nomes em strings dentro de `settings.receptionists`, `settings.professors`, `students.atendimento`, `pending.hostess`, `nps.mentions.name`, `scale.*`.
+
+Estrutura backend sugerida:
+
+```json
+{
+  "id": "uuid",
+  "unitId": "uuid",
+  "name": "string",
+  "role": "admin|gestor|recepcao|professor|leitura",
+  "active": true,
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+Volume esperado: dezenas por unidade.
+
+Riscos de migração:
+
+- Histórico usa nome como identificador. Renomear pessoas pode ter alterado registros antigos.
+- Deve preservar `displayNameSnapshot` nas entidades históricas mesmo usando FK futura.
+
 ## Entidade: Período
 
 Chave atual: `periods[YYYY-MM]`
-
-Estrutura:
 
 ```json
 {
@@ -51,23 +138,39 @@ Estrutura:
 }
 ```
 
-Volume esperado: 1 registro por mês por unidade.
-
 Backend sugerido:
-
-- Tabela `periods`.
-- Colunas: `id`, `unit_id`, `period_key`, `status`, `closed_at`, `created_at`, `updated_at`.
-- Constraint única: `unit_id + period_key`.
-
-## Entidade: Configurações
-
-Chave atual: `periods[YYYY-MM].settings`
-
-Estrutura:
 
 ```json
 {
-  "team": ["Wallace"],
+  "id": "uuid",
+  "unitId": "uuid",
+  "periodKey": "2026-04",
+  "status": "open|closed",
+  "closedAt": "ISO datetime|null",
+  "closedBy": "uuid|null",
+  "label": "Abril/2026",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+Volume esperado: 12 períodos/ano por unidade.
+
+Constraint: `unitId + periodKey` único.
+
+Operações com autenticação:
+
+- Leitura: usuários da unidade.
+- Criar/trocar período: equipe autenticada.
+- Fechar/resetar: gestor/admin.
+
+## Entidade: Configurações do período
+
+Chave atual: `periods[YYYY-MM].settings`
+
+```json
+{
+  "team": ["Wallace", "Charles"],
   "receptionists": ["Wallace"],
   "professors": ["Charles"],
   "addonTypes": ["Energy", "Body", "Coach"],
@@ -75,24 +178,27 @@ Estrutura:
 }
 ```
 
-Volume esperado: pequeno, 1 objeto por período. Listas normalmente abaixo de 100 itens.
-
 Backend sugerido:
 
-- `unit_members` para recepcionistas/professores.
-- `addon_types` para tipos.
-- `period_settings` para snapshot mensal.
+- `period_settings`
+- `addon_types`
+- snapshots de membros ativos no período
 
-Autenticação/autorização:
+Volume esperado: 1 objeto pequeno por período.
 
-- Leitura: usuários autenticados da unidade.
-- Escrita: admin/gestor.
+Operações com autenticação:
 
-## Entidade: Alunos / Atendimentos
+- Leitura: equipe.
+- Escrita: gestor/admin.
+
+Riscos:
+
+- `team` mistura recepção e professores.
+- Alterar configurações hoje pode reatribuir registros de nomes removidos.
+
+## Entidade: Atendimento / Aluno novo
 
 Chave atual: `periods[YYYY-MM].students`
-
-Estrutura observada:
 
 ```json
 {
@@ -102,41 +208,61 @@ Estrutura observada:
   "ultimaVisita": "YYYY-MM-DD",
   "horaVisita": "HH:mm",
   "inicio": "YYYY-MM-DD",
-  "avisoNps": "string",
+  "avisoNps": "Sim|Não|Pendente",
   "atendimento": "string",
-  "feedback": "Positivo|Neutro|Negativo|string",
-  "addon": "Energy|Body|Coach|string",
+  "feedback": "Respondeu|Não respondeu|Pendente",
+  "addon": "string",
   "observacoes": "string"
 }
 ```
 
 Volume esperado: 0 a 1.000 registros/mês por unidade.
 
-Operações:
+Backend sugerido: `student_attendances`
 
-- Criar atendimento.
-- Editar dados.
-- Excluir.
-- Filtrar/exportar.
-- Atualizar addon vinculado.
+Campos:
 
-Backend sugerido:
+- `id`
+- `periodId`
+- `studentName`
+- `membershipNumber`
+- `lastVisitDate`
+- `lastVisitTime`
+- `startedAtDate`
+- `npsNoticeStatus`
+- `receptionistId`
+- `receptionistNameSnapshot`
+- `feedbackStatus`
+- `addonTypeId`
+- `addonTypeSnapshot`
+- `notes`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
 
-- Tabela `student_attendances`.
-- FK para `period_id`.
-- Campos normalizados para atendente e addon quando possível.
-- Índices: `period_id`, `matricula`, `atendimento`, `inicio`, `feedback`.
+Índices:
 
-Riscos de migração:
+- `periodId`
+- `membershipNumber`
+- `receptionistId`
+- `startedAtDate`
+- `feedbackStatus`
 
-- `atendimento` e `addon` hoje são strings livres; no backend devem virar FK ou manter campo legado.
-- Duplicidade por matrícula/nome precisa de regra de negócio.
+Operações com autenticação:
 
-## Entidade: Addons
+- Criar/editar: recepção/gestor/admin.
+- Excluir: gestor/admin ou recepção com auditoria.
+- Exportar: gestor/admin.
+
+Riscos:
+
+- Hoje não há regra forte de duplicidade por matrícula.
+- Vínculo aluno-addon é uma mutação composta e deve virar transação.
+
+## Entidade: Venda de addon
 
 Chave atual: `periods[YYYY-MM].addons`
-
-Estrutura:
 
 ```json
 {
@@ -147,31 +273,45 @@ Estrutura:
 }
 ```
 
-O array representa contadores por dia do mês, índice `0 = dia 1`.
+O array representa dia do mês: índice `0 = dia 1`.
 
-Volume esperado: `receptionists * addonTypes * monthDays`, geralmente baixo.
+Volume esperado: `recepcionistas * tipos * dias`; baixo a médio.
 
-Backend sugerido:
+Backend sugerido: `addon_sales`
 
-- Tabela `addon_sales`.
-- Colunas: `period_id`, `date`, `receptionist_id`, `addon_type_id`, `quantity`.
-- Constraint única por `period/date/receptionist/addon_type`.
+```json
+{
+  "id": "uuid",
+  "periodId": "uuid",
+  "date": "YYYY-MM-DD",
+  "receptionistId": "uuid",
+  "receptionistNameSnapshot": "string",
+  "addonTypeId": "uuid",
+  "addonTypeSnapshot": "string",
+  "quantity": 2,
+  "source": "manual|student_attendance",
+  "studentAttendanceId": "uuid|null",
+  "createdBy": "uuid",
+  "updatedBy": "uuid"
+}
+```
 
-Autenticação/autorização:
+Constraint sugerida: `periodId + date + receptionistId + addonTypeId + source/studentAttendanceId`.
 
-- Leitura: equipe autenticada.
-- Escrita: equipe/gestor, com auditoria.
+Operações com autenticação:
+
+- Leitura: equipe.
+- Escrita manual: recepção/gestor.
+- Ajuste retroativo: gestor/admin.
 
 Riscos:
 
-- Atualização atual é incremental e pode divergir do atendimento vinculado em falha de save.
-- Migração precisa expandir arrays em linhas por dia.
+- Migração precisa expandir matriz em linhas.
+- Quantidade ligada a atendimento pode divergir se rollback local falhar.
 
-## Entidade: Pendências
+## Entidade: Pendência
 
 Chave atual: `periods[YYYY-MM].pending`
-
-Estrutura:
 
 ```json
 {
@@ -182,28 +322,97 @@ Estrutura:
   "data": "YYYY-MM-DD",
   "hostess": "string",
   "resposta": "string",
-  "status": "aberto|respondido|concluido|string"
+  "status": "aberto|respondido|concluido"
 }
 ```
 
 Volume esperado: 0 a 500 registros/mês.
 
-Backend sugerido:
+Backend sugerido: `pending_items`
 
-- Tabela `pending_items`.
-- Índices: `period_id`, `status`, `data`, `hostess`, `matricula`.
-- Histórico opcional de status em `pending_item_events`.
+Campos:
 
-Autenticação/autorização:
+- `id`
+- `periodId`
+- `studentName`
+- `membershipNumber`
+- `description`
+- `requestedAtDate`
+- `assigneeId`
+- `assigneeNameSnapshot`
+- `response`
+- `status`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
 
-- Leitura/escrita para equipe autenticada.
-- Exclusão ou conclusão em massa deveria exigir permissão superior.
+Opcional: `pending_item_events` para histórico de status.
+
+Índices:
+
+- `periodId`
+- `status`
+- `requestedAtDate`
+- `assigneeId`
+- `membershipNumber`
+
+Operações com autenticação:
+
+- Criar/editar/mover status: recepção/gestor.
+- Excluir: gestor/admin ou com auditoria.
+
+## Entidade: Recado
+
+Chave atual: `periods[YYYY-MM].recados`
+Chave legada: `wpm_recados_${YYYY-MM}`
+
+```json
+{
+  "id": "uuid",
+  "from": "string",
+  "to": "Todos|string",
+  "text": "string",
+  "createdAt": "ISO datetime",
+  "read": false
+}
+```
+
+Volume esperado: dezenas a centenas por mês.
+
+Backend sugerido: `shift_notes`
+
+Campos:
+
+- `id`
+- `periodId`
+- `fromUserId`
+- `fromNameSnapshot`
+- `toUserId|null`
+- `toAudience`
+- `message`
+- `createdAt`
+- `createdBy`
+
+Leitura:
+
+- Opção simples: `read` global por recado.
+- Opção recomendada: `shift_note_reads` por usuário.
+
+Operações com autenticação:
+
+- Criar: equipe.
+- Marcar como lido: usuário autenticado.
+- Excluir: autor, gestor ou admin.
+
+Riscos:
+
+- Migração precisa consolidar store atual e chaves legadas antes do envio.
+- Modelo atual `read` global não diferencia usuários.
 
 ## Entidade: NPS
 
 Chave atual: `periods[YYYY-MM].nps`
-
-Estrutura:
 
 ```json
 {
@@ -219,145 +428,169 @@ Estrutura:
     }
   ],
   "rankSnapshot": {
-    "uuid": 1
+    "mentionId": 1
   }
 }
 ```
 
-Volume esperado: 1 objeto por período, com 0 a 100 menções.
+Volume esperado: 1 objeto por período, dezenas de menções.
 
 Backend sugerido:
 
-- `nps_period_metrics`.
-- `nps_mentions`.
+- `nps_period_metrics`
+- `nps_mentions`
+- opcional `nps_rank_snapshots`
 
-Autenticação/autorização:
+Campos de `nps_period_metrics`:
 
-- Escrita de score/meta/observações deve ser autenticada.
-- Alteração de metas pode exigir gestor/admin.
+- `id`
+- `periodId`
+- `score`
+- `monthlyGoal`
+- `semesterGoal`
+- `observations`
+- `updatedBy`
+- `updatedAt`
+
+Campos de `nps_mentions`:
+
+- `id`
+- `periodId`
+- `employeeId|null`
+- `nameSnapshot`
+- `count`
+
+Operações com autenticação:
+
+- Leitura: equipe.
+- Escrita: gestor/recepção autorizada.
+
+Riscos:
+
+- Menções usam nome livre.
+- `rankSnapshot` atual pode estar inconsistente no seed.
 
 ## Entidade: Escala
 
 Chave atual: `periods[YYYY-MM].scale`
 
-Estrutura:
-
 ```json
 {
   "id": "uuid",
   "date": "YYYY-MM-DD",
-  "rowTone": "neutral|green|string",
+  "rowTone": "green|red|neutral",
   "professorShifts": [
     {
       "id": "uuid",
-      "time": "06h - 12h",
+      "time": "08h - 13h",
       "name": "string",
       "swap": "string"
     }
   ],
-  "receptionTime": "string",
+  "receptionTime": "08h - 17h",
   "receptionist": "string",
   "receptionSwap": "string",
   "note": "string"
 }
 ```
 
-Volume esperado: até 31 dias por período, com múltiplos turnos por dia.
+Volume esperado: até 31 dias por período, com 1 a 3 turnos de professor por dia.
 
 Backend sugerido:
 
-- `scale_days`.
-- `scale_professor_shifts`.
-- Índices por `period_id`, `date`, `receptionist`.
+- `scale_days`
+- `scale_professor_shifts`
+- opcional `scale_reception_shifts`
 
-Autenticação/autorização:
+Operações com autenticação:
 
-- Leitura para equipe.
-- Escrita por gestor/admin ou função autorizada.
+- Leitura: equipe.
+- Criar/editar/excluir/duplicar mês anterior: gestor/admin ou responsável de escala.
 
-## Entidade: Eventos e ações
+Riscos:
+
+- Duplicação entre meses deve ser transacional.
+- Professor e recepção usam strings; preservar snapshots.
+- Feriado/sábado é visual (`rowTone`), não calendário oficial.
+
+## Entidade: Evento/Ação
 
 Chave atual: `periods[YYYY-MM].events`
-
-Estrutura:
 
 ```json
 {
   "id": "uuid",
   "date": "YYYY-MM-DD",
   "time": "HH:mm",
-  "type": "Ação|Campanha|Treinamento|Feriado|Evento|string",
+  "type": "Evento|Ação|Campanha|Treinamento|Feriado|Outro",
   "title": "string",
   "place": "string",
   "owner": "string",
-  "status": "Programado|Confirmado|Concluído|string",
+  "status": "Programado|Confirmado|Concluído|Cancelado",
   "description": "string"
 }
 ```
 
-Volume esperado: 0 a 200 eventos/mês.
+Volume esperado: dezenas por mês.
 
-Backend sugerido:
+Backend sugerido: `events`
 
-- Tabela `events`.
-- Índices por `period_id`, `date`, `status`, `type`.
+Campos:
 
-Risco atual:
+- `id`
+- `periodId`
+- `date`
+- `time`
+- `type`
+- `title`
+- `place`
+- `ownerUserId|null`
+- `ownerNameSnapshot`
+- `status`
+- `description`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
 
-- Checagem de duplicidade compara `entry.time` com ele mesmo, gerando falso positivo para horários diferentes.
+Índices:
 
-## Entidade: Recados
+- `periodId`
+- `date`
+- `type`
+- `status`
 
-Chave atual:
+Operações com autenticação:
 
-- Principal: `periods[YYYY-MM].recados`
-- Legado: `wpm_recados_${YYYY-MM}`
-
-Estrutura:
-
-```json
-{
-  "id": "uuid",
-  "from": "string",
-  "to": "string",
-  "text": "string",
-  "createdAt": "ISO datetime",
-  "read": false
-}
-```
-
-Volume esperado: 0 a 500 recados/mês.
-
-Backend sugerido:
-
-- Tabela `shift_notes`.
-- Opcional: `shift_note_reads` por usuário, caso "lido" deixe de ser global.
-
-Autenticação/autorização:
-
-- Criar recado: usuário autenticado.
-- Marcar lido: usuário autenticado.
-- Excluir: autor, gestor ou admin.
+- Criar/editar/duplicar/excluir: gestor/admin ou equipe autorizada.
+- Exportar CSV: gestor/admin.
 
 Riscos:
 
-- Hoje `read` é booleano global, não por usuário.
-- Migração deve consolidar chaves legadas antes de importar.
+- Detector atual de duplicidade tem bug no horário.
+- `owner` é string livre.
 
-## Entidade: UI State
+## Entidade: UI state
 
 Chave atual: `controle_recepcao_app_ui_v34`
 
-Conteúdo: aba ativa, filtros, preferências de visualização e controles de tela.
+```json
+{
+  "activeTab": "dashboard",
+  "studentSearch": "string",
+  "studentFilterAtendente": "string",
+  "studentFilterFeedback": "string",
+  "pendingSearch": "string",
+  "eventSearch": "string",
+  "eventTypeFilter": "string",
+  "eventStatusFilter": "string",
+  "scaleSearch": "string"
+}
+```
 
-Volume esperado: pequeno por navegador.
+Backend sugerido: não migrar como dado operacional. Pode virar preferência local por navegador ou `user_preferences` se houver login.
 
-Backend sugerido:
-
-- Manter local por padrão.
-- Só migrar para backend se houver login multi-dispositivo.
-
-## Entidade: Snapshots e relatórios
+## Entidade: Diagnósticos e snapshots
 
 Chaves atuais:
 
@@ -365,36 +598,19 @@ Chaves atuais:
 - `controle_recepcao_app_report_v34`
 - `controle_recepcao_app_flowtests_v34`
 
-Uso:
-
-- Snapshot local para restore rápido.
-- Relatório de diagnóstico.
-- Resultado de autotestes.
-
 Backend sugerido:
 
-- Snapshots podem virar `backup_exports` ou permanecer arquivo local.
-- Relatórios podem virar logs operacionais se houver observabilidade.
+- Snapshots: manter export JSON client-side ou armazenar como `backup_exports` com autorização forte.
+- Diagnósticos: não precisa migrar, exceto logs operacionais do backend.
 
-## Operações críticas para backend
+## Riscos principais da migração
 
-- Importar backup.
-- Restaurar snapshot.
-- Resetar mês.
-- Fechar mês.
-- Alterar configurações de equipe/tipos.
-- Excluir entidades.
-- Migrar dados legados.
-
-Essas operações devem ter autenticação forte, autorização por papel e log de auditoria.
-
-## Riscos gerais de migração
-
-- Dados locais podem estar divergentes entre IndexedDB e localStorage.
-- Não há `unit_id`/`tenant_id` no modelo atual.
-- Strings de pessoas/tipos precisam virar entidades ou preservar histórico textual.
-- Fechamento de mês precisa ser transacional.
-- Offline/múltiplas abas precisam de estratégia de conflito.
-- Datas devem ser migradas com timezone explícito.
-- Dados gerados por seed em desenvolvimento não devem ir para produção.
-
+- Fonte primária é IndexedDB; localStorage é espelho. Migração deve ler IndexedDB primeiro.
+- Dados locais não têm autenticação nem autoria. Backend precisa criar `createdBy/updatedBy` com valor de migração.
+- Strings livres precisam virar FKs ou snapshots.
+- Fechamento/reset/importação precisam de transação.
+- Matriz de addons deve ser expandida para linhas.
+- Chaves legadas de recados precisam ser consolidadas.
+- Cache do service worker pode manter código antigo e enviar payload antigo.
+- XSS deve ser testado antes de multiusuário.
+- Conflitos entre abas/dispositivos exigirão política clara: online-first ou offline-first com fila de mutações.

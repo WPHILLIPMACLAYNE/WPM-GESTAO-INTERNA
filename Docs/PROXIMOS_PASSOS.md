@@ -1,198 +1,272 @@
-# PROXIMOS_PASSOS — Roadmap Técnico
+# PROXIMOS_PASSOS — Roadmap pós-estabilização
 
 Data: 2026-04-10
-Base auditada: commit `f6f08ea`
+Base local auditada: commit `865586c`
+Objetivo: evoluir para backend sem reabrir a instabilidade de hoje.
 
-## Objetivo
-
-Estabilizar o estado pós-rollback, recuperar confiabilidade de testes/deploy e preparar a evolução para backend sem introduzir nova regressão em produção.
-
-## Etapa 0 — Congelar baseline
+## Etapa 0 — Alinhar baseline
 
 Prioridade: imediata.
 
 Ações:
 
-- Manter `f6f08ea` como baseline funcional até correções críticas serem aplicadas em branch separada.
-- Registrar esta auditoria como referência de estado.
-- Evitar mudanças simultâneas em Service Worker, módulos e backend.
+- Decidir se o baseline oficial é `f6f08ea` remoto ou `865586c` local.
+- Se `865586c` for válido, empurrar a documentação já existente e esta auditoria.
+- Se `f6f08ea` for o baseline desejado, criar branch separada para docs e evitar misturar rollback com evolução.
 
 Critério de aceite:
 
-- Documentos desta auditoria versionados.
-- Nenhuma alteração de código misturada no commit de auditoria.
+- `git status` limpo.
+- Branch local/remota sem divergência inesperada.
+- Auditoria versionada como referência.
 
-## Etapa 1 — Corrigir infraestrutura de testes
+## Etapa 1 — Corrigir infraestrutura de validação
 
 Prioridade: crítica.
 
 Ações:
 
-- Corrigir `package.json` para apontar `test:e2e` para `Scripts/responsive-test.mjs`.
-- Corrigir `package.json` para apontar `test:visual` para `Scripts/visual-check.mjs`.
-- Corrigir `playwright.config.js` para calcular `baseURL` relativo ao repositório atual.
-- Corrigir `vitest.config.js` para cobertura de `src/**/*.js`, não `app.js`.
-- Rodar `npm test`, `npm run test:e2e`, `npm run test:visual`, `npm run test:all`.
+- Corrigir `package.json`:
+  - `test:e2e`: `node Scripts/responsive-test.mjs`
+  - `test:visual`: `node Scripts/visual-check.mjs`
+- Corrigir `playwright.config.js` para não depender de caminho absoluto antigo.
+- Preferir servidor local HTTP nos testes E2E para validar service worker/CDN de forma realista.
+- Corrigir `vitest.config.js` para cobertura de `src/**/*.js`.
+- Rodar:
+  - `npm test`
+  - `npm run test:e2e`
+  - `npm run test:visual`
+  - `npm run test:all`
 
 Critério de aceite:
 
-- Scripts executam sem `MODULE_NOT_FOUND`.
-- Playwright abre o `index.html` correto em qualquer máquina.
-- Relatório de cobertura aponta para código real.
+- Scripts rodam no diretório atual.
+- Playwright abre o app correto.
+- Cobertura mede código real.
 
-## Etapa 2 — Desarmar risco de Service Worker
+## Etapa 2 — Desarmar risco de cache/service worker
 
 Prioridade: crítica.
 
 Ações:
 
-- Versionar `CACHE_NAME` com `APP_VERSION` ou hash do commit.
-- Considerar network-first para `index.html`, JS e CSS durante a fase de estabilização.
-- Garantir limpeza de caches antigos no activate.
-- Adicionar mecanismo de atualização controlada para clientes já abertos.
-- Validar produção com DevTools: cache antigo removido, assets novos carregados.
+- Versionar `CACHE_NAME` com `APP_VERSION` e/ou hash de commit.
+- Considerar `network-first` para `index.html`, JS e CSS.
+- Manter cache-first apenas para ícones/assets estáveis.
+- Adicionar mensagem de update para clientes abertos.
+- Validar deploy/rollback em navegador já usado, não só sessão limpa.
 
 Critério de aceite:
 
-- Após novo deploy/rollback, navegador não mantém bundle antigo.
-- `sw.js` não referencia assets inexistentes.
-- Deploy em Vercel raiz funciona e cenário local/file não quebra silenciosamente.
+- Após deploy, browser carrega assets novos.
+- Após rollback, browser não mantém JS/CSS antigo.
+- `PRECACHE_ASSETS` bate com `index.html`.
 
-## Etapa 3 — Corrigir bugs lógicos prioritários
-
-Prioridade: crítica/média.
-
-Ações:
-
-- Corrigir rollback do CRUD para restaurar `state` inteiro quando `saveData()` falhar.
-- Corrigir duplicidade de eventos para comparar `entry.time` com `entity.time`.
-- Trocar `todayISO()`/datas locais para helper sem UTC drift.
-- Adicionar testes unitários para falha de persistência no CRUD.
-- Adicionar teste para evento com mesmo título/data e horário diferente.
-- Adicionar teste para data local em timezone `America/Sao_Paulo`.
-
-Critério de aceite:
-
-- Falha simulada de persistência não altera estado nem contadores de addon.
-- Evento de mesmo título/data em horário diferente não dispara duplicidade.
-- Datas de formulário/backup seguem calendário local.
-
-## Etapa 4 — Segurança antes de backend
+## Etapa 3 — Corrigir bugs lógicos antes do backend
 
 Prioridade: alta.
 
 Ações:
 
-- Rodar `npm audit fix` e commitar lockfile atualizado.
-- Reduzir sinks genéricos de `innerHTML`.
-- Criar helper único para renderização segura de templates.
-- Remover ou restringir `style` da allowlist do DOMPurify se não for necessário.
-- Planejar CSP sem `'unsafe-inline'`.
-- Adicionar SRI ou estratégia local para DOMPurify e Chart.js.
-- Adicionar testes XSS por entidade: aluno, pendência, evento, recado, NPS e configurações.
+- Corrigir rollback de `createCrudHandler()` em falha de persistência.
+- Corrigir duplicidade de eventos comparando `entry.time` com `entity.time`.
+- Normalizar `rankSnapshot` do seed para `id -> position` ou `{}`.
+- Trocar `todayISO()` para helper de data local.
+- Adicionar testes:
+  - falha simulada de `saveData()`;
+  - evento mesmo título/data e horário diferente;
+  - seed NPS com snapshot coerente;
+  - data local em `America/Sao_Paulo`.
 
 Critério de aceite:
 
-- `npm audit --audit-level=moderate` sem vulnerabilidades.
-- Testes XSS confirmam que inputs aparecem como texto, não executam HTML/JS.
-- CSP futura documentada e compatível com scripts externos.
+- Falha de persistência não altera `state` nem contadores.
+- Duplicidade de eventos não gera falso positivo.
+- Datas seguem calendário local.
 
-## Etapa 5 — Limpeza estrutural controlada
+## Etapa 4 — Segurança mínima para backend
+
+Prioridade: alta.
+
+Ações:
+
+- Executar `npm audit fix` em branch dedicada.
+- Adicionar SRI ou hospedar DOMPurify/Chart.js localmente.
+- Mover script inline final de `index.html` para arquivo JS.
+- Planejar CSP sem `'unsafe-inline'`.
+- Configurar headers de produção no Vercel:
+  - `Content-Security-Policy` com `frame-ancestors 'none'`
+  - opcional `X-Frame-Options: DENY`
+- Criar testes XSS para:
+  - aluno;
+  - pendência;
+  - evento;
+  - recado;
+  - NPS;
+  - configurações.
+
+Critério de aceite:
+
+- `npm audit --audit-level=moderate` sem alta/moderada.
+- Browser não acusa `frame-ancestors` ignorado por meta como única proteção.
+- Entradas maliciosas renderizam como texto.
+
+## Etapa 5 — Atualizar documentação estrutural
 
 Prioridade: média.
 
 Ações:
 
-- Atualizar `MODULE_MAP.md` para a estrutura atual.
-- Criar ou remover referência a `MODULE_STATUS.md`.
-- Decidir destino de `src/ui/render.js`: remover, mover para `Legacy/` ou reincorporar explicitamente.
-- Marcar `src/types.js` como documentação não-runtime ou integrá-lo ao tooling JSDoc.
-- Atualizar `QWEN.md` para refletir a divisão real de render/events.
+- Atualizar `QWEN.md` para refletir a estrutura atual.
+- Atualizar `MODULE_MAP.md` com `render-*`, `events-*`, `backup.js` e `lifecycle.js`.
+- Decidir destino de `MODULE_STATUS.md`: criar ou remover da rotina.
+- Remover/mover `src/ui/render.js` se for legado.
+- Documentar `src/types.js` como JSDoc não-runtime.
 
 Critério de aceite:
 
 - Mapa de módulos bate com `index.html`.
-- Não há arquivo legado em `src/` confundindo runtime.
+- Nenhum arquivo legado em `src/` confunde runtime.
 
-## Etapa 6 — Modelagem de backend
+## Etapa 6 — Desenhar backend canônico
 
 Prioridade: alta após estabilização.
 
 Ações:
 
-- Definir entidades canônicas com base em `Docs/MAPA_ENTIDADES.md`.
-- Adicionar `unit_id`, `created_by`, `updated_by`, `created_at`, `updated_at` e auditoria onde necessário.
-- Definir papéis: admin, gestor, recepção, leitura.
-- Modelar transações para fechamento/reset/importação.
-- Definir migração de addons de matriz por dia para tabela normalizada.
-- Definir estratégia de recados: `read` global ou leitura por usuário.
+- Usar `Docs/MAPA_ENTIDADES.md` como base do ERD.
+- Definir tabelas mínimas:
+  - `units`
+  - `users`
+  - `unit_members`
+  - `periods`
+  - `period_settings`
+  - `student_attendances`
+  - `addon_types`
+  - `addon_sales`
+  - `pending_items`
+  - `shift_notes`
+  - `nps_period_metrics`
+  - `nps_mentions`
+  - `scale_days`
+  - `scale_professor_shifts`
+  - `events`
+  - `audit_events`
+- Definir papéis:
+  - admin;
+  - gestor;
+  - recepção;
+  - professor;
+  - leitura.
+- Definir transações para:
+  - importação de backup;
+  - fechamento de mês;
+  - reset de mês;
+  - renomeação de membro;
+  - atendimento com addon vinculado.
 
 Critério de aceite:
 
 - ERD aprovado.
 - Regras de autorização documentadas.
-- Plano de migração de localStorage/IndexedDB documentado.
+- Campos de auditoria definidos.
 
-## Etapa 7 — Migração localStorage → banco
+## Etapa 7 — Criar migrador localStorage/IndexedDB
 
 Prioridade: alta quando backend estiver pronto.
 
 Ações:
 
-- Criar exportador/migrador que leia IndexedDB primeiro e localStorage como fallback.
-- Consolidar recados legados `wpm_recados_${YYYY-MM}` antes da importação.
-- Validar schema local com versão antes de enviar.
-- Executar dry-run mostrando contagens por entidade.
-- Criar import transacional no backend.
-- Preservar backup JSON antes da primeira migração.
+- Ler IndexedDB primeiro e localStorage como fallback.
+- Consolidar `wpm_recados_${YYYY-MM}` antes do envio.
+- Validar `STORE_VERSION`.
+- Executar dry-run com contagens por entidade.
+- Expandir addons de matriz para linhas.
+- Preservar snapshots de nomes.
+- Fazer import transacional no backend.
+- Gerar backup JSON antes da primeira migração real.
 
 Critério de aceite:
 
-- Dry-run mostra contagens coerentes com dashboard.
+- Dry-run mostra contagens coerentes com Dashboard.
 - Import pode ser revertido.
-- Dados migrados mantêm histórico por período.
+- Migração não perde histórico de meses fechados.
 
-## Etapa 8 — Estratégia de sincronização
-
-Prioridade: média.
-
-Ações:
-
-- Decidir se o app continuará offline-first ou passará para online-first.
-- Se offline-first: criar fila de mutações, controle de versão por registro e resolução de conflito.
-- Se online-first: remover dependência de localStorage como fonte primária e usar cache apenas para UI/offline limitado.
-- Definir política para múltiplas abas.
-
-Critério de aceite:
-
-- Fluxo de concorrência documentado.
-- Não há perda silenciosa de dados em duas abas/dispositivos.
-
-## Etapa 9 — Deploy e observabilidade
+## Etapa 8 — Definir estratégia de sincronização
 
 Prioridade: média.
 
 Ações:
 
-- Adicionar checklist de release.
-- Adicionar smoke test pós-deploy.
-- Registrar versão/commit visível no app.
-- Monitorar erros de inicialização, Service Worker e importação.
-- Documentar rollback seguro, incluindo limpeza de cache.
+- Escolher online-first ou offline-first.
+- Se online-first:
+  - backend como fonte primária;
+  - IndexedDB/localStorage apenas cache;
+  - conflitos tratados no servidor.
+- Se offline-first:
+  - fila de mutações;
+  - IDs estáveis client-side;
+  - `updatedAt`/version por registro;
+  - resolução de conflito explícita.
+- Definir comportamento multiaba/multidispositivo.
 
 Critério de aceite:
 
-- Release pode ser validado em produção com passos objetivos.
-- Rollback não depende de limpeza manual incerta no navegador.
+- Sem perda silenciosa de dados.
+- Conflitos têm regra previsível.
+- UI mostra estado offline/sincronizando/erro.
 
-## Ordem recomendada de commits futuros
+## Etapa 9 — Evoluir UI mobile onde há tabelas largas
 
-1. `fix: corrige scripts e configuracao de testes`
+Prioridade: média/baixa.
+
+Ações:
+
+- Manter scroll horizontal como fallback.
+- Criar cards mobile para:
+  - Alunos;
+  - Pendências;
+  - Escala;
+  - Eventos.
+- Criar dataset visual com muitos atendentes e nomes longos.
+- Revalidar bugs:
+  - valores sobrepostos nos cards de atendente;
+  - gráfico de barras cortado à direita.
+
+Critério de aceite:
+
+- Sem overflow global em `390px` e `760px`.
+- Tarefas principais funcionam sem depender sempre de scroll lateral.
+
+## Etapa 10 — Deploy e observabilidade
+
+Prioridade: média.
+
+Ações:
+
+- Expor versão/commit no app.
+- Criar smoke pós-deploy:
+  - app inicializa;
+  - Chart.js carrega;
+  - service worker registra;
+  - backup exporta;
+  - import valida payload inválido;
+  - mês ativo troca.
+- Registrar erros de inicialização e importação.
+- Documentar rollback seguro, incluindo cache.
+
+Critério de aceite:
+
+- Release validável em produção com checklist objetivo.
+- Rollback não depende de tentativa manual no navegador.
+
+## Ordem recomendada de commits
+
+1. `fix: corrige scripts de teste e baseURL do playwright`
 2. `fix: versiona cache do service worker`
 3. `fix: corrige rollback CRUD e duplicidade de eventos`
-4. `fix: normaliza datas locais sem UTC drift`
-5. `chore: atualiza dependencias vulneraveis`
-6. `test: cobre regressao de CRUD datas eventos e XSS`
-7. `docs: atualiza mapa estrutural dos modulos`
-8. `feat: prepara schema de backend`
-
+4. `fix: normaliza datas locais`
+5. `chore: atualiza dependencia vulneravel do vite`
+6. `test: adiciona regressao de persistencia eventos datas e xss`
+7. `docs: atualiza mapa modular atual`
+8. `feat: prepara schema backend e migrador dry-run`

@@ -32,6 +32,15 @@
      */
     function saveUIState(patch = {}) {
       const next = sanitizeUIState({ ...getUIState(), ...patch });
+      try {
+        const serialized = JSON.stringify(next);
+        localStorage.setItem(UI_KEY, serialized);
+        if (typeof storageCache !== 'undefined' && storageCache?.set) {
+          storageCache.set(UI_KEY, serialized);
+        }
+      } catch {
+        // Persistencia assíncrona abaixo mantém o fluxo resiliente em caso de quota/localStorage indisponível.
+      }
       writeStoredJson(UI_KEY, next);
       removeStoredValues(LEGACY_UI_KEYS);
       return next;

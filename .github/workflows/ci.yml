@@ -59,25 +59,18 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Executar testes E2E
-        run: npx playwright test
+        run: npx playwright test --reporter=line
         env:
           CI: true
 
-      - name: Upload de screenshots (se falhar)
+      - name: Upload de evidências essenciais (se falhar)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-screenshots
+          name: e2e-failure-results
           path: test-results/
-          retention-days: 7
-
-      - name: Upload de relatório HTML
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          if-no-files-found: ignore
+          retention-days: 3
 
   # ─── Validação de Estrutura ─────────────────────────────────────────
   structure-validation:
@@ -91,13 +84,19 @@ jobs:
         run: |
           test -f index.html && echo "✅ index.html existe" || (echo "❌ index.html ausente" && exit 1)
           test -f styles.css && echo "✅ styles.css existe" || (echo "❌ styles.css ausente" && exit 1)
-          test -f app.js && echo "✅ app.js existe" || (echo "❌ app.js ausente" && exit 1)
+          test -f src/main.js && echo "✅ src/main.js existe" || (echo "❌ src/main.js ausente" && exit 1)
+          test -f src/core/config.js && echo "✅ src/core/config.js existe" || (echo "❌ src/core/config.js ausente" && exit 1)
+          test -f src/core/storage.js && echo "✅ src/core/storage.js existe" || (echo "❌ src/core/storage.js ausente" && exit 1)
+          test -f src/ui/render-core.js && echo "✅ src/ui/render-core.js existe" || (echo "❌ src/ui/render-core.js ausente" && exit 1)
           test -f package.json && echo "✅ package.json existe" || (echo "❌ package.json ausente" && exit 1)
 
       - name: Validar imports no index.html
         run: |
           grep -q '<link rel="stylesheet" href="styles.css"' index.html && echo "✅ CSS importado" || (echo "❌ CSS não importado" && exit 1)
-          grep -q '<script src="app.js"' index.html && echo "✅ JS importado" || (echo "❌ JS não importado" && exit 1)
+          grep -q '<script src="src/main.js"' index.html && echo "✅ main.js importado" || (echo "❌ src/main.js não importado" && exit 1)
+          grep -q '<script src="src/core/config.js"' index.html && echo "✅ config.js importado" || (echo "❌ src/core/config.js não importado" && exit 1)
+          grep -q '<script src="src/core/storage.js"' index.html && echo "✅ storage.js importado" || (echo "❌ src/core/storage.js não importado" && exit 1)
+          grep -q '<script src="src/ui/render-core.js"' index.html && echo "✅ render-core.js importado" || (echo "❌ src/ui/render-core.js não importado" && exit 1)
 
       - name: Validar CSP
         run: |
@@ -111,14 +110,15 @@ jobs:
         run: |
           grep -q 'prefers-reduced-motion' styles.css && echo "✅ Reduced motion presente" || (echo "❌ Reduced motion ausente" && exit 1)
 
-      - name: Contar funções no app.js
+      - name: Validar scripts em src
         run: |
-          FUNC_COUNT=$(grep -c 'function ' app.js)
-          echo "📊 Funções no app.js: $FUNC_COUNT"
-          if [ "$FUNC_COUNT" -lt 300 ]; then
-            echo "⚠️ Contagem de funções abaixo do esperado (esperado: 370+)"
+          JS_COUNT=$(find src -type f -name '*.js' | wc -l)
+          echo "📊 Arquivos JS em src/: $JS_COUNT"
+          if [ "$JS_COUNT" -lt 20 ]; then
+            echo "❌ Contagem de módulos abaixo do esperado"
+            exit 1
           else
-            echo "✅ Contagem de funções OK"
+            echo "✅ Estrutura modular OK"
           fi
 
   # ─── Responsividade (Playwright Script) ─────────────────────────────
@@ -142,7 +142,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Executar teste de responsividade
-        run: node responsive-test.mjs
+        run: node Scripts/responsive-test.mjs
 
   # ─── Resumo de Status ───────────────────────────────────────────────
   summary:

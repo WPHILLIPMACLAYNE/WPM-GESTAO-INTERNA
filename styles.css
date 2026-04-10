@@ -5267,6 +5267,34 @@
       }
     }
 
+    /* ── Fix Bug 2: cards de atendente em 2 colunas abaixo de 480px ── */
+    @media (max-width: 480px) {
+      #dashboard .summary-item--dashboard-person {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 8px;
+      }
+      #dashboard .summary-item--dashboard-person .summary-main {
+        grid-column: 1 / -1;
+      }
+      #dashboard .metric span {
+        font-size: 12px;
+      }
+    }
+
+    /* ── Fix Bug 3: scroll horizontal no gráfico Feedback Positivo ── */
+    @media (max-width: 760px) {
+      #dashboard .dashboard-section--feedback .chart-box {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      #dashboard .dashboard-section--feedback .chart {
+        contain: none;
+        min-width: min-content !important;
+        flex-shrink: 0;
+        width: auto;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;

@@ -21,6 +21,8 @@ const SNAPSHOT_OPTS = {
   maxDiffPixelRatio: 0.003
 };
 
+test.skip(!!process.env.CI, 'Visual snapshot tests run only outside CI to avoid environment-based rendering drift.');
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

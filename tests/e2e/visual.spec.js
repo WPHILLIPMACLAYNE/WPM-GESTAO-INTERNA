@@ -23,6 +23,8 @@ const TABS = [
   { id: 'tab-settings', name: 'settings' }
 ];
 
+test.skip(!!process.env.CI, 'Visual snapshot tests run only outside CI to avoid environment-based rendering drift.');
+
 async function waitForInitialUi(page) {
   await page.waitForFunction(() => !!window.__APP_INTERNALS__);
   await page.waitForFunction(() => (

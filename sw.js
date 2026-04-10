@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wpm-v1';
+const CACHE_NAME = 'wpm-2026-04-10';
 
 const PRECACHE_ASSETS = [
   '/index.html',
@@ -21,6 +21,7 @@ const PRECACHE_ASSETS = [
   '/src/features/csv.js',
   '/src/features/diagnostics.js',
   '/src/features/crud.js',
+  '/src/types.js',
   '/src/ui/render-core.js',
   '/src/ui/render-dashboard.js',
   '/src/ui/render-students.js',

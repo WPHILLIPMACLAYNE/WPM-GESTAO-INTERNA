@@ -1,196 +1,82 @@
 # MODULE_MAP.md
 
-## Premissas do Mapa
+## Premissas
 
-- O projeto **não usa `import`/`export` reais**. Todos os arquivos de `src/` são carregados por `<script>` tags clássicos em `index.html`.
-- A coluna **Depende de** reflete **acoplamento por globais + ordem de carga**, não imports ESM.
-- A ordem de carga atual é: `helpers.js` → `config.js` → `schema.js` → `storage.js` → `selectors.js` → `forms.js` → `nps.js` → `csv.js` → `diagnostics.js` → `render.js` → `crud.js` → `events.js` → `main.js`.
+- O app continua browser-only, carregado por `<script>` tags clássicos em `index.html`.
+- Não há `import`/`export` reais no runtime; dependências são por globais e ordem de carga.
+- O mapa abaixo descreve a estrutura atual pós-split de renderização e eventos.
 
-## Tabela Resumida
+## Ordem de carga atual
 
-| Arquivo | Camada | Exports | Depende de | Status |
-|---------|--------|---------|------------|--------|
-| `src/utils/helpers.js` | Transversal | `esc`, `sanitizeHtml`, `sanitizeDeep`, `clamp`, `formatDate`, `formatPct`, datas, CSV, NPS helpers | nenhum | ✅ OK |
-| `src/core/config.js` | 1-Config | chaves de storage, versões, `DOM`, `APP_DEFAULTS`, estado global | nenhum | ✅ OK |
-| `src/core/schema.js` | 3-Schema | `normalizeStore`, `getDefaultStore`, `migrateStore*`, `sanitizeStore` | `config.js`, `storage.js`, `main.js` | ⚠ globais tardios |
-| `src/core/storage.js` | 2-Persistência | IndexedDB/localStorage, fila serializada, broadcast, UI state, seed, reset | `config.js`, `helpers.js`, `render.js`, `main.js` | ⚠ mistura camadas |
-| `src/domain/selectors.js` | 4-Domínio | KPIs, filtros, ranking, memoização, resumos | `helpers.js`, `config.js`, `storage.js` | ✅ OK |
-| `src/features/forms.js` | 3-Schema | leitura/validação de forms, builders, `apply*Save` | `helpers.js`, `config.js`, `main.js` | ✅ OK |
-| `src/features/crud.js` | 6-UI | `createCrudHandler`, helpers de vínculo de addon | `forms.js`, `render.js`, `main.js` | ✅ OK |
-| `src/features/csv.js` | 4-Domínio | serialização e export CSV de pendências/escala/eventos | `helpers.js`, `selectors.js`, `config.js` | ⚠ utilidades duplicadas |
-| `src/features/diagnostics.js` | 7-Diagnósticos | smoke tests, persistência de relatório, painel | `selectors.js`, `render.js`, `storage.js` | ✅ OK |
-| `src/features/nps.js` | 6-UI | CRUD de menções e persistência de observações NPS | `render.js`, `main.js` | ✅ OK |
-| `src/ui/render.js` | 5-Renderização | scheduler, patch DOM, renders de todas as abas e painéis | quase todo `src/` | ⚠ arquivo muito grande |
-| `src/ui/events.js` | 6-UI | delegation, modais, atalhos, tooltips, DnD, a11y | `render.js`, `forms.js`, `nps.js`, `csv.js`, `main.js`, `storage.js` | ⚠ alto acoplamento |
-| `src/main.js` | Orquestração transversal | bootstrap, load/save store, lifecycle mensal, `APP_INTERNALS` | todos os módulos anteriores | ⚠ núcleo centralizado |
+1. `src/utils/helpers.js`
+2. `src/core/config.js`
+3. `src/core/period-builder.js`
+4. `src/core/seed.js`
+5. `src/core/schema.js`
+6. `src/core/storage.js`
+7. `src/domain/selectors.js`
+8. `src/features/forms.js`
+9. `src/features/nps.js`
+10. `src/features/csv.js`
+11. `src/features/diagnostics.js`
+12. `src/ui/render-core.js`
+13. `src/ui/render-dashboard.js`
+14. `src/ui/render-students.js`
+15. `src/ui/render-pending.js`
+16. `src/ui/render-nps.js`
+17. `src/ui/render-scale.js`
+18. `src/ui/render-events.js`
+19. `src/ui/render-settings.js`
+20. `src/ui/render-addons.js`
+21. `src/features/crud.js`
+22. `src/ui/events-core.js`
+23. `src/ui/events-students.js`
+24. `src/ui/events-pending.js`
+25. `src/ui/events-addons.js`
+26. `src/ui/events-scale.js`
+27. `src/ui/events-nps.js`
+28. `src/core/backup.js`
+29. `src/core/lifecycle.js`
+30. `src/main.js`
 
-## Detalhe Por Arquivo
+## Mapa resumido
 
-### `src/utils/helpers.js`
+| Arquivo | Camada | Responsabilidade principal | Depende de |
+|---|---|---|---|
+| `src/utils/helpers.js` | transversal | escape, sanitização, datas, CSV, NPS e helpers de período | APIs padrão |
+| `src/core/config.js` | config | constantes, chaves, defaults, helper `DOM` e estado global | nenhum módulo local |
+| `src/core/period-builder.js` | core | preferências, UI state, equipe, addons e builders/reset de período | config, storage, helpers, lifecycle |
+| `src/core/seed.js` | core | seed determinístico por período | config, helpers, period-builder |
+| `src/core/schema.js` | core | normalização, migração e sanitização do store | config, period-builder, lifecycle, helpers |
+| `src/core/storage.js` | core | IndexedDB, localStorage, cache, fila serializada e broadcast | config, helpers, render-core |
+| `src/core/backup.js` | core | load/save store, export/import, snapshots e autoteste | storage, schema, selectors, lifecycle |
+| `src/core/lifecycle.js` | core | troca/reset/fechamento de mês, lock de período e sync do app | backup, period-builder, selectors, render-core |
+| `src/domain/selectors.js` | domínio | KPIs, filtros, rankings, históricos e memoização | helpers, config, period-builder |
+| `src/features/forms.js` | features | leitura/validação de formulários e builders de entidades | helpers, config, lifecycle |
+| `src/features/crud.js` | features | factory genérica de CRUD para aluno, pendência e evento | forms, backup, lifecycle, renders |
+| `src/features/csv.js` | features | exportação CSV de pendências, escala e eventos | helpers |
+| `src/features/diagnostics.js` | features | smoke tests de fluxo e persistência de relatórios | schema, backup, render-settings |
+| `src/features/nps.js` | features | mutações de NPS e observações | forms, backup, render-nps |
+| `src/ui/render-core.js` | ui/render | scheduler de render, filtros persistidos e patch helpers de DOM | helpers, storage, lifecycle |
+| `src/ui/render-dashboard.js` | ui/render | hero, dashboard, gráficos Chart.js, insights e recados | selectors, backup, lifecycle |
+| `src/ui/render-students.js` | ui/render | tabela, filtros e CRUD visual de alunos | selectors, forms, crud, lifecycle |
+| `src/ui/render-pending.js` | ui/render | tabela, Kanban e CRUD visual de pendências | selectors, lifecycle |
+| `src/ui/render-nps.js` | ui/render | score, metas, histórico e ranking NPS | selectors, features/nps, lifecycle |
+| `src/ui/render-scale.js` | ui/render | tabela, board e modal da escala | selectors, forms, lifecycle |
+| `src/ui/render-events.js` | ui/render | cards, tabela, próximos e calendário de eventos | selectors, forms, lifecycle |
+| `src/ui/render-settings.js` | ui/render | configurações, backup, diagnósticos e auditoria por período | backup, diagnostics, lifecycle |
+| `src/ui/render-addons.js` | ui/render | grid de addons, ranking e rename de atendente | selectors, backup, lifecycle |
+| `src/ui/events-core.js` | ui/events | delegação global, modais, toasts, atalhos, a11y e storage sync | renders, backup, lifecycle |
+| `src/ui/events-students.js` | ui/events | binds de aluno | render-students, crud |
+| `src/ui/events-pending.js` | ui/events | binds de pendências e drag-and-drop | render-pending, csv |
+| `src/ui/events-addons.js` | ui/events | binds de addons e rename | render-addons |
+| `src/ui/events-scale.js` | ui/events | binds de escala | render-scale, csv |
+| `src/ui/events-nps.js` | ui/events | binds de NPS e autosave | render-nps, features/nps |
+| `src/main.js` | bootstrap | expõe `APP_INTERNALS` e inicializa o app | todos os módulos anteriores |
+| `src/types.js` | documentação | typedefs JSDoc para checagem estática | não é carregado em runtime |
 
-- Responsabilidade: utilitários puros compartilhados para escape, sanitização, formatação, datas, CSV e helpers de NPS.
-- Camada: transversal, apoiando principalmente Schema, Domínio, Renderização e Persistência.
-- Depende de: nenhum módulo local; usa apenas APIs padrão do navegador/JS.
-- Exports completos:
-  - `esc`, `sanitizeHtml`, `sanitizeDeep`, `clamp`, `formatDate`, `formatPct`, `formatPctPrecise`, `normalizeSearchText`, `csvEscape`, `buildCsvContent`, `shortText`, `formatBytes`, `formatPersistenceTimestamp`, `getWeekdayLabel`, `suggestScaleTone`, `isValidPeriodKey`, `getPeriodLabel`, `getPreviousPeriodKey`, `getNextPeriodKey`, `getInitialPeriodKey`, `toneLabel`, `compareByDateTime`, `eventStatusClass`, `normalizeEventType`, `isDateInActivePeriod`, `getPeriodPrefix`, `getDefaultPeriodDate`, `getActivePeriodFallbackDate`, `getPeriodDisplayDate`, `formatRecadoDateTime`, `getNpsGoalProgress`, `getRiskBand`, `getNpsHistoryBandClass`
-- Status: `✅ OK`
+## Observações
 
-### `src/core/config.js`
-
-- Responsabilidade: declarar constantes do app, defaults, helper DOM e variáveis globais mutáveis compartilhadas.
-- Camada: `1-Config`.
-- Depende de: nenhum módulo local.
-- Exports completos:
-  - `todayISO`, `currentMonthDayISO`, `STORAGE_KEY`, `STORAGE_BROADCAST_KEY`, `STORE_VERSION`, `LEGACY_STORAGE_KEYS`, `APP_VERSION`, `LOCAL_SNAPSHOT_KEY`, `SYSTEM_REPORT_KEY`, `FLOW_TEST_REPORT_KEY`, `MONTH_NAMES`, `UI_KEY`, `IDB_NAME`, `IDB_STORE_NAME`, `LEGACY_LOCAL_SNAPSHOT_KEYS`, `LEGACY_SYSTEM_REPORT_KEYS`, `LEGACY_FLOW_TEST_REPORT_KEYS`, `LEGACY_UI_KEYS`, `DOM`, `APP_DEFAULTS`
-- Status: `✅ OK`
-
-### `src/core/schema.js`
-
-- Responsabilidade: normalização de store, migrações de versão e sanitização do estado persistido.
-- Camada: `3-Schema`.
-- Depende de:
-  - `src/core/config.js`
-  - `src/core/storage.js`
-  - `src/main.js`
-- Exports completos:
-  - `isValidPeriodKey`, `normalizeStore`, `seedYear`, `getDefaultStore`, `migrateStoreToV1`, `migrateStoreToV2`, `migrateStoreToV3`, `migrateStoreToV4`, `migrateStore`, `sanitizeStore`
-- Status: `⚠ globais tardios`
-
-### `src/core/storage.js`
-
-- Responsabilidade: persistência híbrida, cache, broadcast, UI state, seed determinístico, builders de período limpo e reset.
-- Camada: `2-Persistência`, com trechos de Schema e UI state.
-- Depende de:
-  - `src/core/config.js`
-  - `src/utils/helpers.js`
-  - `src/ui/render.js`
-  - `src/main.js`
-- Exports completos:
-  - `isQuotaExceededError`, `readLocalStorageValue`, `writeLocalStorageValue`, `deleteLocalStorageValue`, `cloneSerializable`, `canUseStorageBroadcast`, `queueStorageOperation`, `updatePersistenceTechState`, `formatPersistenceTimestamp`, `normalizePersistenceOptions`, `emitStorageBroadcast`, `getKnownStorageKeys`, `withIndexedDbStore`, `idbGetValue`, `idbSetValue`, `idbDeleteValue`, `hydrateStorageCache`, `readPrimaryStoredValue`, `readStoredValue`, `readStoredJson`, `readStoredJsonWithFallback`, `persistStoredValue`, `persistStoredJson`, `writeStoredValue`, `writeStoredJson`, `removeStoredValue`, `removeStoredValues`, `hasStoredValue`, `hasStoredValueWithFallback`, `getStoreVersion`, `setStoreVersion`, `getUIState`, `sanitizeDeep`, `saveUIState`, `sanitizeUIState`, `setActiveTab`, `getReceptionists`, `getProfessors`, `getAllEmployees`, `totalAddonVolumeForPerson`, `getAddonPeople`, `getTotalAddonVolume`, `hydrateLegacyAddonsFromStudents`, `makeRng`, `pick`, `maybe`, `generatePeriodSeed`, `seedAddons`, `getInitialPeriodKey`, `buildCleanPeriodFromTemplate`, `buildEmptyPeriodFromTemplate`, `resetPeriodData`
-- Status: `⚠ mistura camadas`
-
-### `src/domain/selectors.js`
-
-- Responsabilidade: memoização e derivação de KPIs, rankings, filtros e resumos operacionais.
-- Camada: `4-Domínio/Seletores`.
-- Depende de:
-  - `src/utils/helpers.js`
-  - `src/core/config.js`
-  - `src/core/storage.js`
-- Exports completos:
-  - `limparCacheSelectores`, `criarAssinaturaSelector`, `lerSelectorMemorizado`, `selecionarTotaisAddons`, `selecionarResumoRecepcionistas`, `itemsComFeedback`, `selecionarLideresHistoricos`, `selecionarResumoPendencias`, `selecionarPendenciasFiltradas`, `selecionarRankingNps`, `selecionarDadosEventosAgrupados`, `selecionarResumoEscala`, `getNpsGoalProgress`, `selecionarIndicadoresDashboard`, `totalAddonByPerson`, `totalNpsMentions`, `computeSummary`, `getOldestOpenPending`, `diffInDays`, `totalTipo`
-- Status: `✅ OK`
-
-### `src/features/forms.js`
-
-- Responsabilidade: coletar dados dos formulários, validar payloads e construir entidades normalizadas.
-- Camada: `3-Schema`.
-- Depende de:
-  - `src/utils/helpers.js`
-  - `src/core/config.js`
-  - `src/main.js`
-- Exports completos:
-  - `isNonEmptyString`, `isValidNumber`, `isPositiveNumber`, `isValidDateValue`, `createValidationResult`, `normalizeNumericId`, `validateStudent`, `validatePending`, `getStudentFormData`, `getPendingFormData`, `buildStudentEntity`, `buildPendingEntity`, `upsertStudent`, `upsertPending`, `createValidationFailureResult`, `createSaveSuccessResult`, `applyStudentSave`, `applyPendingSave`, `getEventFormData`, `getScaleFormData`, `getSettingsFormData`, `getMentionDraft`, `getNpsObservationsDraft`, `validateEvent`, `buildEventEntity`, `upsertEvent`, `applyEventSave`, `limparErrosValidacao`, `apresentarErroValidacao`
-- Status: `✅ OK`
-
-### `src/features/crud.js`
-
-- Responsabilidade: encapsular handlers CRUD reutilizáveis para coleções do app.
-- Camada: `6-UI/Eventos`.
-- Depende de:
-  - `src/features/forms.js`
-  - `src/ui/render.js`
-  - `src/main.js`
-- Exports completos:
-  - `getStudentAddonLink`, `applyStudentAddonLink`, `createCrudHandler`
-- Status: `✅ OK`
-
-### `src/features/csv.js`
-
-- Responsabilidade: converter coleções para CSV e iniciar downloads.
-- Camada: `4-Domínio` com finalidade de exportação.
-- Depende de:
-  - `src/utils/helpers.js`
-  - `src/domain/selectors.js`
-  - `src/core/config.js`
-- Exports completos:
-  - `csvEscape`, `buildCsvContent`, `downloadCsvFile`, `getPendingCsvRows`, `getScaleCsvRows`, `getEventsCsvRows`, `exportPendingCsv`, `exportScaleCsv`, `exportEventsCsv`, `list`
-- Status: `⚠ utilidades duplicadas`
-
-### `src/features/diagnostics.js`
-
-- Responsabilidade: armazenar/limpar smoke tests e renderizar o painel de fluxo.
-- Camada: `7-Diagnósticos`.
-- Depende de:
-  - `src/domain/selectors.js`
-  - `src/ui/render.js`
-  - `src/core/storage.js`
-- Exports completos:
-  - `loadFlowSmokeReport`, `saveFlowSmokeReport`, `clearFlowSmokeTests`, `renderFlowSmokePanel`, `runFlowSmokeTests`
-- Status: `✅ OK`
-
-### `src/features/nps.js`
-
-- Responsabilidade: mutações do ranking de NPS e persistência de observações.
-- Camada: `6-UI/Eventos`.
-- Depende de:
-  - `src/ui/render.js`
-  - `src/main.js`
-- Exports completos:
-  - `registerMention`, `adjustMention`, `setMentionCount`, `renameMention`, `removeMention`, `saveNpsObservations`
-- Status: `✅ OK`
-
-### `src/ui/render.js`
-
-- Responsabilidade: scheduler de render, patching incremental e renderização de todas as views, painéis e ferramentas de support UI.
-- Camada: `5-Renderização`.
-- Depende de:
-  - `src/utils/helpers.js`
-  - `src/core/config.js`
-  - `src/core/storage.js`
-  - `src/domain/selectors.js`
-  - `src/features/forms.js`
-  - `src/features/nps.js`
-  - `src/features/csv.js`
-  - `src/features/diagnostics.js`
-  - `src/main.js`
-- Exports completos:
-  - `getStudentViewFilters`, `getPendingViewFilters`, `getEventViewFilters`, `getScaleViewFilters`, `renderSection`, `renderSections`, `normalizarAlvosRender`, `requestRender`, `limparFilaRender`, `executarRenderAgendado`, `applyUIStateToControls`, `initUIBindings`, `resetViewFilters`, `criarAssinaturaHtml`, `criarNoRenderizado`, `escaparSeletorCss`, `obterSeletorFoco`, `capturarEstadoFoco`, `restaurarEstadoFoco`, `aplicarHtmlSeMudou`, `aplicarPatchPorChave`, `aplicarPatchLinhas`, `aplicarPatchCards`, `aplicarPatchItensKanban`, `aplicarPatchBlocosAgrupados`, `getUpcomingScale`, `getUpcomingEvent`, `toneLabel`, `eventStatusClass`, `normalizeSearchText`, `getScaleFilteredList`, `getEventsFilteredList`, `getScaleSummaryText`, `getEventSummaryText`, `suggestScaleTone`, `normalizeEventType`, `getCurrentPeriodDateInfo`, `renderEventsCalendar`, `renderDashboardInsights`, `renderHero`, `renderDashboard`, `createRecadoId`, `getRecadosStorageKey`, `sanitizeRecado`, `normalizeRecadosCollection`, `mergeRecadosCollections`, `areRecadosCollectionsEqual`, `readLegacyRecados`, `clearLegacyRecadosStorageKey`, `getLegacyRecadoPeriodKeys`, `ensureRecadosPeriod`, `getStoreRecados`, `migrateLegacyRecadosToStore`, `loadRecados`, `saveRecados`, `formatPctPrecise`, `getUnreadRecadosCount`, `syncRecadosSelects`, `renderFeedbackSummary`, `renderHeroRecadosBadge`, `renderRecadosPanel`, `publishRecado`, `markRecadoAsRead`, `removeRecado`, `bindRecadosModule`, `installDashboardEnhancements`, `renderStudents`, `updateStudentInline`, `populateStudentFilters`, `clearStudentForm`, `finalizeStudentSaveUI`, `renderStudentSaveUI`, `editStudent`, `removeStudent`, `renderAddons`, `updateAddon`, `addPerson`, `renamePerson`, `buildPendingMeta`, `studentStatusPill`, `npsPill`, `pendingPill`, `updatePendingStatus`, `limparEstadoDropPendencias`, `bindPendingDnD`, `positionTooltip`, `bindTooltips`, `renderPending`, `clearPendingForm`, `finalizePendingSaveUI`, `renderPendingSaveUI`, `editPending`, `removePending`, `getRiskBand`, `getSortedMentions`, `getRankMap`, `captureNpsRankSnapshot`, `trendBadge`, `getNpsHistoryBandClass`, `getNpsHistoryRows`, `renderNps`, `updateNpsScore`, `updateNpsGoal`, `renderScaleShiftRows`, `addScaleShiftRow`, `removeScaleShiftRow`, `clearScaleForm`, `openScaleModal`, `editScaleDay`, `saveScaleDay`, `removeScaleDay`, `renderScale`, `clearEventForm`, `finalizeEventSaveUI`, `renderEventSaveUI`, `openEventModal`, `editEventItem`, `removeEventItem`, `duplicateEventItem`, `renderEvents`, `renderSettings`, `saveSettings`, `resizeMonth`, `doResizeMonth`, `getPeriodMetrics`, `getBackupSummary`, `formatBytes`, `getSettingsStorageUsage`, `getSettingsMetaSnapshot`, `renderSettingsHealthBar`, `renderSettingsSupportPanels`, `isLegacyPeriodPayload`, `extractImportedPayload`, `isMonthArchivePayload`, `getMonthArchiveImportMeta`, `buildArchiveEntryFromMonthArchivePayload`, `buildStoreFromMonthArchivePayload`, `getImportedPayloadDescriptor`, `coerceImportedStore`, `buildBackupPayload`, `applyImportedStore`, `saveLocalSnapshot`, `restoreLocalSnapshot`, `loadSystemReport`, `saveSystemReport`, `runSystemDiagnostics`, `renderBackupSummary`, `renderDiagnosticsPanel`, `renderPersistenceTechPanel`, `renderPeriodAudit`, `clearEmptyMonths`, `downloadData`, `importData`, `resetDemoData`, `renderAll`, `register`, `show`, `hide`, `professorSlotsFilled`, `UI_BINDINGS`, `UI_CONTROL_IDS`, `AREAS_RENDERIZACAO`, `RENDER_MAP`, `RECADOS_STORAGE_PREFIX`
-- Status: `⚠ arquivo muito grande`
-
-### `src/ui/events.js`
-
-- Responsabilidade: delegação de eventos, modais, atalhos, acessibilidade, tooltips e drag-and-drop.
-- Camada: `6-UI/Eventos`.
-- Depende de:
-  - `src/ui/render.js`
-  - `src/features/forms.js`
-  - `src/features/nps.js`
-  - `src/features/csv.js`
-  - `src/features/diagnostics.js`
-  - `src/main.js`
-  - `src/core/storage.js`
-- Exports completos:
-  - `openModal`, `closeModal`, `openStudentModal`, `openPendingModal`, `bindUIEvents`, `obterElementosFocaveis`, `obterModalAtivo`, `limparErroValidacaoCampo`, `sincronizarLabelsComCampos`, `configurarRotulosAcessiveisEstaticos`, `obterTicketsPendencia`, `atualizarRovingPendencias`, `focarPendenciaPorIndice`, `agendarRetornoFocoPendencia`, `restaurarFocoPendenteSeNecessario`, `moverPendenciaPorTeclado`, `bindAcessibilidade`, `initializeStaticControls`, `bindTabKeyboardNavigation`, `bindModalBackdropClose`, `bindGlobalKeyboardShortcuts`, `bindStorageSync`
-- Status: `⚠ alto acoplamento`
-
-### `src/main.js`
-
-- Responsabilidade: bootstrap da aplicação, ciclo de vida mensal, persistência de alto nível e exposição do `APP_INTERNALS`.
-- Camada: orquestração transversal entre Persistência, Renderização e UI.
-- Depende de:
-  - `src/utils/helpers.js`
-  - `src/core/config.js`
-  - `src/core/schema.js`
-  - `src/core/storage.js`
-  - `src/domain/selectors.js`
-  - `src/features/forms.js`
-  - `src/features/nps.js`
-  - `src/features/csv.js`
-  - `src/features/diagnostics.js`
-  - `src/ui/render.js`
-  - `src/features/crud.js`
-  - `src/ui/events.js`
-- Exports completos:
-  - `prepareStoreCandidate`, `readStoredStore`, `loadStore`, `saveStore`, `anunciarAoLeitor`, `showSaveToast`, `showToast`, `showConfirm`, `_resolveConfirm`, `saveData`, `consumeStorageBroadcast`, `getCommittedStoreSnapshot`, `buildBackupPayloadFromStore`, `buildMonthArchivePayload`, `runPersistenceSelfTest`, `shortText`, `slugify`, `renderEllipsisCell`, `normalizeData`, `getPeriodLabel`, `getNextPeriodKey`, `getPreviousPeriodKey`, `isPeriodLocked`, `isCurrentPeriodLocked`, `getCurrentPeriodLockMessage`, `canMutateCurrentPeriod`, `assertWritableCurrentPeriod`, `syncCurrentPeriodLockUI`, `periodHasMeaningfulData`, `formatScaleBoardDay`, `ensurePeriod`, `syncPeriodControls`, `switchPeriod`, `changePeriodFromControls`, `closeCurrentMonth`, `resetSelectedMonth`, `duplicatePreviousMonthScale`, `syncAppState`, `initializeForms`, `initializeSavedUIState`, `renderInitialViews`, `initializeApp`, `syncDisableState`, `finishClose`, `doDuplicate`, `LOCKED_CURRENT_PERIOD_ACTIONS`, `LOCKED_CURRENT_PERIOD_CHANGE_ACTIONS`, `LOCKED_CURRENT_PERIOD_INPUT_ACTIONS`, `LOCKED_CURRENT_PERIOD_BLUR_ACTIONS`, `LOCKED_CURRENT_PERIOD_CONTROL_IDS`, `APP_INTERNALS`, `__APP_INTERNALS__`
-- Status: `⚠ núcleo centralizado`
+- `src/ui/render.js` e `src/ui/events.js` não fazem mais parte do runtime.
+- O maior acoplamento atual está em `render-dashboard.js`, `render-settings.js`, `events-core.js`, `backup.js` e `lifecycle.js`.
+- O projeto segue sensível à ordem de carga; qualquer reordenação de scripts em `index.html` pode quebrar o bootstrap.

@@ -1,10 +1,4 @@
 import { defineConfig } from '@playwright/test';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const baseURL = `file://${path.join(__dirname, 'index.html')}`;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -13,8 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
+  webServer: {
+    command: 'python3 -m http.server 3000 --bind 127.0.0.1',
+    url: 'http://127.0.0.1:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 30000
+  },
   use: {
-    baseURL,
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure'
   },

@@ -183,12 +183,14 @@ for (const vp of VIEWPORTS) {
           sel.value = 'Respondeu';
           sel.dispatchEvent(new Event('change', { bubbles: true }));
         }
+        saveUIState({ studentFilterFeedback: 'Respondeu' });
+        renderStudents();
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       });
       await page.waitForFunction(() => {
         const rows = document.querySelectorAll('#studentTableBody tr');
         return rows.length > 0 && rows.length < 30;
-      }, { timeout: 5000 }).catch(() => {});
+      }, { timeout: 5000 });
       await page.waitForTimeout(300);
       await snap(page, `alunos-filtro-feedback-${vp.name}-chromium-linux.png`);
     });

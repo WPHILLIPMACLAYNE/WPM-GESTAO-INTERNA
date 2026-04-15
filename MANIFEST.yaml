@@ -1,0 +1,62 @@
+name: cortex
+display_name: CORTEX
+category: project-evolution-operating-system
+version: 4.0.0
+license: Apache-2.0
+entrypoint: START.md
+default_mode: advisory
+repository_purpose: official CORTEX source repository for packaging, documentation, adapters, templates, and installer flow
+language:
+  core: english
+  operator_responses: portuguese
+install_target: .cortex
+application_read_order:
+  - PROTOCOL.md
+  - MODES.md
+  - MANIFEST.yaml
+documentation:
+  overview: docs/overview.md
+  first_use: docs/first-use.md
+  installing: docs/installing.md
+  operating_model: docs/how-it-works.md
+  boundaries: docs/what-it-changes.md
+  agent_policy: docs/agent-policy.md
+  templates: docs/templates.md
+  using_with_agents: docs/using-with-agents.md
+lite_files:
+  - PROJECT_CONTEXT.md
+  - CURRENT_STATUS.md
+  - AGENT_HANDOFF.md
+required_project_files:
+  - PROJECT_CONTEXT.md
+  - CURRENT_STATUS.md
+  - AGENT_HANDOFF.md
+  - QUICK_REFERENCE.md
+  - PLANOS_ABC.md
+  - LEARNING_LEDGER.md
+  - REGRESSION_MAP.md
+  - IMPROVEMENT_BACKLOG.md
+  - AUDIT_MATRIX.md
+  - RESTRUCTURING_PLAN.md
+  - OPERATOR_PROFILE.md
+branch_policy:
+  never_start_on_main: true
+  require_new_branch_per_agent_session: true
+  require_last_stable_branch_as_base: true
+  operator_owns_merge_to_main: true
+scoring:
+  name: CSEI
+  dimensions:
+    - Structure
+    - Clarity
+    - Safety
+    - Verification
+    - Continuity
+    - Recoverability
+    - Regression Pressure
+knowledge_ladder:
+  - Observation
+  - Signal
+  - Pattern
+  - Rule
+  - DNA

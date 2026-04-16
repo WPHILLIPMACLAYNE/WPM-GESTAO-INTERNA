@@ -125,6 +125,19 @@
         renderDiagnosticsPanel,
         renderFlowSmokePanel,
         renderPeriodAudit
+      },
+      backend: {
+        getSupabaseClient,
+        isSupabaseEnabled,
+        getSupabaseStatus,
+        resetSupabaseClient
+      },
+      observability: {
+        initSentry,
+        captureError,
+        captureMessage,
+        getObservabilityStatus,
+        resetObservability
       }
     });
 

@@ -46,7 +46,7 @@
       `);
       const pendingTableBody = document.getElementById('pendingTableBody');
       if (!rows.length) {
-        aplicarHtmlSeMudou(pendingTableBody, `<tr><td colspan="8"><div class="empty">Nenhuma pendência encontrada.</div></td></tr>`);
+        aplicarHtmlSeMudou(pendingTableBody, `<tr><td colspan="8"><div class="empty"><strong>Nenhuma pendência no período</strong>Use <em>Nova pendência</em> para registrar uma solicitação ou ajuste os filtros ativos para ver itens arquivados.</div></td></tr>`);
       } else {
         aplicarPatchLinhas(pendingTableBody, rows, item => item.id, p => `
           <tr class="${p.status === 'aberto' ? 'row-attention' : ''}">
@@ -80,7 +80,7 @@
         const lista = pendingKanban.querySelector(`[data-drop-status="${coluna.status}"] .kanban-list`);
         if (!lista) return;
         if (!coluna.items.length) {
-          aplicarHtmlSeMudou(lista, '<div class="empty">Nenhum item</div>');
+          aplicarHtmlSeMudou(lista, '<div class="empty empty--compact">Sem itens nesta coluna</div>');
           return;
         }
         aplicarPatchItensKanban(lista, coluna.items, item => item.id, item => `

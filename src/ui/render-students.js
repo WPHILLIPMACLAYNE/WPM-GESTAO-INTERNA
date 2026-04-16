@@ -69,7 +69,7 @@
         return (!query || hay.includes(query)) && (!person || s.atendimento === person) && (!feedback || s.feedback === feedback);
       });
       if (!rows.length) {
-        aplicarHtmlSeMudou(tbody, `<tr><td colspan="11"><div class="empty">Nenhum atendimento encontrado.</div></td></tr>`);
+        aplicarHtmlSeMudou(tbody, `<tr><td colspan="11"><div class="empty"><strong>Nenhum atendimento encontrado</strong>Ajuste os filtros acima ou clique em <em>Novo atendimento</em> para registrar o primeiro aluno do mês.</div></td></tr>`);
         return;
       }
       aplicarPatchLinhas(tbody, rows, item => item.id, s => `

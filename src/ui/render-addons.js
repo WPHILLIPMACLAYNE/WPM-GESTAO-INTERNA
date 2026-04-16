@@ -42,7 +42,7 @@
           }).join('')}
         </div>
       `;
-      }).join('') || '<div class="empty">Cadastre atendentes em Configurações.</div>';
+      }).join('') || '<div class="empty"><strong>Sem atendentes cadastrados</strong>Abra <em>Configurações</em> e cadastre a equipe para liberar o lançamento diário de addons por tipo.</div>';
 
       const rankingHost = document.getElementById('addonsTopSellers');
       if (!rankingHost) return;

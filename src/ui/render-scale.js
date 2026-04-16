@@ -47,7 +47,7 @@
           <div class="field"><label>Troca</label><input data-scale-shift="swap" data-index="${index}" aria-label="Troca do professor na linha ${index + 1}" value="${esc(shift.swap || '')}" placeholder="Se houver" /></div>
           <button class="btn btn-danger btn-xs" type="button" data-action="remove-scale-shift-row" data-index="${index}" aria-label="Excluir linha ${index + 1} de professor">Excluir</button>
         </div>
-      `).join('') : '<div class="empty">Adicione ao menos uma linha de professor para montar o dia.</div>';
+      `).join('') : '<div class="empty empty--compact"><strong>Sem turnos neste dia</strong>Adicione ao menos uma linha de professor para compor a escala.</div>';
     }
 
     /** @param {Object} [values] @returns {void} */
@@ -221,7 +221,7 @@
       }
 
       if (!sorted.length) {
-        aplicarHtmlSeMudou(body, `<tr><td colspan="7"><div class="empty">Nenhum dia de escala encontrado para os filtros aplicados em ${esc(getPeriodLabel())}.</div></td></tr>`);
+        aplicarHtmlSeMudou(body, `<tr><td colspan="7"><div class="empty"><strong>Escala vazia em ${esc(getPeriodLabel())}</strong>Os dias cadastrados aparecerão aqui. Use <em>Adicionar dia de escala</em> ou <em>Duplicar mês anterior</em> para começar.</div></td></tr>`);
       } else {
         const linhasEscala = sorted.flatMap(item => {
           const shifts = item.professorShifts.length ? item.professorShifts : [{ time: '', name: '', swap: '' }];
@@ -252,7 +252,7 @@
 
       if (board) {
         if (!sorted.length) {
-          aplicarHtmlSeMudou(board, `<div class="empty">Nenhum dia de escala cadastrado para ${esc(getPeriodLabel())}. Use “Adicionar dia de escala” ou “Duplicar mês anterior”.</div>`);
+          aplicarHtmlSeMudou(board, `<div class="empty"><strong>Escala ainda não montada</strong>Monte a escala de ${esc(getPeriodLabel())} com <em>Adicionar dia de escala</em> ou <em>Duplicar mês anterior</em> — os cards aparecerão aqui em grid visual.</div>`);
         } else {
           aplicarPatchCards(board, sorted, item => item.id, item => {
             const info = formatScaleBoardDay(item.date);

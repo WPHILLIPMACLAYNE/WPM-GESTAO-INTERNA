@@ -516,7 +516,7 @@
 
       const summaryList = document.getElementById('summaryList');
       if (!summary.length) {
-        aplicarHtmlSeMudou(summaryList, `<div class="empty">Nenhum atendente configurado.</div>`);
+        aplicarHtmlSeMudou(summaryList, `<div class="empty"><strong>Nenhum atendente configurado</strong>Cadastre atendentes em <em>Configurações</em> para acompanhar volumes, feedback e addons por pessoa.</div>`);
       } else {
         aplicarPatchCards(summaryList, summary, row => row.nome, row => `
           <div class="summary-item summary-item--dashboard-person">
@@ -535,7 +535,7 @@
       feedbackChart.style.minWidth = `${Math.max(summary.length * 88, 560)}px`;
       feedbackChart.style.alignItems = 'flex-end';
       if (!summary.length) {
-        aplicarHtmlSeMudou(feedbackChart, `<div class="empty">Sem dados para exibir.</div>`);
+        aplicarHtmlSeMudou(feedbackChart, `<div class="empty"><strong>Sem dados para o gráfico</strong>Registre atendimentos com feedback respondido para visualizar o percentual positivo por atendente.</div>`);
       } else {
         aplicarPatchCards(feedbackChart, summary, item => item.nome, s => {
           const h = Math.max(8, (s.taxaPositiva / maxPositiveRate) * 190);
@@ -553,7 +553,7 @@
       const addonPeople = getAddonPeople(state);
       const activeReceptionists = new Set(getReceptionists(state));
       if (!addonPeople.length) {
-        aplicarHtmlSeMudou(addonsOverview, '<div class="empty">Sem atendentes cadastrados.</div>');
+        aplicarHtmlSeMudou(addonsOverview, '<div class="empty"><strong>Sem atendentes cadastrados</strong>Abra <em>Configurações</em> para habilitar o acompanhamento de addons por pessoa.</div>');
       } else {
         aplicarPatchCards(addonsOverview, addonPeople, person => person, person => {
           const total = indicadores.totaisAddons.porPessoa[person] || 0;
@@ -583,7 +583,7 @@
               <div class="meta">${buildPendingMeta(p)}</div>
               <div class="desc" data-tooltip="${esc(p.pendencia || '')}">${esc(shortText(p.pendencia || 'Sem pendência registrada.', 130))}</div>
             </div>
-          `).join('') || '<div class="empty">Nenhuma pendência cadastrada.</div>'}
+          `).join('') || '<div class="empty empty--compact"><strong>Sem pendências em destaque</strong>Ir para a aba <em>Pendências</em> para registrar ou revisar solicitações dos alunos.</div>'}
         </div>
       `);
     }

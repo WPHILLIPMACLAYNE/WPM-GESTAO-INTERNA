@@ -1,8 +1,14 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10
+Data: 2026-04-10 · Última atualização: 2026-04-16
 Base local auditada: commit `865586c`
 Objetivo: evoluir para backend sem reabrir a instabilidade de hoje.
+
+> **Atualização 2026-04-16** — Overhaul de UI/UX (polish layer v1) entregue.
+> Escopo: design system consolidado, hierarquia de z-index corrigida, microinterações,
+> 15 estados vazios ricos, back-to-top global, melhorias de acessibilidade
+> (`prefers-reduced-motion`, `prefers-contrast`, `:focus-visible` universal).
+> Detalhes e inventário de arquivos em [`UI_UX_OVERHAUL.md`](./UI_UX_OVERHAUL.md).
 
 ## Etapa 0 — Alinhar baseline
 

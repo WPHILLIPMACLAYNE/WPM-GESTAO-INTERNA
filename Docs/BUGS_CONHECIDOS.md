@@ -223,3 +223,28 @@ Evidência:
 Impacto: podem depender de dados reais específicos, nomes longos ou browser/device.
 
 Correção sugerida: adicionar teste visual com dataset de nomes longos e muitos atendentes.
+
+---
+
+## RESOLVIDOS
+
+### Conflito de z-index entre `.topbar` e `.modal`
+
+Status: **Resolvido em 2026-04-16** (overhaul de UI/UX).
+
+Evidência original: ambos em `z-index: 20` — dependia da ordem de montagem para qual ficava por cima.
+
+Correção aplicada: introdução de hierarquia tokenizada no polish layer de `styles.css`:
+`--z-topbar: 40; --z-modal: 90; --z-sticky: 30; --z-toast: 100`. Agora modais sempre cobrem a topbar, toasts cobrem modais, e o botão `.back-to-top` fica abaixo de modais.
+
+Ver `UI_UX_OVERHAUL.md` seção 1.
+
+### Estados vazios genéricos ("Nenhum item encontrado")
+
+Status: **Resolvido em 2026-04-16** (overhaul de UI/UX).
+
+Evidência original: 15 mensagens vazias sem contexto nem próxima ação.
+
+Correção aplicada: todas reescritas com padrão `<strong>Título</strong>Corpo + <em>ação</em>` em `src/ui/render-*.js`. Novo CSS `.empty strong/small/em/.empty--compact` no polish layer.
+
+Ver `UI_UX_OVERHAUL.md` seção 2.

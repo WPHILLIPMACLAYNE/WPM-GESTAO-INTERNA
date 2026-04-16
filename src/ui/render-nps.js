@@ -184,7 +184,7 @@
             <button class="btn btn-danger btn-xs" data-action="remove-mention" data-id="${item.id}" aria-label="Excluir ${esc(item.name)} do ranking de NPS">Excluir</button>
           </div>
         </div>
-      `).join('') : '<div class="empty">Ainda não há funcionários citados no NPS.</div>';
+      `).join('') : '<div class="empty"><strong>Nenhum funcionário citado ainda</strong>Registre as menções do NPS usando o formulário acima — os nomes com mais citações vão ranquear aqui automaticamente.</div>';
 
       const lideres = selecionarLideresHistoricos();
       aplicarHtmlSeMudou(document.getElementById('npsHistLeaders'), lideres.length ? `

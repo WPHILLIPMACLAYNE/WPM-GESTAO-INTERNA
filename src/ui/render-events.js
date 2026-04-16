@@ -206,7 +206,7 @@
 
       const eventsList = document.getElementById('eventsList');
       if (!list.length) {
-        aplicarHtmlSeMudou(eventsList, `<div class="empty">Nenhum evento ou ação encontrado para os filtros aplicados em ${esc(getPeriodLabel())}.</div>`);
+        aplicarHtmlSeMudou(eventsList, `<div class="empty"><strong>Nenhum evento ou ação em ${esc(getPeriodLabel())}</strong>Ajuste os filtros acima ou use <em>Novo evento</em> para programar uma ação de retenção, comunicação ou visita.</div>`);
       } else {
         aplicarPatchCards(eventsList, list, item => item.id, item => `
           <div class="event-card">
@@ -255,13 +255,13 @@
           </div>
           <div class="event-desc">${esc(next.description || 'Sem descrição adicional.')}</div>
         </div>
-      ` : `<div class="empty">Nenhum evento ou ação programado com os filtros atuais.</div>`);
+      ` : `<div class="empty empty--compact"><strong>Sem próximos eventos</strong>Os próximos eventos programados com os filtros atuais aparecerão aqui.</div>`);
 
       renderEventsCalendar(dadosEventos);
 
       const eventsTableBody = document.getElementById('eventsTableBody');
       if (!list.length) {
-        aplicarHtmlSeMudou(eventsTableBody, `<tr><td colspan="8"><div class="empty">Nenhum registro na agenda com os filtros aplicados.</div></td></tr>`);
+        aplicarHtmlSeMudou(eventsTableBody, `<tr><td colspan="8"><div class="empty"><strong>Agenda vazia</strong>Nenhum registro combina com os filtros aplicados. Limpe os filtros ou adicione um novo evento para popular a tabela.</div></td></tr>`);
       } else {
         aplicarPatchLinhas(eventsTableBody, list, item => item.id, item => `
           <tr>

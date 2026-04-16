@@ -262,11 +262,38 @@ Use esta ordem para evitar retrabalho e dependências quebradas:
 
 ### Bloco D — Entrega técnica pós-ativação
 
-- [ ] Ajustar contrato de variáveis em `config.js`
-- [ ] Criar `src/core/supabase.js`
-- [ ] Planejar bootstrap do `Sentry`
-- [ ] Planejar workflow seguro para `Mailgun`
-- [ ] Planejar integrações de CI com `BrowserStack` e `Codecov`
+- [x] Ajustar contrato de variáveis em `config.js` *(via `env.example.js` + `window.__APP_ENV__` inline em `index.html`)*
+- [x] Criar `src/core/supabase.js` *(scaffold com fallback null se SDK ou env ausentes)*
+- [x] Planejar bootstrap do `Sentry` *(`src/core/observability.js` — initSentry condicional)*
+- [ ] Planejar workflow seguro para `Mailgun` *(precisa de backend/edge; pendente até Fase 1+)*
+- [x] Planejar integrações de CI com `BrowserStack` e `Codecov` *(workflow `ci.yml` faz upload condicional ao Codecov quando `CODECOV_TOKEN` existir)*
+
+### Status detalhado do bloco D (snapshot 2026-04-15)
+
+Implementado neste branch (`backend/fase-0-infra`):
+
+- `env.example.js` template browser-safe + `env.js` gitignored
+- `Scripts/setup-env.mjs` para devs locais (`npm run setup`)
+- `Scripts/generate-env.mjs` para CI/Vercel (lê `process.env` e gera `env.js`)
+- `index.html` carrega defaults inline + `env.js` opcional + CSP expandida
+  para `*.supabase.co` (HTTPS+WSS), `*.sentry.io` (ingest) e
+  `browser.sentry-cdn.com` (script-src)
+- `src/core/supabase.js` — `getSupabaseClient()` retorna null em modo offline
+- `src/core/observability.js` — `initSentry()` + `captureError()` no-op se
+  DSN ou SDK ausentes
+- `sw.js` precache atualizado (cache `wpm-2026-04-15`) + env.js best-effort
+- `APP_INTERNALS.backend` e `.observability` expostos para diagnóstico
+- Testes unit cobrindo fallback (10 novos casos em `runtime-env.test.js`)
+- CI: novo step de coverage para Codecov com guard `secrets.CODECOV_TOKEN`
+
+Pendente (depende do bloco manual):
+
+- Adicionar `<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/...">`
+  em `index.html` quando o projeto Supabase existir
+- Adicionar `<script src="https://browser.sentry-cdn.com/...">` quando o
+  projeto Sentry existir
+- Popular `env.js` via Vercel build com chaves reais
+- Definir camada de e-mail Mailgun (depende de edge function/backend)
 
 ## Critério de aceite da Fase 0
 

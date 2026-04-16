@@ -27,16 +27,25 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Executar testes unitários
-        run: npm test
+      - name: Executar testes unitários com coverage
+        run: npm run test:coverage
 
-      - name: Upload de coverage
+      - name: Upload de coverage (artefato)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
           retention-days: 30
+
+      - name: Upload para Codecov (somente quando token presente)
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unit
+          fail_ci_if_error: false
 
   # ─── Testes E2E (Playwright) ────────────────────────────────────────
   e2e-tests:

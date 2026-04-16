@@ -173,14 +173,54 @@ git status
 | src/core/config.js | Constantes e estado global |
 | src/core/storage.js | IndexedDB + localStorage |
 | src/core/lifecycle.js | Mês ativo, fechamento, reset |
+| src/core/supabase.js | Wrapper do client Supabase (fallback null) |
+| src/core/observability.js | Bootstrap condicional do Sentry |
 | src/domain/selectors.js | KPIs e derivados |
 | src/ui/render-dashboard.js | Dashboard + gráficos Chart.js |
 | index.html | Entry point — ordem dos scripts é crítica |
+| env.example.js | Template do contrato runtime (browser-safe) |
+| env.js | Valores reais (gitignored, gerado via Doppler/Vercel) |
 | styles.css | CSS global + media queries |
 | sw.js | Service Worker — cache versionado |
 | .github/workflows/ci.yml | Pipeline CI/CD |
 | Docs/AUDITORIA_COMPLETA.md | Auditoria técnica completa |
 | Docs/MAPA_ENTIDADES.md | Estrutura de dados para o backend |
+
+## Contrato de ambiente runtime (Fase 0)
+
+O app lê configuração de `window.__APP_ENV__`, populado nesta ordem:
+
+1. Inline `<script>` em `index.html` define defaults seguros (todos `null`).
+2. `<script src="env.js">` opcional sobrescreve com valores reais.
+3. Falha silenciosa se `env.js` não existir (gitignored).
+
+**Setup local:**
+```bash
+npm run setup        # copia env.example.js → env.js (idempotente)
+# edite env.js manualmente OU:
+doppler run -- node Scripts/generate-env.mjs
+```
+
+**Build em CI/Vercel:**
+```bash
+node Scripts/generate-env.mjs   # lê process.env e gera env.js
+```
+
+**Chaves browser-safe atualmente suportadas:**
+
+| Chave | Origem | Quando aparece |
+|-------|--------|----------------|
+| `SUPABASE_URL` | Supabase project | Fase 1 |
+| `SUPABASE_ANON_KEY` | Supabase project | Fase 1 |
+| `SENTRY_DSN` | Sentry project | Fase 0 (depois de criar) |
+| `SENTRY_ENVIRONMENT` | App config | Fase 0 |
+| `SENTRY_RELEASE` | CI commit SHA | Fase 0 |
+
+**Diagnóstico:**
+```js
+window.__APP_INTERNALS__.backend.getSupabaseStatus()
+window.__APP_INTERNALS__.observability.getObservabilityStatus()
+```
 
 ---
 

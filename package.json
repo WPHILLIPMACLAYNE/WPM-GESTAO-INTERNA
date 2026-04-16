@@ -4,6 +4,9 @@
   "description": "WPM Gestão Interna — Sistema de gestão interna para recepção",
   "type": "module",
   "scripts": {
+    "setup": "node Scripts/setup-env.mjs",
+    "postinstall": "node Scripts/setup-env.mjs",
+    "build:env": "node Scripts/generate-env.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

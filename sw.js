@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wpm-2026-04-10';
+const CACHE_NAME = 'wpm-2026-04-15';
 
 const PRECACHE_ASSETS = [
   '/index.html',
@@ -9,6 +9,8 @@ const PRECACHE_ASSETS = [
   '/icons/icon-maskable-512.svg',
   '/src/utils/helpers.js',
   '/src/core/config.js',
+  '/src/core/observability.js',
+  '/src/core/supabase.js',
   '/src/core/period-builder.js',
   '/src/core/seed.js',
   '/src/core/schema.js',
@@ -45,11 +47,27 @@ function isCdnRequest(url) {
   return url.includes('cdn.jsdelivr.net') || url.includes('unpkg.com');
 }
 
+// env.js é opcional (gitignored em dev, gerado no build). Tentativa best-effort.
+const OPTIONAL_ASSETS = ['/env.js'];
+
+async function precacheOptional(cache) {
+  await Promise.all(OPTIONAL_ASSETS.map(async (asset) => {
+    try {
+      await cache.add(asset);
+    } catch {
+      // silencioso: env.js pode não existir em dev
+    }
+  }));
+}
+
 // Install: pre-cache de assets estáticos
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then(async (cache) => {
+        await cache.addAll(PRECACHE_ASSETS);
+        await precacheOptional(cache);
+      })
       .then(() => self.skipWaiting())
   );
 });

@@ -11,16 +11,31 @@
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
   <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <!-- connect-src/script-src expandidos para Supabase + Sentry (Fase 0) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
           crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
+  <script>
+    window.__APP_ENV__ = Object.assign({
+      SUPABASE_URL: null,
+      SUPABASE_ANON_KEY: null,
+      SENTRY_DSN: null,
+      SENTRY_ENVIRONMENT: null,
+      SENTRY_RELEASE: null,
+      APP_RUNTIME_OVERRIDE: null
+    }, window.__APP_ENV__ || {});
+  </script>
+  <script src="env.js" onerror="console.info('[env] env.js ausente — usando defaults locais')"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
   <script src="src/utils/helpers.js"></script>
   <script src="src/core/config.js"></script>
+  <script src="src/core/observability.js"></script>
+  <script src="src/core/supabase.js"></script>
   <script src="src/core/period-builder.js"></script>
   <script src="src/core/seed.js"></script>
   <script src="src/core/schema.js"></script>

@@ -25,10 +25,12 @@ function restoreGlobal(name, snapshot) {
 function collectAppScripts(html) {
   return [...html.matchAll(/<script src="([^"]+)"/g)]
     .map(match => match[1])
-    .filter(src => !src.startsWith('http'));
+    .filter(src => !src.startsWith('http'))
+    .filter(src => src !== 'env.js')
+    .filter(src => fs.existsSync(path.join(ROOT_DIR, src)));
 }
 
-export async function loadRealApp() {
+export async function loadRealApp(options = {}) {
   const html = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf8');
   const scripts = collectAppScripts(html);
   const bundle = scripts
@@ -74,6 +76,14 @@ export async function loadRealApp() {
   window.crypto = crypto.webcrypto;
   window.structuredClone = globalThis.structuredClone;
   window.DOMPurify = { sanitize: value => value };
+  window.__APP_ENV__ = Object.assign({
+    SUPABASE_URL: null,
+    SUPABASE_ANON_KEY: null,
+    SENTRY_DSN: null,
+    SENTRY_ENVIRONMENT: null,
+    SENTRY_RELEASE: null,
+    APP_RUNTIME_OVERRIDE: null
+  }, window.__APP_ENV__ || {}, options.appEnv || {});
 
   window.document.write(html);
   window.eval(bundle);

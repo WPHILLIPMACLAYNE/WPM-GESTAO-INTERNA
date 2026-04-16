@@ -20,6 +20,10 @@
     const APP_VERSION = 'v34';
     const APP_RUNTIME = (() => {
       try {
+        const runtimeOverride = String(window?.__APP_ENV__?.APP_RUNTIME_OVERRIDE || '').toLowerCase();
+        if (runtimeOverride === 'development' || runtimeOverride === 'production') {
+          return runtimeOverride;
+        }
         const protocol = String(window?.location?.protocol || '').toLowerCase();
         const hostname = String(window?.location?.hostname || '').toLowerCase();
         const isLocalhost = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(hostname);

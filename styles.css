@@ -3826,6 +3826,9 @@
       display: block;
       background: transparent;
     }
+    #dashboard .dashboard-chart-shell canvas[hidden] {
+      display: none !important;
+    }
     #dashboard .dashboard-chart-empty {
       position: absolute;
       inset: 0;
@@ -3839,6 +3842,9 @@
       font-size: 13px;
       line-height: 1.5;
       text-align: center;
+    }
+    #dashboard .dashboard-chart-empty[hidden] {
+      display: none !important;
     }
     #dashboard > .grid-2 {
       gap: var(--gap-cards);

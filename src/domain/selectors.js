@@ -368,10 +368,28 @@
         state.nps.monthlyGoal
       );
       return lerSelectorMemorizado(`dashboard_graficos_${limite}`, assinatura, () => {
+        const normalizeFeedback = raw => {
+          const value = String(raw ?? '').trim();
+          if (!value) return 'Pendente';
+          const lowered = value.toLowerCase();
+          if (lowered === 'respondeu') return 'Respondeu';
+          if (lowered === 'pendente') return 'Pendente';
+          if (lowered === 'não respondeu' || lowered === 'nao respondeu' || lowered === 'nao-respondeu' || lowered === 'não-respondeu') return 'Não respondeu';
+          return 'Pendente';
+        };
+
+        const feedbackDistribuicaoCounts = { respondeu: 0, pendente: 0, naoRespondeu: 0 };
+        state.students.forEach(item => {
+          const key = normalizeFeedback(item?.feedback);
+          if (key === 'Respondeu') feedbackDistribuicaoCounts.respondeu += 1;
+          else if (key === 'Não respondeu') feedbackDistribuicaoCounts.naoRespondeu += 1;
+          else feedbackDistribuicaoCounts.pendente += 1;
+        });
+
         const feedbackDistribuicao = [
-          { label: 'Respondeu', value: state.students.filter(item => item.feedback === 'Respondeu').length, color: '#22c55e' },
-          { label: 'Pendente', value: state.students.filter(item => item.feedback === 'Pendente').length, color: '#FFC20F' },
-          { label: 'Não respondeu', value: state.students.filter(item => item.feedback === 'Não respondeu').length, color: '#ef4444' }
+          { label: 'Respondeu', value: feedbackDistribuicaoCounts.respondeu, color: '#22c55e' },
+          { label: 'Pendente', value: feedbackDistribuicaoCounts.pendente, color: '#FFC20F' },
+          { label: 'Não respondeu', value: feedbackDistribuicaoCounts.naoRespondeu, color: '#ef4444' }
         ];
 
         const addonRankingBase = Object.entries(totaisAddons.porPessoa || {})

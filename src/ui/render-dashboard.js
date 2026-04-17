@@ -111,9 +111,13 @@
     function setDashboardChartFallback(chartId, message) {
       const { canvas, empty } = getDashboardChartNodes(chartId);
       destroyDashboardChart(chartId);
-      if (canvas) canvas.hidden = true;
+      if (canvas) {
+        canvas.hidden = true;
+        canvas.style.display = 'none';
+      }
       if (empty) {
         empty.hidden = false;
+        empty.style.display = '';
         empty.textContent = message;
       }
     }
@@ -123,8 +127,10 @@
       const { canvas, empty } = getDashboardChartNodes(chartId);
       if (!canvas) return null;
       canvas.hidden = false;
+      canvas.style.display = '';
       if (empty) {
         empty.hidden = true;
+        empty.style.display = 'none';
         empty.textContent = '';
       }
       return canvas;
@@ -274,8 +280,8 @@
         }
       });
 
-      const totalFeedback = chartData.feedbackDistribuicao.reduce((acc, item) => acc + item.value, 0);
-      if (!totalFeedback) {
+      const totalFeedback = chartData.feedbackDistribuicao.reduce((acc, item) => acc + (Number.isFinite(Number(item?.value)) ? Number(item.value) : 0), 0);
+      if (totalFeedback <= 0) {
         setDashboardChartFallback('dashboardFeedbackDistributionChart', 'Sem feedbacks registrados neste período.');
       } else {
         mountDashboardChart('dashboardFeedbackDistributionChart', {
@@ -350,8 +356,8 @@
         }
       });
 
-      const hasAddonSales = chartData.addonRanking.some(item => item.value > 0);
-      if (!chartData.addonRanking.length || !hasAddonSales) {
+      const totalAddonSales = chartData.addonRanking.reduce((acc, item) => acc + (Number.isFinite(Number(item?.value)) ? Number(item.value) : 0), 0);
+      if (!chartData.addonRanking.length || totalAddonSales <= 0) {
         setDashboardChartFallback('dashboardAddonRankingChart', 'Nenhuma venda de addon registrada no período.');
       } else {
         mountDashboardChart('dashboardAddonRankingChart', {

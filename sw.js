@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wpm-2026-04-15';
+const CACHE_NAME = 'wpm-2026-04-17';
 
 const PRECACHE_ASSETS = [
   '/index.html',

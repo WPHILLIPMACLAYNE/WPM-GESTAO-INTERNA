@@ -324,7 +324,7 @@ APLICATIVO FINALIZADO/
 
 ### Dependências de Desenvolvimento
 
-```json
+```jsonc
 {
   "playwright": "^1.59.1"   // Apenas para testes automatizados
 }

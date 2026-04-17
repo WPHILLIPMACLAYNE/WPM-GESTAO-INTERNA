@@ -75,6 +75,9 @@ Tag criada em 10/04/2026. CI 100% verde. Se tudo quebrar, volte aqui.
 | 6 — Painel Admin | ⏳ | `backend/fase-6-admin` | Interface de gestão de unidades |
 
 > **Atualize esta tabela ao concluir cada fase. Mude ⏳ para ✅.**
+> Estado real em 17/04/2026: a entrega tecnica da Fase 0 ja foi mergeada no `main`
+> (runtime env, scaffold de Supabase/Sentry e CI). A ativacao manual dos servicos
+> externos continua controlada em `Docs/FASE_0_CHECKLIST.md`.
 
 ---
 

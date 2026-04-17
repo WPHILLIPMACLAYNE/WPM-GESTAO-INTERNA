@@ -14,9 +14,17 @@ function captureGlobal(name) {
     : { exists: false, value: undefined };
 }
 
+function setMutableProperty(target, name, value) {
+  Object.defineProperty(target, name, {
+    configurable: true,
+    writable: true,
+    value
+  });
+}
+
 function restoreGlobal(name, snapshot) {
   if (snapshot.exists) {
-    globalThis[name] = snapshot.value;
+    setMutableProperty(globalThis, name, snapshot.value);
     return;
   }
   delete globalThis[name];
@@ -56,34 +64,38 @@ export async function loadRealApp(options = {}) {
     structuredClone: captureGlobal('structuredClone')
   };
 
-  globalThis.window = window;
-  globalThis.document = window.document;
-  globalThis.localStorage = window.localStorage;
-  globalThis.sessionStorage = window.sessionStorage;
-  globalThis.HTMLElement = window.HTMLElement;
-  globalThis.Node = window.Node;
-  globalThis.CustomEvent = window.CustomEvent;
-  globalThis.Blob = window.Blob;
-  globalThis.FileReader = window.FileReader;
-  globalThis.Event = window.Event;
-  globalThis.MouseEvent = window.MouseEvent;
-  globalThis.KeyboardEvent = window.KeyboardEvent;
-  globalThis.requestAnimationFrame = cb => setTimeout(cb, 0);
-  globalThis.cancelAnimationFrame = id => clearTimeout(id);
-  globalThis.structuredClone = globalThis.structuredClone || window.structuredClone || structuredClone;
-  window.requestAnimationFrame = globalThis.requestAnimationFrame;
-  window.cancelAnimationFrame = globalThis.cancelAnimationFrame;
-  window.crypto = crypto.webcrypto;
-  window.structuredClone = globalThis.structuredClone;
-  window.DOMPurify = { sanitize: value => value };
-  window.__APP_ENV__ = Object.assign({
+  const requestAnimationFrame = cb => setTimeout(cb, 0);
+  const cancelAnimationFrame = id => clearTimeout(id);
+  const structuredCloneImpl = globalThis.structuredClone || window.structuredClone || structuredClone;
+
+  setMutableProperty(globalThis, 'window', window);
+  setMutableProperty(globalThis, 'document', window.document);
+  setMutableProperty(globalThis, 'localStorage', window.localStorage);
+  setMutableProperty(globalThis, 'sessionStorage', window.sessionStorage);
+  setMutableProperty(globalThis, 'HTMLElement', window.HTMLElement);
+  setMutableProperty(globalThis, 'Node', window.Node);
+  setMutableProperty(globalThis, 'CustomEvent', window.CustomEvent);
+  setMutableProperty(globalThis, 'Blob', window.Blob);
+  setMutableProperty(globalThis, 'FileReader', window.FileReader);
+  setMutableProperty(globalThis, 'Event', window.Event);
+  setMutableProperty(globalThis, 'MouseEvent', window.MouseEvent);
+  setMutableProperty(globalThis, 'KeyboardEvent', window.KeyboardEvent);
+  setMutableProperty(globalThis, 'requestAnimationFrame', requestAnimationFrame);
+  setMutableProperty(globalThis, 'cancelAnimationFrame', cancelAnimationFrame);
+  setMutableProperty(globalThis, 'structuredClone', structuredCloneImpl);
+  setMutableProperty(window, 'requestAnimationFrame', requestAnimationFrame);
+  setMutableProperty(window, 'cancelAnimationFrame', cancelAnimationFrame);
+  setMutableProperty(window, 'crypto', crypto.webcrypto);
+  setMutableProperty(window, 'structuredClone', structuredCloneImpl);
+  setMutableProperty(window, 'DOMPurify', { sanitize: value => value });
+  setMutableProperty(window, '__APP_ENV__', Object.assign({
     SUPABASE_URL: null,
     SUPABASE_ANON_KEY: null,
     SENTRY_DSN: null,
     SENTRY_ENVIRONMENT: null,
     SENTRY_RELEASE: null,
     APP_RUNTIME_OVERRIDE: null
-  }, window.__APP_ENV__ || {}, options.appEnv || {});
+  }, window.__APP_ENV__ || {}, options.appEnv || {}));
 
   window.document.write(html);
   window.eval(bundle);

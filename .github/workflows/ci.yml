@@ -2,7 +2,7 @@ name: CI — Testes Automatizados
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'backend/**']
   pull_request:
     branches: [main]
   schedule:
@@ -39,10 +39,12 @@ jobs:
           retention-days: 30
 
       - name: Upload para Codecov (somente quando token presente)
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
           flags: unit
           fail_ci_if_error: false

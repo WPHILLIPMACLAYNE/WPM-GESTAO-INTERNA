@@ -21,6 +21,12 @@ Esse arquivo inaugura a estrutura de backend com:
 - gatilhos de `updated_at`
 - políticas de RLS com separação entre leitura, operação e gestão
 
+Também foi criado o scaffold local mínimo do projeto Supabase:
+
+- `supabase/config.toml`
+- `supabase/seed.sql`
+- scripts npm `supabase:start`, `supabase:stop`, `supabase:status` e `supabase:reset`
+
 ## Tabelas cobertas
 
 - `units`
@@ -61,5 +67,5 @@ Esse arquivo inaugura a estrutura de backend com:
 
 1. Revisar a migration no Supabase Studio/CLI e ajustar tipos/campos antes de popular dados reais.
 2. Criar a migration seguinte com funções transacionais de fechamento/reset/import.
-3. Adicionar seeds mínimos de unidade, usuário admin e período de exemplo para ambiente de desenvolvimento.
+3. Evoluir o seed atual com bootstrap de usuário admin e vínculos de unidade quando a estratégia de auth estiver fechada.
 4. Validar as políticas de RLS com cenários de `admin`, `gestor`, `recepcao`, `professor` e `leitura`.

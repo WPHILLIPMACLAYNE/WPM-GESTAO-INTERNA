@@ -1,3 +1,8 @@
 node_modules/
 env.js
 supabase/.temp/
+.ai/
+.codex
+.codex/
+.idea/
+test-results/

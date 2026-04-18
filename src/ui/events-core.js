@@ -33,6 +33,7 @@
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('body--modal-open');
       const destino = modal.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])') || modal.querySelector('.modal-content');
       destino?.focus({ preventScroll: true });
     }
@@ -46,6 +47,7 @@
       const modalAberto = document.querySelector('.modal.show');
       if (!modalAberto) {
         document.body.style.overflow = '';
+        document.body.classList.remove('body--modal-open');
         const retorno = estadoAcessibilidade.focoRetornoModal[id];
         if (retorno && retorno.isConnected) retorno.focus({ preventScroll: true });
       } else {

@@ -377,6 +377,11 @@
       badge.textContent = archive ? `✕ Fechado em ${archive.closedAtLabel}` : '● Mês em andamento';
       badge.classList.toggle('closed', !!archive);
       badge.classList.toggle('active', !archive);
+      const topbar = badge.closest('.topbar');
+      if (topbar) {
+        topbar.classList.toggle('topbar--month-closed', !!archive);
+        topbar.classList.toggle('topbar--month-active', !archive);
+      }
       const closeBtn = document.getElementById('closeMonthBtn');
       if (closeBtn) closeBtn.disabled = !!archive;
       syncCurrentPeriodLockUI();

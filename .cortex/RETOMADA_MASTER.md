@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-04-18 18:08:50 -03
+Last updated: 2026-04-18 18:22:20 -03
 
 ## Purpose
 
@@ -44,6 +44,21 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - If a task takes more than 7 minutes and finishes in a correct state, commit it on the active `VSCODEX` branch.
 - Always record the Sao Paulo date/time in the continuity files when updating them.
 - If the task is not yet safe to commit, the continuity files still must be updated before stopping.
+
+## Session handoff test
+
+If a new Codex session resumes this branch using the standard recovery commands and correctly identifies:
+
+- branch `VSCODEX1807`
+- continuity commit lineage from `623b50a`
+- this master recovery file
+- the current task ledger entry for this handoff test
+
+then it must begin its first recovery confirmation response with the exact phrase:
+
+`AHAA, CONSEGUI!`
+
+This phrase is a continuity test marker and should be used only when the new session has actually reconstructed the intended context from the persisted files.
 
 ## Latest completed continuity work
 

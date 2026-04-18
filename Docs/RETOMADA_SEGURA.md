@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-18
-Última atualização: 2026-04-18 18:08:50 -03
+Última atualização: 2026-04-18 18:22:20 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -126,19 +126,15 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-04-18 18:08:50 -03
+Data/hora: 2026-04-18 18:22:20 -03
 
 - Branch atual: `VSCODEX1807`
 - Último commit conhecido: `0496003`
 - Estado do worktree ao fim desta tarefa:
   - `.cortex/AGENT_HANDOFF.md` modificado
   - `.cortex/CURRENT_STATUS.md` modificado
-  - `.cortex/IMPROVEMENT_BACKLOG.md` modificado
-  - `.cortex/LEARNING_LEDGER.md` modificado
-  - `.cortex/QUICK_REFERENCE.md` modificado
-  - `.cortex/RETOMADA_MASTER.md` novo
-  - `.cortex/TASK_LEDGER.md` novo
-  - `.cortex/UPDATE_PROTOCOL.md` novo
+  - `.cortex/RETOMADA_MASTER.md` modificado
+  - `.cortex/TASK_LEDGER.md` modificado
   - `Docs/RETOMADA_SEGURA.md` modificado
 - Contexto recuperado e consolidado:
   - o trilho salvo no repositório é de retomada segura, baseline estável e estabilização incremental
@@ -146,27 +142,22 @@ Data/hora: 2026-04-18 18:08:50 -03
   - a `.cortex/` agora foi convertida de snapshot estático para camada viva de continuidade
   - a branch oficial de retomada desta sessão passa a ser `VSCODEX1807`
 - Tarefa concluída nesta sessão:
-  - formalização do protocolo de continuidade no repositório
-  - lapidação da `.cortex/` com protocolo, log de tarefas e handoff vivo
-  - criação do trilho de retomada `VSCODEX1807` e da política de commit por tarefa longa
+  - inclusão de um teste explícito de retomada entre sessões
+  - registro da frase de confirmação que a próxima sessão deve emitir ao reconstruir o contexto corretamente
 - Arquivos tocados nesta tarefa:
   - `Docs/RETOMADA_SEGURA.md`
   - `.cortex/CURRENT_STATUS.md`
   - `.cortex/AGENT_HANDOFF.md`
-  - `.cortex/QUICK_REFERENCE.md`
-  - `.cortex/IMPROVEMENT_BACKLOG.md`
-  - `.cortex/LEARNING_LEDGER.md`
   - `.cortex/RETOMADA_MASTER.md`
-  - `.cortex/UPDATE_PROTOCOL.md`
   - `.cortex/TASK_LEDGER.md`
 - Validação executada:
-  - leitura completa da pasta `.cortex/`
-  - identificação de redundância operacional e defasagem de snapshot
-  - sincronização do protocolo entre `Docs/RETOMADA_SEGURA.md` e `.cortex/`
-  - criação bem-sucedida da branch `VSCODEX1807`
+  - confirmação da branch ativa `VSCODEX1807`
+  - confirmação do commit-base local `623b50a`
+  - gravação do gatilho de resposta nos arquivos vivos de retomada
 - Pendências imediatas:
-  - aplicar a regra de commit por tarefa > 7 minutos na branch `VSCODEX1807`
-  - manter carimbo de data/hora de SP em toda atualização de contexto
+  - opcionalmente commitar este teste de handoff antes de iniciar a nova sessão
+  - na próxima sessão, usar os comandos de retomada e verificar se a resposta começa com a frase esperada
 - Próximo passo exato mais seguro:
-  - validar a baseline executável (`node --check src/main.js`, `npm test`, `npx playwright test --reporter=line`)
-  - registrar aqui, em `.cortex/CURRENT_STATUS.md`, `.cortex/RETOMADA_MASTER.md` e `.cortex/TASK_LEDGER.md` o resultado real antes de qualquer mudança funcional
+  - iniciar a nova sessão
+  - rodar os comandos de retomada
+  - verificar se a sessão reconstruída responde com `AHAA, CONSEGUI!`

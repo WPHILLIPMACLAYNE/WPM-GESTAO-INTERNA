@@ -1,6 +1,6 @@
 # TASK_LEDGER
 
-Last updated: 2026-04-18 18:08:50 -03
+Last updated: 2026-04-18 18:22:20 -03
 
 This file records one durable checkpoint per completed task.
 
@@ -67,3 +67,25 @@ This file records one durable checkpoint per completed task.
 - Next step:
   - validate executable baseline on `VSCODEX1807`
   - update all continuity files with the exact result and timestamp
+
+### Task 003
+
+- Date/time: 2026-04-18 18:22:20 -03
+- Branch: `VSCODEX1807`
+- HEAD: `623b50a`
+- Task: add a continuity test marker so a future session can prove that it recovered the correct context from the persisted files
+- Files touched:
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/TASK_LEDGER.md`
+  - `Docs/RETOMADA_SEGURA.md`
+- Validation:
+  - confirmed active branch `VSCODEX1807`
+  - confirmed clean worktree before this task
+  - wrote the explicit recovery phrase rule into the living continuity files
+- Pending:
+  - optionally commit this handoff-test checkpoint if the user wants it persisted in git before switching sessions
+- Next step:
+  - in the next session, run the standard recovery commands
+  - if context reconstruction succeeds, begin the confirmation response with `AHAA, CONSEGUI!`

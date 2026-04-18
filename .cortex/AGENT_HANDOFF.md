@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-04-18 18:08:50 -03
+Last updated: 2026-04-18 18:22:20 -03
 
 ## Current handoff
 
@@ -52,6 +52,12 @@ Read in this order:
 5. `.cortex/QUICK_REFERENCE.md`
 
 Then inspect `git status`, current branch, and recent commits before editing anything.
+
+## Recovery confirmation rule
+
+If a future session reconstructs the context from the persisted recovery files and confirms the active recovery branch and ledger state correctly, it should start its first confirmation reply with:
+
+`AHAA, CONSEGUI!`
 
 ## Next safe step
 

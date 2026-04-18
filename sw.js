@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wpm-2026-04-17';
+const CACHE_NAME = 'wpm-' + (self.APP_VERSION || 'v34-fixed');
 
 const PRECACHE_ASSETS = [
   '/index.html',
@@ -93,6 +93,22 @@ self.addEventListener('fetch', (event) => {
   if (isCdnRequest(url)) {
     event.respondWith(
       fetch(event.request).catch(() => new Response('', { status: 503 }))
+    );
+    return;
+  }
+
+  // Network-first logic for index.html as part of rollback/deploy stability
+  if (event.request.mode === 'navigate' || url.endsWith('/index.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('/index.html')))
     );
     return;
   }

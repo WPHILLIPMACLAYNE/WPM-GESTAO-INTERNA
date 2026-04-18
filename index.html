@@ -10,15 +10,14 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
-  <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline -->
+  <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline, será evoluído fase a fase -->
   <!-- connect-src/script-src expandidos para Supabase + Sentry (Fase 0) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
-          crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" integrity="sha256-ieH6dkfLSVNw06mXrOQ4f10V2fTFrxI1LFPapACVYoc=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha256-IGtui7APx7uix+6AykHbPp4FunvgqjWr66nP1TV/XQ4=" crossorigin="anonymous"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
   <script>
     window.__APP_ENV__ = Object.assign({
@@ -1025,36 +1024,6 @@
     </div>
   </footer>
   <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Voltar ao topo" title="Voltar ao topo">↑</button>
-  <script>
-    (function () {
-      var btn = document.getElementById('backToTopBtn');
-      if (!btn) return;
-      var threshold = 480;
-      function toggle() {
-        if (window.scrollY > threshold) btn.classList.add('show');
-        else btn.classList.remove('show');
-      }
-      window.addEventListener('scroll', toggle, { passive: true });
-      btn.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      toggle();
-    })();
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(function(reg) {
-        console.log('[PWA] Service worker registrado:', reg.scope);
-      }).catch(function() {
-        console.log('[PWA] Service worker indisponível (file:// ou sem suporte)');
-      });
-      window.addEventListener('online', function() {
-        var t = document.getElementById('saveToast');
-        if (t) { t.textContent = 'Conexão restaurada'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2000); }
-      });
-      window.addEventListener('offline', function() {
-        var t = document.getElementById('saveToast');
-        if (t) { t.textContent = 'Modo offline — dados locais'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 3000); }
-      });
-    }
-  </script>
+  <script src="src/sw-registration.js"></script>
 </body>
 </html>

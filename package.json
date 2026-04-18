@@ -17,7 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "node Scripts/responsive-test.mjs",
     "test:visual": "node Scripts/visual-check.mjs",
-    "test:all": "npm run test && npm run test:e2e"
+    "test:all": "npm run test && npm run test:e2e && npm run test:visual"
   },
   "keywords": [
     "gestao-interna",

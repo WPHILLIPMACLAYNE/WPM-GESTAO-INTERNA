@@ -181,7 +181,7 @@ git status
 | src/ui/render-dashboard.js | Dashboard + gráficos Chart.js |
 | index.html | Entry point — ordem dos scripts é crítica |
 | env.example.js | Template do contrato runtime (browser-safe) |
-| env.js | Valores reais (gitignored, gerado via Doppler/Vercel) |
+| env.js | Overrides locais (gitignored, gerado via setup/Doppler) |
 | styles.css | CSS global + media queries |
 | sw.js | Service Worker — cache versionado |
 | .github/workflows/ci.yml | Pipeline CI/CD |
@@ -193,8 +193,8 @@ git status
 O app lê configuração de `window.__APP_ENV__`, populado nesta ordem:
 
 1. Inline `<script>` em `index.html` define defaults seguros (todos `null`).
-2. `<script src="env.js">` opcional sobrescreve com valores reais.
-3. Falha silenciosa se `env.js` não existir (gitignored).
+2. Em runtime local (`localhost`, `127.0.0.1`, `file://`), `env.js` opcional sobrescreve os defaults.
+3. Em runtime remoto (ex.: GitHub Pages), `env.js` não é requisitado para evitar `404` de bootstrap.
 
 **Setup local:**
 ```bash

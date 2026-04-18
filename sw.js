@@ -47,10 +47,12 @@ function isCdnRequest(url) {
   return url.includes('cdn.jsdelivr.net') || url.includes('unpkg.com');
 }
 
-// env.js é opcional (gitignored em dev, gerado no build). Tentativa best-effort.
-const OPTIONAL_ASSETS = ['/env.js'];
+// env.js é opcional e deve existir apenas no runtime local.
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+const OPTIONAL_ASSETS = LOCAL_HOSTS.has(self.location.hostname) ? ['/env.js'] : [];
 
 async function precacheOptional(cache) {
+  if (!OPTIONAL_ASSETS.length) return;
   await Promise.all(OPTIONAL_ASSETS.map(async (asset) => {
     try {
       await cache.add(asset);

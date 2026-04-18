@@ -30,7 +30,15 @@
       APP_RUNTIME_OVERRIDE: null
     }, window.__APP_ENV__ || {});
   </script>
-  <script src="env.js" onerror="console.info('[env] env.js ausente — usando defaults locais')"></script>
+  <script>
+    (function loadLocalEnvOverrides() {
+      const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+      const isLocalRuntime = window.location.protocol === 'file:' || localHosts.has(window.location.hostname);
+      if (!isLocalRuntime) return;
+      const envScript = "<script src=\"env.js\" onerror=\"console.info('[env] env.js ausente — usando defaults locais')\"><\/script>";
+      document.write(envScript);
+    })();
+  </script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
   <script src="src/utils/helpers.js"></script>
   <script src="src/core/config.js"></script>

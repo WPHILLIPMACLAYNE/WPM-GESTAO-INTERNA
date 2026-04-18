@@ -1,101 +1,79 @@
 # CURRENT_STATUS
 
-Snapshot date: 2026-04-14
+Snapshot date: 2026-04-18
+Last updated: 2026-04-18 18:08:50 -03
 
-## Repository state at bootstrap
+## Live status
 
-- Branch: `agent/cortex-bootstrap-initial-audit`
-- HEAD: `a21f6e45effbf58ec16c6824b2d36e766e485d95`
-- Recent tag on HEAD: `v1.0-stable`
-- Pre-bootstrap worktree state: clean
+- Branch: `VSCODEX1807`
+- HEAD: `0496003`
+- Baseline in production: `origin/main`
+- App version: `v34`
+- Store version: `4`
+- Runtime model: browser-only SPA with 30 classic `<script>` files in fixed order
+- Active recovery branch: `VSCODEX1807`
+- Recovery branch created at: `2026-04-18 18:07:46 -03`
 
-Recent visible progression from `git log --oneline -5`:
+## Current working reading
 
-1. `a21f6e4` `test: atualiza snapshots mobile do dashboard pós-fix Bug 2 e Bug 3`
-2. `e88daab` `fix: corrige cards mobile e gráfico cortado no Dashboard`
-3. `a6e167b` `docs: diagnóstico mobile Bug 2 e Bug 3`
-4. `87d85c7` `fix: correções pós-auditoria — SW, testes, bug lógico e resíduos`
-5. `992ca8f` `docs: auditoria completa pós-estabilização`
+The project is operationally mature and still architecturally fragile.
 
-## Current baseline reading
+Confirmed live facts:
 
-The codebase appears functionally mature and structurally fragile.
+- `index.html` script order remains a hard runtime contract
+- `window.__APP_INTERNALS__` is exposed and part of the continuity surface
+- `package.json` already points `test:e2e` and `test:visual` to `Scripts/...`
+- `todayISO()` already uses local-date formatting
+- `sw.js` cache naming improved from the old `wpm-v1` state, but still is not tied to `APP_VERSION` or commit
+- `src/core/seed.js` still appears to keep a `rankSnapshot` semantic mismatch candidate
 
-Evidence-backed positives:
+## Current safe next step
 
-- runtime split is already in place across `src/core`, `src/domain`, `src/features`, `src/ui`, `src/utils`
-- mobile dashboard fixes documented in `Docs/DIAGNOSTICO_MOBILE.md` are reflected in current code and recent commits
-- previously documented infra issues in scripts/config are already corrected in current files
-- `APP_INTERNALS` exposure, backup flows, diagnostics, lifecycle, and service worker are all present in the codebase
-- test assets and snapshots are present for unit, integration, E2E, and visual coverage
+Before any functional rewrite:
 
-Evidence-backed constraints:
+1. stay on `VSCODEX1807` for recovery-safe work
+2. validate executable baseline
+3. record the exact outcome in this file, `RETOMADA_MASTER.md`, and `TASK_LEDGER.md`
+4. only then start scoped hardening work
 
-- runtime still depends on classic script ordering
-- globals remain the main module interface
-- docs are partially out of sync with the codebase
-- executable validation is blocked in this workspace because dev dependencies are not installed
+Suggested validation sequence:
 
-## Validation attempted during bootstrap
+1. `node --check src/main.js`
+2. `npm test`
+3. `npx playwright test --reporter=line`
 
-Attempted commands:
+## CORTEX operating rule
 
-- `npm test`
-- `npx playwright test --reporter=list`
+`.cortex/` is now a living continuity layer, not a one-time bootstrap snapshot.
 
-Observed results:
+After every completed task:
 
-- `npm test` failed with `sh: 1: vitest: not found`
-- `npx playwright test --reporter=list` failed with `Cannot find package '@playwright/test'`
+1. update `CURRENT_STATUS.md`
+2. update `AGENT_HANDOFF.md`
+3. update `RETOMADA_MASTER.md`
+4. append an entry to `TASK_LEDGER.md`
+5. update any reference artifact that changed materially
 
-Meaning:
+Protocol details live in `UPDATE_PROTOCOL.md`.
 
-- the repository contains test definitions and configs
-- this workspace does not currently contain the installed dev toolchain needed to execute them
-- no new functional conclusion should be drawn from the failed commands beyond missing dependencies
+## Authoritative priority
 
-## Documentation state
-
-Current docs are valuable but not uniform. The repo now contains:
-
-- historical migration narrative
-- audit snapshots at different moments
-- debt and bug registers
-- architecture maps
-- stage-by-stage split notes
-
-Current source-of-truth priority for structure:
+For present-state decisions, trust these in order:
 
 1. live code in `index.html`, `src/`, `sw.js`, configs
-2. `MODULE_MAP.md`
-3. recent git history
-4. debt/audit docs
-5. older general docs such as `QWEN.md` and `Docs/DOCUMENTACAO.md`
-
-## Stable baseline to preserve
-
-Preserve these before any structural or functional work:
-
-- `APP_VERSION = v34`
-- `STORE_VERSION = 4`
-- current 30-script runtime order from `index.html`
-- local-first persistence model
-- exposed `window.__APP_INTERNALS__`
-- current mobile dashboard fixes
-- corrected local test script paths and Playwright server config
+2. `Docs/RETOMADA_SEGURA.md`
+3. `CURRENT_STATUS.md`
+4. `RETOMADA_MASTER.md`
+5. `TASK_LEDGER.md`
+6. `MODULE_MAP.md`
+7. other audit/reference docs as dated evidence
 
 ## Main unresolved pressures
 
 - script-order coupling
 - shared mutable globals
-- storage/schema/lifecycle centrality
-- doc drift between older audits and current code
-- service worker/versioning still not tied to app version or commit hash
-- security posture still includes CSP `unsafe-inline` and CDN dependencies
-- seed `rankSnapshot` shape still appears inconsistent with `src/types.js`
-
-## Confidence level
-
-Moderate to high for structural state.
-
-Lower for runtime pass/fail in this exact workspace because automated execution is currently blocked by missing dependencies.
+- storage, backup, and lifecycle centrality
+- documentation drift across historical docs
+- service worker release identity still not coupled to version/commit
+- CSP/CDN hardening gap
+- `rankSnapshot` semantics still require explicit validation

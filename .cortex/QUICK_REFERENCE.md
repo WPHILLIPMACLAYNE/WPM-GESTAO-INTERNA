@@ -1,5 +1,7 @@
 # QUICK_REFERENCE
 
+Last updated: 2026-04-18 18:08:50 -03
+
 ## Identity
 
 - App: `WPM Gestão Interna`
@@ -21,6 +23,27 @@
 - Dashboard render: `src/ui/render-dashboard.js`
 - Global UI/event infra: `src/ui/events-core.js`
 - PWA/cache: `sw.js`
+
+## CORTEX files to keep alive
+
+Mandatory after each completed task:
+
+- `.cortex/CURRENT_STATUS.md`
+- `.cortex/AGENT_HANDOFF.md`
+- `.cortex/RETOMADA_MASTER.md`
+- `.cortex/TASK_LEDGER.md`
+- `Docs/RETOMADA_SEGURA.md`
+
+Reference artifacts, update only when facts materially change:
+
+- `.cortex/PROJECT_CONTEXT.md`
+- `.cortex/REGRESSION_MAP.md`
+- `.cortex/IMPROVEMENT_BACKLOG.md`
+- `.cortex/LEARNING_LEDGER.md`
+- `.cortex/RESTRUCTURING_PLAN.md`
+- `.cortex/AUDIT_MATRIX.md`
+- `.cortex/OPERATOR_PROFILE.md`
+- `.cortex/PLANOS_ABC.md`
 
 ## Runtime order contract
 
@@ -81,4 +104,16 @@ git log --oneline --decorate -5
 npm install
 npm test
 npx playwright test --reporter=list
+```
+
+## Continuity commands
+
+```bash
+git branch --show-current
+git rev-parse --short HEAD
+git status --short
+sed -n '1,220p' Docs/RETOMADA_SEGURA.md
+sed -n '1,220p' .cortex/CURRENT_STATUS.md
+sed -n '1,220p' .cortex/RETOMADA_MASTER.md
+sed -n '1,240p' .cortex/TASK_LEDGER.md
 ```

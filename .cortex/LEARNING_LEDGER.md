@@ -1,5 +1,7 @@
 # LEARNING_LEDGER
 
+Last updated: 2026-04-18 18:08:50 -03
+
 ## 2026-04-14
 
 ### L-001
@@ -115,3 +117,45 @@ Evidence:
 
 Operational consequence:
 Treat NPS ranking history as a targeted validation candidate before deeper refactors.
+
+## 2026-04-18
+
+### L-009
+
+Finding:
+The original `.cortex/` install was useful as a bootstrap snapshot, but not strong enough as a live continuity system.
+
+Evidence:
+
+- recovery of the interrupted work depended on reading multiple scattered documents
+- `CURRENT_STATUS.md` and `AGENT_HANDOFF.md` were still framed as one-time bootstrap outputs
+- no dedicated task ledger existed inside `.cortex/`
+
+Operational consequence:
+`.cortex/` must be maintained as a living handoff layer after every completed task, not only during initial installation.
+
+### L-010
+
+Finding:
+The most useful split inside `.cortex/` is between living continuity files and slower-moving reference files.
+
+Evidence:
+
+- `CURRENT_STATUS.md`, `AGENT_HANDOFF.md`, and `Docs/RETOMADA_SEGURA.md` are needed at every resume
+- files such as `PROJECT_CONTEXT.md`, `AUDIT_MATRIX.md`, and `RESTRUCTURING_PLAN.md` remain valuable but do not need per-task churn
+
+Operational consequence:
+Future maintenance should update a small mandatory core on every task and touch the broader reference set only when stable facts actually change.
+
+### L-011
+
+Finding:
+Recovery continuity gets stronger when work happens on a predictable timestamped recovery branch rather than directly on `main`.
+
+Evidence:
+
+- the active recovery branch is now `VSCODEX1807`
+- the user explicitly wants session-loss recovery to depend on persisted repo state, not editor memory
+
+Operational consequence:
+For interrupted-session work, prefer the active `VSCODEXHHMM` branch and treat it as the primary continuity track until the work is safely committed and handed off.

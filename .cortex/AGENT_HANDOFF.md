@@ -1,85 +1,58 @@
 # AGENT_HANDOFF
 
-## What was done
+Last updated: 2026-04-18 18:08:50 -03
 
-Installed the initial CORTEX documentation layer only.
+## Current handoff
 
-No functional source files were changed.
-No architecture rewrite was started.
-This snapshot was built from repository evidence, not from assumptions.
+This repository already has a functioning CORTEX layer and it must now be maintained continuously.
 
-## Critical context for the next agent
+Current state:
 
-This repository is already operationally modularized, but not architecturally decoupled.
+- baseline branch in use: `VSCODEX1807`
+- current HEAD reference: `0496003`
+- continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
+- continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
 
-Key reality:
+## What must happen after each completed task
 
-- the app is still a browser-only classic-script runtime
-- script order in `index.html` is a hard dependency
-- `storage`, `state`, and lifecycle flows remain globally shared
-- several older docs are now historical and must not be treated as current truth without code verification
+1. update `Docs/RETOMADA_SEGURA.md`
+2. update `.cortex/CURRENT_STATUS.md`
+3. update `.cortex/AGENT_HANDOFF.md` if the next safe step changed
+4. update `.cortex/RETOMADA_MASTER.md`
+5. append a task entry to `.cortex/TASK_LEDGER.md`
+6. update any affected reference artifact if a stable fact changed
 
 ## Immediate guardrails
 
-Do not start by rewriting source architecture.
-Do not convert the runtime to ESM or a build pipeline as a first move.
-Do not change `index.html` script order casually.
-Do not touch persistence or month lifecycle without targeted regression checks.
-Do not assume an audit finding is still live unless the current code confirms it.
+Do not:
 
-## What is already fixed in live code
+- rewrite the runtime architecture as a first move
+- reorder `index.html` scripts casually
+- touch persistence, backup, or month lifecycle without targeted regression thinking
+- trust old audit language over live code
+- end a task without leaving a persistent checkpoint
 
-Compared with older audit notes, the current repo already reflects fixes for:
+## Current safe interpretation
 
-- broken local test script paths in `package.json`
-- outdated absolute Playwright base path
-- `todayISO()` UTC drift issue
-- event duplicate time comparison bug
-- dashboard mobile Bug 2 / Bug 3 fixes
-- versioned service worker cache name compared with older `wpm-v1`
+The app is stable enough to evolve, but only with:
 
-## What is still live risk
+- branch-safe work
+- small reversible steps
+- validation-led changes
+- continuity artifacts updated at task boundaries
 
-- classic script/global coupling
-- doc drift
-- CSP/CDN hardening gap
-- service worker version not coupled to `APP_VERSION` or commit
-- potential semantic mismatch in `rankSnapshot`
+## If resuming after interruption
 
-## If you need the next safe step
+Read in this order:
 
-Take this order:
+1. `Docs/RETOMADA_SEGURA.md`
+2. `.cortex/CURRENT_STATUS.md`
+3. `.cortex/RETOMADA_MASTER.md`
+4. `.cortex/TASK_LEDGER.md`
+5. `.cortex/QUICK_REFERENCE.md`
 
-1. Restore dev dependencies without changing app code.
-2. Run executable baseline checks.
-3. Reconcile historical docs against current live code.
-4. Only then propose or make scoped hardening changes.
+Then inspect `git status`, current branch, and recent commits before editing anything.
 
-## Suggested validation sequence
+## Next safe step
 
-Use this before any functional edit:
-
-1. `npm install`
-2. `npm test`
-3. `npx playwright test --reporter=list`
-4. `git diff --stat`
-
-If those pass, the repo has an executable baseline.
-If they fail, document whether the failure is environmental, test drift, or code regression.
-
-## Files that matter first
-
-- `index.html`
-- `src/core/config.js`
-- `src/core/storage.js`
-- `src/core/backup.js`
-- `src/core/lifecycle.js`
-- `src/features/crud.js`
-- `src/ui/render-dashboard.js`
-- `src/ui/events-core.js`
-- `MODULE_MAP.md`
-- `TECH_DEBT.md`
-
-## Working rule
-
-Treat continuity as the primary objective. The first useful contribution after this bootstrap is baseline validation and doc-source alignment, not structural ambition.
+Stay on `VSCODEX1807`, validate the baseline, and record the actual results before starting hardening work.

@@ -72,14 +72,17 @@
           return;
         }
 
-        state = cloneSerializable(result.nextState);
+        const nextState = cloneSerializable(result.nextState);
 
-        // Hooks pré-salvamento (ex: decrementar contador de addon)
-        if (onBeforeSave) onBeforeSave(result.entity, previous, state);
+        // Hooks pré-salvamento processam o próximo state
+        if (onBeforeSave) onBeforeSave(result.entity, previous, nextState);
+
+        // Aplica e tenta salvar
+        state = nextState;
         const saved = await saveData();
 
         if (!saved) {
-          state = previousState;
+          state = previousState; // Revert everything if save failed
           storage.activePeriod = currentPeriodKey;
           storage.periods[currentPeriodKey] = state;
           if (onAfterSave) onAfterSave(result.entity, previous, state, 'rollback');

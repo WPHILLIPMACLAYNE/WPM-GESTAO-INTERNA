@@ -275,13 +275,13 @@ Implementado neste branch (`backend/fase-0-infra`):
 - `env.example.js` template browser-safe + `env.js` gitignored
 - `Scripts/setup-env.mjs` para devs locais (`npm run setup`)
 - `Scripts/generate-env.mjs` para CI/Vercel (lê `process.env` e gera `env.js`)
-- `index.html` carrega defaults inline + `env.js` opcional + CSP expandida
+- `index.html` carrega defaults inline + `env.js` opcional apenas no runtime local + CSP expandida
   para `*.supabase.co` (HTTPS+WSS), `*.sentry.io` (ingest) e
   `browser.sentry-cdn.com` (script-src)
 - `src/core/supabase.js` — `getSupabaseClient()` retorna null em modo offline
 - `src/core/observability.js` — `initSentry()` + `captureError()` no-op se
   DSN ou SDK ausentes
-- `sw.js` precache atualizado (cache `wpm-2026-04-15`) + env.js best-effort
+- `sw.js` precache atualizado (cache `wpm-2026-04-15`) + env.js best-effort apenas em host local
 - `APP_INTERNALS.backend` e `.observability` expostos para diagnóstico
 - Testes unit cobrindo fallback (10 novos casos em `runtime-env.test.js`)
 - CI: novo step de coverage para Codecov com guard `secrets.CODECOV_TOKEN`

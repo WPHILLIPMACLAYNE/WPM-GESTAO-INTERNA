@@ -1,9 +1,12 @@
 # BUGS_CONHECIDOS — WPM Gestão Interna
 
-Data: 2026-04-10
-Base local auditada: commit `865586c`
-Base remota observada: `origin/main` em `f6f08ea`
-Escopo: bugs/riscos encontrados durante auditoria somente leitura. Não corrigidos neste commit.
+Data original: 2026-04-10
+Última revisão de contexto: 2026-04-18
+Baseline atual em produção: `origin/main` (`bc6307f`)
+Escopo: inventário histórico de bugs/riscos levantados em auditorias anteriores.
+
+> Status dos itens pode ter mudado desde a auditoria original.
+> Antes de executar qualquer correção, revalidar cada item no baseline atual.
 
 ## CRÍTICO
 

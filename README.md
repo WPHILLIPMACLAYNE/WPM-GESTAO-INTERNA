@@ -17,6 +17,7 @@ Sistema de gestão interna para recepção — controle de atendimentos, pendên
 - [Arquitetura](#arquitetura)
 - [Como rodar localmente](#como-rodar-localmente)
 - [Testes](#testes)
+- [Fluxo Seguro de Evolução](#fluxo-seguro-de-evolução)
 - [Estrutura de diretórios](#estrutura-de-diretórios)
 - [Design system](#design-system)
 - [PWA e offline](#pwa-e-offline)
@@ -178,6 +179,12 @@ Acesse **http://localhost:3000**.
 
 > **Por que um servidor?** O Service Worker e os módulos JS exigem origem HTTP (não `file://`). Qualquer servidor estático serve.
 
+### Runtime de ambiente (`env.js`)
+
+- O app sempre inicia com defaults seguros de `window.__APP_ENV__` embutidos no `index.html`.
+- O arquivo `env.js` é opcional e carregado somente em runtime local (`localhost`, `127.0.0.1` ou `file://`).
+- Em deploy remoto (como GitHub Pages), `env.js` não é requisitado, evitando ruído de `404` no boot.
+
 ---
 
 ## Testes
@@ -197,6 +204,21 @@ npm run test:all
 ```
 
 Relatórios ficam em `playwright-report/` e `test-results/`.
+
+> Esses artefatos são locais e estão no `.gitignore`.
+
+---
+
+## Fluxo Seguro de Evolução
+
+Para continuar o projeto sem risco de quebrar o deploy atual:
+
+- use `origin/main` como baseline estável;
+- desenvolva sempre em branch própria;
+- não faça alterações diretas em `main`;
+- valide testes antes de abrir PR.
+
+Guia prático completo: [`Docs/RETOMADA_SEGURA.md`](./Docs/RETOMADA_SEGURA.md).
 
 ---
 

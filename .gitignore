@@ -1,2 +1,10 @@
 node_modules/
 env.js
+playwright-report/
+test-results/
+.vscode/
+.idea/
+.ai/
+.codex
+.codex/
+supabase/.temp/

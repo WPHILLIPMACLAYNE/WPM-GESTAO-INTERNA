@@ -10,7 +10,8 @@ Projeto: WPM Gestão Interna
 Autor: Wallace Phillip Maclayne Alves Alencar  
 Unidade: Smart Fit Pampulha, Belo Horizonte, MG  
 Repositório: https://github.com/WPHILLIPMACLAYNE/WPM-GESTAO-INTERNA  
-Deploy: https://wpm-gestao-interna.vercel.app  
+Deploy (produção): https://wphillipmaclayne.github.io/WPM-GESTAO-INTERNA/  
+Preview/CI deploy: https://wpm-gestao-interna.vercel.app  
 Domínio futuro: wpmgestao.me  
 
 ---
@@ -25,19 +26,20 @@ Domínio futuro: wpmgestao.me
 - **Secrets:** Doppler
 - **Testes dispositivos reais:** BrowserStack (2000+ browsers, Student Pack)
 - **Cobertura de testes:** Codecov (integrado ao CI, Student Pack)
-- **Testes unitários:** Vitest (118/118)
-- **Testes E2E:** Playwright (142/142)
-- **CI:** 9/9 checks verdes
+- **Testes unitários:** Vitest (`npm test`)
+- **Testes E2E:** Playwright (`npx playwright test`)
+- **CI:** GitHub Actions (unit, E2E, estrutura, responsividade)
 
 ---
 
 ## Ponto de restauração
 
 ```bash
-git checkout v1.0-stable
+git checkout origin/main
 ```
 
-Tag criada em 10/04/2026. CI 100% verde. Se tudo quebrar, volte aqui.
+Baseline estável atual (18/04/2026): `origin/main` em `bc6307f` (v34).
+Tag histórica de recuperação: `v1.0-stable` (10/04/2026).
 
 ---
 
@@ -135,7 +137,7 @@ git push
 ## Regras de ouro — NUNCA viole
 
 1. **Nunca faça push sem CI verde**
-2. **Nunca force push no main sem autorização explícita do Wallace**
+2. **Nunca use force push no main**
 3. **Nunca commite chaves, tokens ou senhas**
 4. **Nunca altere lógica de negócio ao corrigir bug de layout**
 5. **Commits pequenos — uma funcionalidade por commit**
@@ -179,7 +181,7 @@ git status
 | src/ui/render-dashboard.js | Dashboard + gráficos Chart.js |
 | index.html | Entry point — ordem dos scripts é crítica |
 | env.example.js | Template do contrato runtime (browser-safe) |
-| env.js | Valores reais (gitignored, gerado via Doppler/Vercel) |
+| env.js | Overrides locais (gitignored, gerado via setup/Doppler) |
 | styles.css | CSS global + media queries |
 | sw.js | Service Worker — cache versionado |
 | .github/workflows/ci.yml | Pipeline CI/CD |
@@ -191,8 +193,8 @@ git status
 O app lê configuração de `window.__APP_ENV__`, populado nesta ordem:
 
 1. Inline `<script>` em `index.html` define defaults seguros (todos `null`).
-2. `<script src="env.js">` opcional sobrescreve com valores reais.
-3. Falha silenciosa se `env.js` não existir (gitignored).
+2. Em runtime local (`localhost`, `127.0.0.1`, `file://`), `env.js` opcional sobrescreve os defaults.
+3. Em runtime remoto (ex.: GitHub Pages), `env.js` não é requisitado para evitar `404` de bootstrap.
 
 **Setup local:**
 ```bash
@@ -239,12 +241,12 @@ npx playwright test --reporter=line
 Vercel → Deployments → último deploy que funcionava → Promote to Production
 ```
 
-### Rollback completo
+### Rollback completo (seguro)
 ```bash
-cd ~/storage/APPSPAGESTAOWPM/APLICATIVOFINALIZADO
-sudo rm -rf test-results
-git checkout v1.0-stable
-git push origin HEAD:main --force
+git checkout -b hotfix/revert-<sha> origin/main
+git revert <sha-do-merge-problematico>
+git push -u origin hotfix/revert-<sha>
+# Abrir PR de rollback e mergear com checks verdes
 ```
 
 ---
@@ -272,4 +274,4 @@ git push origin HEAD:main --force
 
 ---
 
-*Última atualização: 10/04/2026*
+*Última atualização: 18/04/2026*

@@ -1,6 +1,10 @@
 # WPM Gestão Interna — Documentação Técnica
 
 > **Versão:** v34 &nbsp;|&nbsp; **Autor:** Wallace Phillip Maclayne &nbsp;|&nbsp; **Licença:** Todos os direitos reservados
+>
+> **Nota de manutenção (2026-04-18):** partes deste documento descrevem fases anteriores
+> (incluindo referências históricas ao monólito). Para estado técnico atual e ordem real de
+> runtime, usar `README.md` + `MODULE_MAP.md` como fonte primária.
 
 ---
 

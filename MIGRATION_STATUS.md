@@ -1,10 +1,21 @@
 # MIGRATION_STATUS.md
 
-## Resumo Executivo
+## Estado Atual (2026-04-18)
+
+- Baseline estável em produção: `origin/main` (`bc6307f`, GitHub Pages v34).
+- Runtime atual usa módulos `render-*` e `events-*` (ver `MODULE_MAP.md`).
+- Suíte unitária validada nesta baseline: `129/129` (`npm test`).
+- Neste ambiente local, Playwright pode falhar por dependência de sistema ausente (`libatk-1.0.so.0`); validar E2E em CI/runner com deps completas.
+- Fluxo seguro para evoluções: `Docs/RETOMADA_SEGURA.md`.
+
+> **Importante:** o restante deste documento é histórico de auditorias anteriores e
+> não deve ser usado como fonte única de baseline técnico atual.
+
+## Resumo Executivo (Histórico)
 
 A migração do monólito `SISTEMA_FINALIZADO.html` para a estrutura modular atual preservou a **paridade funcional pública do `APP_INTERNALS`**, manteve o CSS-base do sistema e hoje opera com **116/116 testes Vitest** e **42/42 testes Playwright** aprovados, totalizando **158/158**. A auditoria confirmou que a divisão em arquivos melhorou navegação e testabilidade, mas **não criou isolamento real entre módulos**: o projeto continua baseado em `<script>` tags clássicos, globais compartilhados e forte dependência da ordem de carga. Durante a pós-auditoria foi necessária uma correção adicional em `src/ui/render.js` para estabilizar o patch de linhas de tabela no navegador real.
 
-## Estado Validado
+## Estado Validado (Histórico)
 
 - `index.html` usa `<script>` tags clássicos, **sem `type="module"`**.
 - Ordem de carga confirmada:

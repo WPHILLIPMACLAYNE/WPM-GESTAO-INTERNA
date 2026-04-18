@@ -17,6 +17,7 @@ Sistema de gestão interna para recepção — controle de atendimentos, pendên
 - [Arquitetura](#arquitetura)
 - [Como rodar localmente](#como-rodar-localmente)
 - [Testes](#testes)
+- [Fluxo Seguro de Evolução](#fluxo-seguro-de-evolução)
 - [Estrutura de diretórios](#estrutura-de-diretórios)
 - [Design system](#design-system)
 - [PWA e offline](#pwa-e-offline)
@@ -197,6 +198,21 @@ npm run test:all
 ```
 
 Relatórios ficam em `playwright-report/` e `test-results/`.
+
+> Esses artefatos são locais e estão no `.gitignore`.
+
+---
+
+## Fluxo Seguro de Evolução
+
+Para continuar o projeto sem risco de quebrar o deploy atual:
+
+- use `origin/main` como baseline estável;
+- desenvolva sempre em branch própria;
+- não faça alterações diretas em `main`;
+- valide testes antes de abrir PR.
+
+Guia prático completo: [`Docs/RETOMADA_SEGURA.md`](./Docs/RETOMADA_SEGURA.md).
 
 ---
 

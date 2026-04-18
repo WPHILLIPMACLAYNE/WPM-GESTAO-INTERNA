@@ -1,8 +1,8 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10 · Última atualização: 2026-04-16
-Base local auditada: commit `865586c`
-Objetivo: evoluir para backend sem reabrir a instabilidade de hoje.
+Data: 2026-04-10 · Última atualização: 2026-04-18
+Baseline estável em produção: `origin/main` @ `bc6307f` (GitHub Pages v34)
+Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 
 > **Atualização 2026-04-16** — Overhaul de UI/UX (polish layer v1) entregue.
 > Escopo: design system consolidado, hierarquia de z-index corrigida, microinterações,
@@ -10,21 +10,26 @@ Objetivo: evoluir para backend sem reabrir a instabilidade de hoje.
 > (`prefers-reduced-motion`, `prefers-contrast`, `:focus-visible` universal).
 > Detalhes e inventário de arquivos em [`UI_UX_OVERHAUL.md`](./UI_UX_OVERHAUL.md).
 
-## Etapa 0 — Alinhar baseline
+> **Atualização 2026-04-18** — baseline oficial consolidado no `origin/main` (`bc6307f`).
+> Qodana removido do fluxo para simplificar CI e reduzir ruído operacional.
+> Fluxo seguro documentado em [`RETOMADA_SEGURA.md`](./RETOMADA_SEGURA.md).
+
+## Etapa 0 — Proteger baseline
 
 Prioridade: imediata.
 
 Ações:
 
-- Decidir se o baseline oficial é `f6f08ea` remoto ou `865586c` local.
-- Se `865586c` for válido, empurrar a documentação já existente e esta auditoria.
-- Se `f6f08ea` for o baseline desejado, criar branch separada para docs e evitar misturar rollback com evolução.
+- Trabalhar sempre em branch de feature criada a partir de `origin/main`.
+- Usar worktree limpa para evitar contaminar o diretório principal com artefatos de teste.
+- Proibir qualquer alteração direta em `main`.
+- Garantir que `.gitignore` continue cobrindo `test-results/` e `playwright-report/`.
 
 Critério de aceite:
 
-- `git status` limpo.
-- Branch local/remota sem divergência inesperada.
-- Auditoria versionada como referência.
+- `main` permanece estável e sem commits experimentais.
+- Toda mudança relevante entra por PR.
+- Artefatos gerados localmente não são versionados.
 
 ## Etapa 1 — Corrigir infraestrutura de validação
 

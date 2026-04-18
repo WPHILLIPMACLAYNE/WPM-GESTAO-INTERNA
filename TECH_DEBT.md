@@ -3,7 +3,7 @@
 ## CRÍTICO (corrigir agora)
 
 - Arquitetura ainda depende de `<script>` tags clássicos e globais implícitos; não há fronteiras reais entre módulos, o que mantém o sistema vulnerável a bugs de ordem de carga como o caso das pills.
-- `src/ui/render.js`, `src/ui/events.js` e `src/main.js` concentram responsabilidades demais e continuam funcionando como “mini-monólitos” dentro da modularização.
+- O split de UI melhorou a organização, mas `src/ui/render-dashboard.js`, `src/ui/render-settings.js`, `src/ui/events-core.js` e `src/main.js` ainda concentram responsabilidades demais e funcionam como “mini-monólitos”.
 - `src/core/storage.js` mistura persistência, UI state, seed determinístico, builders de período e helpers de schema, reduzindo previsibilidade e dificultando testes localizados.
 - O bootstrap padrão usa `seedYear()` + `buildEmptyPeriodFromTemplate()` e **não** consome `generatePeriodSeed()`. O seed determinístico existe e funciona, mas não alimenta a inicialização real do app.
 - Há funções duplicadas entre `src/utils/helpers.js` e outros módulos (`csvEscape`, `buildCsvContent`, `formatBytes`, `getRiskBand`, `getNpsGoalProgress`, `normalizeSearchText`, `eventStatusClass`, `formatPersistenceTimestamp`, `shortText`, etc.), aumentando risco de divergência.
@@ -14,8 +14,9 @@
 - O linting básico fica poluído por `no-undef` e `no-unused-vars` porque a configuração atual não modela a arquitetura browser-only baseada em globais; além disso, o comando original com `--no-eslintrc` está defasado no ESLint 10.
 - Funções longas candidatas a split:
   - `src/core/storage.js`: `generatePeriodSeed`
-  - `src/ui/events.js`: `bindUIEvents`
-  - `src/ui/render.js`: `renderNps`, `renderScale`, `renderEvents`
+  - `src/ui/events-core.js`: `bindUIEvents`
+  - `src/ui/render-dashboard.js`: `renderDashboard`
+  - `src/ui/render-settings.js`: `renderSettings`
 - Ainda há resíduos de manutenção:
   - `TODO` de migração futura em `src/core/schema.js`
   - `console.warn` de fallback/sync em `src/utils/helpers.js` e `src/core/storage.js`

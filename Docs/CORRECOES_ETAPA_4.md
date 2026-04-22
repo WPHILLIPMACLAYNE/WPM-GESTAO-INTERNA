@@ -1,7 +1,7 @@
-# Correções — Etapa 4: Testes Automatizados
+# Correções — Etapa 4: Hardening de Segurança
 
-> **Data:** 5 de abril de 2026  
-> **Status:** ✅ **CONCLUÍDO** — 131/131 testes passando (112 Vitest + 19 Playwright).
+> **Data:** 22 de abril de 2026  
+> **Status:** ✅ **CONCLUÍDO** — 165/165 testes passando (138 Vitest + 27 Playwright).
 
 ---
 
@@ -9,19 +9,19 @@
 
 ### 1.1 Objetivo
 
-Criar infraestrutura de testes automatizados cobrindo:
-- **Testes unitários** das funções puras
-- **Testes de integração** dos fluxos principais
-- **Testes E2E** com Playwright (responsividade + regressão visual)
-- **CI automatizado** com GitHub Actions
+Fechar a Etapa 4 de segurança mínima antes do backend, cobrindo:
+- **CSP sem `unsafe-inline`** para scripts e estilos
+- **Headers HTTP de produção** para clickjacking e MIME sniffing
+- **Testes XSS por entidade** nas renderizações críticas
+- **Validação E2E em browser real** para garantir ausência de violações de CSP
 
 ### 1.2 Stack de Testes
 
 | Ferramenta | Uso | Status |
 |-----------|-----|--------|
-| **Vitest** | Testes unitários + integração | ✅ **112 testes passando** |
-| **Playwright** | Testes E2E (responsividade + regressão) | 📝 15 testes escritos, pendente execução |
-| **GitHub Actions** | CI automatizado | ✅ 4 jobs configurados |
+| **Vitest** | Testes unitários + integração | ✅ **138 testes passando** |
+| **Playwright** | Testes E2E (estrutura, UX e CSP) | ✅ **27 testes passando** |
+| **Vercel headers** | Hardening de produção | ✅ `Content-Security-Policy`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options` |
 
 ---
 
@@ -31,19 +31,14 @@ Criar infraestrutura de testes automatizados cobrindo:
 
 ```
 tests/
-├── helpers/
-│   └── pure-functions.js      # Funções puras extraídas para teste
 ├── unit/
-│   ├── esc.test.js            # 15 testes (escape + sanitização)
-│   ├── format.test.js         # 20 testes (formatação + CSV)
-│   ├── date-helpers.test.js   | 16 testes (datas + períodos)
-│   ├── nps.test.js            # 10 testes (NPS + risk bands)
-│   ├── validation.test.js     # 11 testes (validação de forms)
-│   └── period-metrics.test.js # 12 testes (métricas de período)
+│   ├── security-config.test.js # CSP + headers de produção
+│   ├── xss-entities.test.js    # aluno, pendência, evento, recado, NPS, settings
+│   └── ...                     # suíte existente de helpers, datas, NPS e validação
 ├── integration/
-│   └── flows.test.js          # 14 testes (fluxos de negócio)
+│   └── flows.test.js           # Fluxos de negócio
 └── e2e/
-    └── app.spec.js            # 14 testes (Playwright E2E)
+    └── app.spec.js             # Estrutura, UX e segurança CSP
 ```
 
 ### 2.2 Cobertura por Categoria
@@ -57,9 +52,10 @@ tests/
 | **Validação** | `validation.test.js` | 11 | Aluno, pendência, evento |
 | **Métricas** | `period-metrics.test.js` | 12 | Contagens, dados significativos |
 | **Fluxos (integração)** | `flows.test.js` | 14 | CRUD, backup, navegação, escala |
-| **E2E (Playwright)** | `app.spec.js` | 15 | Responsividade, CSP, DOMPurify, modais |
-| **Total escritos** | 8 arquivos | **100 unit. + 12 integ. + 15 E2E** | |
-| **Total executados** | Vitest (7 arquivos) | **112** | ✅ 112 passing |
+| **Segurança config** | `security-config.test.js` | 2 | CSP local + headers Vercel |
+| **XSS por entidade** | `xss-entities.test.js` | 6 | aluno, pendência, evento, recado, NPS, configurações |
+| **E2E (Playwright)** | `app.spec.js` | 27 | Estrutura, responsividade, funcionalidade e CSP |
+| **Total executados (Vitest)** | 11 arquivos | **138** | ✅ |
 
 ### 2.3 Exemplos de Testes
 
@@ -203,27 +199,26 @@ CI — Testes Automatizados
 
 ---
 
-## 6. Estatísticas (Números Reais — Executados em 05/04/2026)
+## 6. Estatísticas (Números Reais — Executados em 22/04/2026)
 
 ### 6.1 Resultado da Execução
 
 | Categoria | Escritos | Executados | Passando | Falhando |
 |-----------|----------|------------|----------|----------|
-| **Unitários (Vitest)** | 98 | 98 | 98 | 0 |
-| **Integração (Vitest)** | 14 | 14 | 14 | 0 |
-| **E2E (Playwright)** | 19 | 19 | 19 | 0 |
-| **TOTAL** | **131** | **131** | **131** | **0** |
+| **Vitest (unit + integração)** | 138 | 138 | 138 | 0 |
+| **E2E (Playwright)** | 27 | 27 | 27 | 0 |
+| **TOTAL** | **165** | **165** | **165** | **0** |
 
 ### 6.2 Comandos de Execução
 
 ```bash
-# Vitest (unitários + integração) — 112 testes
+# Vitest (unitários + integração) — 138 testes
 npm test
-# Output: Tests  112 passed (112)
+# Output: Tests  138 passed (138)
 
-# Playwright (E2E) — 19 testes
+# Playwright (E2E) — 27 testes
 npx playwright test --project=chromium
-# Output: 19 passed (21.0s)
+# Output: 27 passed
 
 # Tudo junto
 npm run test:all
@@ -241,10 +236,12 @@ npm run test:all
 
 | Problema | Correção | Impacto |
 |----------|----------|---------|
-| Hash SRI do DOMPurify estava errado | Removido integrity, mantido crossorigin | CSP não bloqueava mais o CDN |
-| CSP bloqueava inline script | Adicionado `'unsafe-inline'` ao script-src (necessário para app com JS em arquivo externo mas com scripts inline de fallback) | App carrega sem erros de CSP |
+| `style-src` ainda dependia de `'unsafe-inline'` | Migração de estilos estáticos e dinâmicos para CSS/CSSOM via stylesheet local | CSP endurecida sem violação no browser |
+| `frame-ancestors` em meta era proteção insuficiente | Adicionado `vercel.json` com header CSP + `X-Frame-Options: DENY` | Deploy com anti-clickjacking real |
+| Faltavam testes de regressão XSS por entidade | Adicionados `security-config.test.js` e `xss-entities.test.js` | Renderizações críticas cobertas |
+| Runtime CSSOM quebrava na troca de período | Reaproveitado `styles.css` como stylesheet runtime e protegido acesso a `cssRules` | Playwright voltou a passar 27/27 |
 | `getWeekdayLabel` usava meia-noite UTC (dia errado em SP) | Mudado para meio-dia UTC (`Date.UTC(..., 12)`) | Teste de dia da semana passou |
-| Testes E2E dependiam de JS renderizando views | Reescritos para testar estrutura HTML estática + elementos presentes | 19/19 passando |
+| Testes E2E dependiam de JS renderizando views | Reescritos para testar estrutura HTML estática + elementos presentes | Base E2E estabilizada |
 | Testes E2E com strict mode violation (2 botões same selector) | Usado `getByRole('button', { name: '...' })` | Seletores únicos |
 
 ---

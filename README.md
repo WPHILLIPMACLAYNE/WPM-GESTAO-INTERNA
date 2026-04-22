@@ -332,7 +332,7 @@ O app funciona offline após a primeira visita:
 - [x] **Fase 0** — Infraestrutura de runtime, Supabase base e observabilidade
 - [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
 - [ ] **Cache-busting do Service Worker** — versionamento por commit hash
-- [ ] **Testes XSS** — aluno, pendência, evento, recado, NPS
+- [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
 - [ ] **Backend canônico (Supabase)** — schema, auth, RLS
 - [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
 - [ ] **Relatórios exportáveis** — PDF mensal consolidado

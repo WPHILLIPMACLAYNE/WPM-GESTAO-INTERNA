@@ -22,6 +22,12 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > `script-src` não depende mais de `'unsafe-inline'`, DOMPurify/Chart.js têm SRI,
 > scripts inline foram extraídos e Playwright HTTP usa porta isolada.
 
+> **Atualização 2026-04-22 17:36** — Etapa 4 concluída em `32311fd`.
+> `style-src` também deixou de depender de `'unsafe-inline'`, o deploy ganhou
+> headers HTTP no `vercel.json`, estilos dinâmicos migraram para CSSOM compatível
+> com a CSP e a cobertura de segurança passou a incluir testes XSS por entidade,
+> configuração de headers e validação browser-real sem violações de inline style.
+
 ## Etapa 0 — Proteger baseline
 
 Prioridade: imediata.
@@ -109,30 +115,30 @@ Critério de aceite:
 
 Prioridade: alta.
 
-Status 2026-04-22: iniciada em `5eb1324`. Concluído nesta fatia: `npm audit --audit-level=moderate` sem vulnerabilidades, SRI nos CDNs atuais, extração de scripts inline do app shell, remoção de `'unsafe-inline'` de `script-src` e cobertura Playwright para CSP/SRI. Ainda falta resolver `style-src 'unsafe-inline'`, headers de produção e testes XSS por entidade.
+Status 2026-04-22: concluída localmente em `32311fd`. Entregue nesta etapa: `npm audit --audit-level=moderate` sem vulnerabilidades, SRI nos CDNs atuais, extração de scripts inline do app shell, remoção de `'unsafe-inline'` de `script-src` e `style-src`, headers de produção no `vercel.json` e testes XSS/CSP cobrindo renderização e navegador real.
 
 Ações:
 
 - Executar `npm audit fix` em branch dedicada.
 - Adicionar SRI ou hospedar DOMPurify/Chart.js localmente.
 - Mover script inline final de `index.html` para arquivo JS.
-- Planejar CSP sem `'unsafe-inline'`.
+- Planejar CSP sem `'unsafe-inline'`. ✅
 - Configurar headers de produção no Vercel:
-  - `Content-Security-Policy` com `frame-ancestors 'none'`
-  - opcional `X-Frame-Options: DENY`
+  - `Content-Security-Policy` com `frame-ancestors 'none'` ✅
+  - `X-Frame-Options: DENY` ✅
 - Criar testes XSS para:
-  - aluno;
-  - pendência;
-  - evento;
-  - recado;
-  - NPS;
-  - configurações.
+  - aluno; ✅
+  - pendência; ✅
+  - evento; ✅
+  - recado; ✅
+  - NPS; ✅
+  - configurações. ✅
 
 Critério de aceite:
 
-- `npm audit --audit-level=moderate` sem alta/moderada.
-- Browser não acusa `frame-ancestors` ignorado por meta como única proteção.
-- Entradas maliciosas renderizam como texto.
+- `npm audit --audit-level=moderate` sem alta/moderada. ✅
+- Browser não acusa `frame-ancestors` ignorado por meta como única proteção. ✅
+- Entradas maliciosas renderizam como texto. ✅
 
 ## Etapa 5 — Atualizar documentação estrutural
 

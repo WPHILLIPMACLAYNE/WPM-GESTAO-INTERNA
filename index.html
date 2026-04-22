@@ -1049,11 +1049,62 @@
       toggle();
     })();
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(function(reg) {
-        console.log('[PWA] Service worker registrado:', reg.scope);
-      }).catch(function() {
-        console.log('[PWA] Service worker indisponível (file:// ou sem suporte)');
-      });
+      var canRegisterSw = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      var hadServiceWorkerControllerAtBoot = Boolean(navigator.serviceWorker.controller);
+      var isReloadingForUpdate = false;
+      var toastTimerId = null;
+
+      function showSystemToast(message, duration) {
+        var toast = document.getElementById('saveToast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = 'save-toast';
+        toast.classList.add('show');
+        clearTimeout(toastTimerId);
+        if (duration > 0) {
+          toastTimerId = setTimeout(function() {
+            toast.classList.remove('show');
+            toastTimerId = setTimeout(function() { toast.className = 'save-toast'; }, 220);
+          }, duration);
+        }
+      }
+
+      if (canRegisterSw) {
+        var swUrl = new URL('sw.js', window.location.href);
+        navigator.serviceWorker.register(swUrl.href).then(function(reg) {
+          console.log('[PWA] Service worker registrado:', reg.scope);
+
+          reg.addEventListener('updatefound', function() {
+            var nextWorker = reg.installing;
+            if (!nextWorker) return;
+            nextWorker.addEventListener('statechange', function() {
+              if (nextWorker.state === 'installed' && hadServiceWorkerControllerAtBoot) {
+                showSystemToast('Nova versao detectada. Aplicando atualizacao...', 2600);
+              }
+            });
+          });
+
+          window.addEventListener('online', function() {
+            reg.update().catch(function() {
+              console.log('[PWA] Falha ao verificar atualizacao do service worker');
+            });
+          });
+        }).catch(function() {
+          console.log('[PWA] Service worker indisponivel (file:// ou sem suporte)');
+        });
+
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          if (!hadServiceWorkerControllerAtBoot || isReloadingForUpdate) return;
+          isReloadingForUpdate = true;
+          showSystemToast('Aplicativo atualizado. Recarregando...', 1200);
+          setTimeout(function() {
+            window.location.reload();
+          }, 900);
+        });
+      } else {
+        console.log('[PWA] Service worker indisponivel (file:// ou sem suporte)');
+      }
+
       window.addEventListener('online', function() {
         var t = document.getElementById('saveToast');
         if (t) { t.textContent = 'Conexão restaurada'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2000); }

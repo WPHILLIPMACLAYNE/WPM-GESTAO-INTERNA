@@ -10,6 +10,7 @@ const PRECACHE_ASSET_PATHS = [
   'icons/icon-192.svg',
   'icons/icon-512.svg',
   'icons/icon-maskable-512.svg',
+  'src/core/env-bootstrap.js',
   'src/utils/helpers.js',
   'src/core/config.js',
   'src/core/observability.js',
@@ -42,6 +43,8 @@ const PRECACHE_ASSET_PATHS = [
   'src/ui/events-addons.js',
   'src/ui/events-scale.js',
   'src/ui/events-nps.js',
+  'src/ui/back-to-top.js',
+  'src/core/pwa.js',
   'src/main.js'
 ];
 const PRECACHE_ASSETS = PRECACHE_ASSET_PATHS.map((asset) => new URL(asset, APP_SCOPE_URL).href);
@@ -59,7 +62,7 @@ function hashCacheManifest(input) {
 
 // CDN URLs — network-only (não cachear)
 function isCdnRequest(url) {
-  return url.includes('cdn.jsdelivr.net') || url.includes('unpkg.com');
+  return url.includes('cdn.jsdelivr.net');
 }
 
 const CACHE_MANIFEST_VERSION = hashCacheManifest([

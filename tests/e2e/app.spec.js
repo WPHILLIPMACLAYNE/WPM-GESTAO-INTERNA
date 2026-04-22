@@ -178,6 +178,15 @@ test.describe('Segurança: CSP', () => {
     expect(content).toContain("frame-ancestors 'none'");
   });
 
+  test('script-src nao deve depender de unsafe-inline', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const content = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+    const scriptSrc = content?.split(';').map(part => part.trim()).find(part => part.startsWith('script-src')) || '';
+    expect(scriptSrc).toContain("script-src 'self'");
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
+    await expect(page.locator('script:not([src])')).toHaveCount(0);
+  });
+
   test('deve carregar main.js via tag script src', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     const scriptTag = page.locator('script[src="src/main.js"]');
@@ -188,6 +197,16 @@ test.describe('Segurança: CSP', () => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     const scriptTag = page.locator('script[src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"]');
     await expect(scriptTag).toHaveCount(1);
+    await expect(scriptTag).toHaveAttribute('integrity', /^sha384-/);
+    await expect(scriptTag).toHaveAttribute('crossorigin', 'anonymous');
+  });
+
+  test('deve carregar DOMPurify com SRI', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const scriptTag = page.locator('script[src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"]');
+    await expect(scriptTag).toHaveCount(1);
+    await expect(scriptTag).toHaveAttribute('integrity', /^sha384-/);
+    await expect(scriptTag).toHaveAttribute('crossorigin', 'anonymous');
   });
 
   test('deve carregar styles.css via link tag', async ({ page }) => {

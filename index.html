@@ -10,35 +10,19 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
-  <!-- Nota: 'unsafe-inline' necessário para app single-file com JS inline -->
-  <!-- connect-src/script-src expandidos para Supabase + Sentry (Fase 0) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <!-- style-src ainda mantém 'unsafe-inline' por causa de estilos inline legados no HTML/templates. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
+          integrity="sha384-JEyTNhjM6R1ElGoJns4U2Ln4ofPcqzSsynQkmEc/KGy6336qAZl70tDLufbkla+3"
           crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+          integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+          crossorigin="anonymous"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
-  <script>
-    window.__APP_ENV__ = Object.assign({
-      SUPABASE_URL: null,
-      SUPABASE_ANON_KEY: null,
-      SENTRY_DSN: null,
-      SENTRY_ENVIRONMENT: null,
-      SENTRY_RELEASE: null,
-      APP_RUNTIME_OVERRIDE: null
-    }, window.__APP_ENV__ || {});
-  </script>
-  <script>
-    (function loadLocalEnvOverrides() {
-      const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
-      const isLocalRuntime = window.location.protocol === 'file:' || localHosts.has(window.location.hostname);
-      if (!isLocalRuntime) return;
-      const envScript = "<script src=\"env.js\" onerror=\"console.info('[env] env.js ausente — usando defaults locais')\"><\/script>";
-      document.write(envScript);
-    })();
-  </script>
+  <script src="src/core/env-bootstrap.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
   <script src="src/utils/helpers.js"></script>
   <script src="src/core/config.js"></script>
@@ -1033,87 +1017,7 @@
     </div>
   </footer>
   <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Voltar ao topo" title="Voltar ao topo">↑</button>
-  <script>
-    (function () {
-      var btn = document.getElementById('backToTopBtn');
-      if (!btn) return;
-      var threshold = 480;
-      function toggle() {
-        if (window.scrollY > threshold) btn.classList.add('show');
-        else btn.classList.remove('show');
-      }
-      window.addEventListener('scroll', toggle, { passive: true });
-      btn.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      toggle();
-    })();
-    if ('serviceWorker' in navigator) {
-      var canRegisterSw = window.location.protocol === 'http:' || window.location.protocol === 'https:';
-      var hadServiceWorkerControllerAtBoot = Boolean(navigator.serviceWorker.controller);
-      var isReloadingForUpdate = false;
-      var toastTimerId = null;
-
-      function showSystemToast(message, duration) {
-        var toast = document.getElementById('saveToast');
-        if (!toast) return;
-        toast.textContent = message;
-        toast.className = 'save-toast';
-        toast.classList.add('show');
-        clearTimeout(toastTimerId);
-        if (duration > 0) {
-          toastTimerId = setTimeout(function() {
-            toast.classList.remove('show');
-            toastTimerId = setTimeout(function() { toast.className = 'save-toast'; }, 220);
-          }, duration);
-        }
-      }
-
-      if (canRegisterSw) {
-        var swUrl = new URL('sw.js', window.location.href);
-        navigator.serviceWorker.register(swUrl.href).then(function(reg) {
-          console.log('[PWA] Service worker registrado:', reg.scope);
-
-          reg.addEventListener('updatefound', function() {
-            var nextWorker = reg.installing;
-            if (!nextWorker) return;
-            nextWorker.addEventListener('statechange', function() {
-              if (nextWorker.state === 'installed' && hadServiceWorkerControllerAtBoot) {
-                showSystemToast('Nova versao detectada. Aplicando atualizacao...', 2600);
-              }
-            });
-          });
-
-          window.addEventListener('online', function() {
-            reg.update().catch(function() {
-              console.log('[PWA] Falha ao verificar atualizacao do service worker');
-            });
-          });
-        }).catch(function() {
-          console.log('[PWA] Service worker indisponivel (file:// ou sem suporte)');
-        });
-
-        navigator.serviceWorker.addEventListener('controllerchange', function() {
-          if (!hadServiceWorkerControllerAtBoot || isReloadingForUpdate) return;
-          isReloadingForUpdate = true;
-          showSystemToast('Aplicativo atualizado. Recarregando...', 1200);
-          setTimeout(function() {
-            window.location.reload();
-          }, 900);
-        });
-      } else {
-        console.log('[PWA] Service worker indisponivel (file:// ou sem suporte)');
-      }
-
-      window.addEventListener('online', function() {
-        var t = document.getElementById('saveToast');
-        if (t) { t.textContent = 'Conexão restaurada'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2000); }
-      });
-      window.addEventListener('offline', function() {
-        var t = document.getElementById('saveToast');
-        if (t) { t.textContent = 'Modo offline — dados locais'; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 3000); }
-      });
-    }
-  </script>
+  <script src="src/ui/back-to-top.js"></script>
+  <script src="src/core/pwa.js"></script>
 </body>
 </html>

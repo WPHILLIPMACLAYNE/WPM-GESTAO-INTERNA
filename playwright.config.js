@@ -8,13 +8,13 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
   webServer: {
-    command: 'python3 -m http.server 3000 --bind 127.0.0.1',
-    url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI,
+    command: 'python3 -m http.server 4173 --bind 127.0.0.1',
+    url: 'http://127.0.0.1:4173',
+    reuseExistingServer: false,
     timeout: 30000
   },
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure'
   },

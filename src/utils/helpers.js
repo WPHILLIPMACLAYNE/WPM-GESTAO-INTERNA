@@ -259,6 +259,38 @@
       return safeGoal ? Math.min(100, (safeScore / safeGoal) * 100) : 0;
     }
 
+    /** @param {NpsMention[]} mentions @returns {NpsMention[]} */
+    function sortNpsMentionsByRanking(mentions = []) {
+      return [...mentions].sort((a, b) => {
+        if (Number(b.count || 0) !== Number(a.count || 0)) return Number(b.count || 0) - Number(a.count || 0);
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      });
+    }
+
+    /** @param {NpsMention[]} mentions @returns {Object<string, number>} */
+    function buildNpsRankSnapshot(mentions = []) {
+      return Object.fromEntries(
+        sortNpsMentionsByRanking(mentions).map((item, index) => [item.id, index + 1])
+      );
+    }
+
+    /** @param {NpsMention[]} mentions @param {*} snapshot @returns {Object<string, number>} */
+    function normalizeNpsRankSnapshot(mentions = [], snapshot = {}) {
+      const safeSnapshot = snapshot && typeof snapshot === 'object' && !Array.isArray(snapshot) ? snapshot : {};
+      const mentionIds = new Set(mentions.map(item => item.id).filter(Boolean));
+      const normalized = {};
+      Object.entries(safeSnapshot).forEach(([key, value]) => {
+        const position = Number(value);
+        if (mentionIds.has(key) && Number.isFinite(position) && position > 0) {
+          normalized[key] = position;
+        }
+      });
+      if (Object.keys(safeSnapshot).length && !Object.keys(normalized).length && mentions.length) {
+        return buildNpsRankSnapshot(mentions);
+      }
+      return normalized;
+    }
+
     /** @param {number} score - NPS score (0-100). @returns {RiskBand} Risk band with label and tone class. */
     function getRiskBand(score) {
       const value = clamp(Number(score || 0), 0, 100);

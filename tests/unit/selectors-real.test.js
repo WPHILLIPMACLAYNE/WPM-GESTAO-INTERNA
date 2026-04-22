@@ -92,6 +92,17 @@ describe('Seletores reais do app modularizado', () => {
     expect(august.students.every(student => String(student.inicio).startsWith('2026-08-'))).toBe(true);
     expect(july.pending.every(item => String(item.data).startsWith('2026-07-'))).toBe(true);
     expect(august.events.every(item => String(item.date).startsWith('2026-08-'))).toBe(true);
+
+    const mentionIds = july.nps.mentions.map(item => item.id).sort();
+    const snapshotIds = Object.keys(july.nps.rankSnapshot).sort();
+    const expectedSnapshot = Object.fromEntries(
+      july.nps.mentions
+        .slice()
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'pt-BR'))
+        .map((item, index) => [item.id, index + 1])
+    );
+    expect(snapshotIds).toEqual(mentionIds);
+    expect(july.nps.rankSnapshot).toEqual(expectedSnapshot);
   });
 
   it('selecionarTotaisAddons() e selecionarIndicadoresDashboard() derivam KPIs consistentes', async () => {
@@ -180,9 +191,37 @@ describe('Seletores reais do app modularizado', () => {
     expect(first.totalCitacoes).toBe(
       first.ranking.reduce((acc, item) => acc + Number(item.count || 0), 0)
     );
+    expect(first.ranking.every(item => item.tendencia.classe === 'trend-stable')).toBe(true);
 
     app.window.__APP_INTERNALS__.domain.limparCacheSelectores();
     const third = app.window.__APP_INTERNALS__.domain.selecionarRankingNps();
     expect(third).not.toBe(first);
+  });
+
+  it('normalizeData() corrige rankSnapshot legado sem ids de menção', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+
+    const legacyPeriod = app.window.generatePeriodSeed('2026-07');
+    legacyPeriod.nps.rankSnapshot = Object.fromEntries(
+      legacyPeriod.nps.mentions.map(item => [item.name, item.count])
+    );
+
+    await app.setStore({
+      version: app.window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: '2026-07',
+      periods: { '2026-07': legacyPeriod },
+      archives: {}
+    });
+
+    const ranking = app.window.__APP_INTERNALS__.domain.selecionarRankingNps();
+    const normalizedStore = app.window.__APP_INTERNALS__.persistence
+      .readStoredJson(app.window.__APP_INTERNALS__.config.STORAGE_KEY);
+    const normalizedSnapshot = normalizedStore.periods['2026-07'].nps.rankSnapshot;
+
+    expect(Object.keys(normalizedSnapshot).sort()).toEqual(
+      legacyPeriod.nps.mentions.map(item => item.id).sort()
+    );
+    expect(ranking.ranking.every(item => item.tendencia.classe === 'trend-stable')).toBe(true);
   });
 });

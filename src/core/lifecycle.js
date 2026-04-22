@@ -177,6 +177,7 @@
         name: item.name || item.nome || '',
         count: Math.max(0, Number(item.count || item.citacoes || 0))
       })).filter(item => item.name);
+      data.nps.rankSnapshot = normalizeNpsRankSnapshot(data.nps.mentions, data.nps.rankSnapshot);
 
       hydrateLegacyAddonsFromStudents(data);
 

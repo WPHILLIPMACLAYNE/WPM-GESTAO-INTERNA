@@ -72,40 +72,44 @@
           return;
         }
 
-        state = cloneSerializable(result.nextState);
+        async function commitSave() {
+          state = cloneSerializable(result.nextState);
 
-        // Hooks pré-salvamento (ex: decrementar contador de addon)
-        if (onBeforeSave) onBeforeSave(result.entity, previous, state);
-        const saved = await saveData();
+          // Hooks pré-salvamento (ex: decrementar contador de addon)
+          if (onBeforeSave) onBeforeSave(result.entity, previous, state);
+          const saved = await saveData();
 
-        if (!saved) {
-          state = previousState;
-          storage.activePeriod = currentPeriodKey;
-          storage.periods[currentPeriodKey] = state;
-          if (onAfterSave) onAfterSave(result.entity, previous, state, 'rollback');
-          showToast(`Falha ao salvar ${name}. Tente novamente.`, 'danger');
+          if (!saved) {
+            state = cloneSerializable(previousState);
+            storage.activePeriod = currentPeriodKey;
+            storage.periods[currentPeriodKey] = state;
+            limparCacheSelectores();
+            requestRender(renderTargets);
+            if (onAfterSave) onAfterSave(result.entity, previous, state, 'rollback');
+            showToast(`Falha ao salvar ${name}. Tente novamente.`, 'danger');
+            return;
+          }
+
+          // Hooks pós-salvamento (ex: incrementar contador de addon)
+          if (onAfterSave) onAfterSave(result.entity, previous, state, 'saved');
+
+          finalizeUI();
+          renderUI();
+          requestRender(renderTargets);
+        }
+
+        const dupMessage = duplicateCheck ? duplicateCheck(result.entity, currentCollection) : null;
+        if (dupMessage) {
+          showConfirm(dupMessage, () => {
+            commitSave().catch(err => {
+              console.error(`Falha ao confirmar salvamento de ${name}:`, err);
+              showToast(`Falha ao salvar ${name}. Tente novamente.`, 'danger');
+            });
+          });
           return;
         }
 
-        // Hooks pós-salvamento (ex: incrementar contador de addon)
-        if (onAfterSave) onAfterSave(result.entity, previous, state, 'saved');
-
-        // Verificar duplicata (específico de eventos)
-        if (duplicateCheck) {
-          const dupMessage = duplicateCheck(result.entity, currentCollection);
-          if (dupMessage) {
-            showConfirm(dupMessage, () => {
-              finalizeUI();
-              renderUI();
-              requestRender(renderTargets);
-            });
-            return;
-          }
-        }
-
-        finalizeUI();
-        renderUI();
-        requestRender(renderTargets);
+        await commitSave();
       };
     }
 
@@ -169,7 +173,7 @@
           entry.id !== entity.id &&
           String(entry.date || '') === String(entity.date || '') &&
           String(entry.time || '') === String(entity.time || '') &&
-          String(entry.title || '').trim().toLowerCase() === String(entity.title || '').trim().toLowerCase()
+          normalizeSearchText(entry.title) === normalizeSearchText(entity.title)
         );
         return dup ? 'Já existe um evento com o mesmo título, data e horário. Deseja salvar mesmo assim?' : null;
       }

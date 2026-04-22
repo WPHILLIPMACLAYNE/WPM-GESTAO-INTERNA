@@ -136,12 +136,16 @@
     function removeEventItem(id) {
       if (!assertWritableCurrentPeriod()) return;
       showConfirm('Deseja excluir este evento / ação?', async () => {
+        const previousEvents = cloneSerializable(state.events);
         const existing = state.events.find(entry => entry.id === id);
         if (!existing) return;
         state.events = state.events.filter(entry => entry.id !== id);
         const saved = await saveData();
         if (!saved) {
-          state.events.push(existing);
+          state.events = previousEvents;
+          storage.periods[currentPeriodKey] = state;
+          limparCacheSelectores();
+          requestRender(['dashboard', 'events']);
           showToast('Falha ao salvar exclusão. Tente novamente.', 'danger');
           return;
         }
@@ -154,6 +158,7 @@
       if (!assertWritableCurrentPeriod()) return;
       const item = state.events.find(entry => entry.id === id);
       if (!item) return;
+      const previousEvents = cloneSerializable(state.events);
       const clone = {
         ...structuredClone(item),
         id: crypto.randomUUID(),
@@ -164,7 +169,15 @@
       state.events.sort(compareByDateTime);
       const saved = await saveData();
       requestRender(['events', 'dashboard']);
-      if (saved) showSaveToast('✓ evento duplicado');
+      if (!saved) {
+        state.events = previousEvents;
+        storage.periods[currentPeriodKey] = state;
+        limparCacheSelectores();
+        requestRender(['events', 'dashboard']);
+        showToast('Falha ao duplicar evento. Tente novamente.', 'danger');
+        return;
+      }
+      showSaveToast('✓ evento duplicado');
     }
 
     /** @returns {void} */

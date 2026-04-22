@@ -142,6 +142,14 @@ async function createEvent(page, data) {
   await expect(page.locator('#eventModal')).not.toHaveClass(/show/);
 }
 
+async function getPersistedEventCount(page, periodKey = '2026-04') {
+  return page.evaluate((targetPeriod) => {
+    const storageKey = window.__APP_INTERNALS__.config.STORAGE_KEY;
+    const store = window.__APP_INTERNALS__.persistence.readStoredJson(storageKey);
+    return store?.periods?.[targetPeriod]?.events?.length || 0;
+  }, periodKey);
+}
+
 test.describe('Fluxos E2E reais', () => {
   test('todas as 8 abas renderizam sem erro no console', async ({ page }) => {
     const consoleErrors = [];
@@ -358,6 +366,70 @@ test.describe('Fluxos E2E reais', () => {
     await page.locator('#eventsList .event-card').filter({ hasText: '(cópia)' }).getByRole('button', { name: 'Excluir' }).click();
     await page.getByRole('button', { name: 'Confirmar' }).click();
     await expect(page.locator('#eventsList .event-card')).toHaveCount(1);
+  });
+
+  test('eventos fazem rollback em falha de persistência e confirmam duplicata antes de salvar', async ({ page }) => {
+    await seedEmptyStore(page, '2026-04');
+    await page.locator('#tab-events').click();
+
+    await page.evaluate(() => {
+      window.__originalSaveStoreForTest = window.saveStore;
+      window.saveStore = async () => false;
+    });
+
+    await page.getByRole('button', { name: 'Adicionar' }).click();
+    await page.locator('#event_date').fill('2026-04-18');
+    await page.locator('#event_time').fill('10:00');
+    await page.locator('#event_type').selectOption('Evento');
+    await page.locator('#event_status').selectOption('Confirmado');
+    await page.locator('#event_title').fill('Campanha matrícula');
+    await page.locator('#event_place').fill('Recepção');
+    await page.locator('#event_owner').fill('Coordenação');
+    await page.locator('#event_description').fill('Teste de rollback de persistência.');
+    await page.getByRole('button', { name: 'Salvar evento / ação' }).click();
+
+    await expect(page.locator('#eventModal')).toHaveClass(/show/);
+    await expect(page.locator('#eventsList .event-card')).toHaveCount(0);
+    await expect.poll(() => getPersistedEventCount(page)).toBe(0);
+    await expect(page.locator('#saveToast')).toContainText('Falha ao salvar evento');
+
+    await page.evaluate(() => {
+      window.saveStore = window.__originalSaveStoreForTest;
+      delete window.__originalSaveStoreForTest;
+    });
+
+    await page.getByRole('button', { name: 'Salvar evento / ação' }).click();
+    await expect(page.locator('#eventModal')).not.toHaveClass(/show/);
+    await expect(page.locator('#eventsList .event-card')).toHaveCount(1);
+    await expect.poll(() => getPersistedEventCount(page)).toBe(1);
+
+    await page.getByRole('button', { name: 'Adicionar' }).click();
+    await page.locator('#event_date').fill('2026-04-18');
+    await page.locator('#event_time').fill('10:00');
+    await page.locator('#event_type').selectOption('Evento');
+    await page.locator('#event_status').selectOption('Programado');
+    await page.locator('#event_title').fill('  campanha matrícula  ');
+    await page.locator('#event_place').fill('Entrada da unidade');
+    await page.locator('#event_owner').fill('Equipe comercial');
+    await page.locator('#event_description').fill('Mesmo título, data e horário exige confirmação.');
+    await page.getByRole('button', { name: 'Salvar evento / ação' }).click();
+
+    await expect(page.locator('#confirmModal')).toHaveClass(/show/);
+    await expect(page.locator('#eventModal')).toHaveClass(/show/);
+    await expect.poll(() => getPersistedEventCount(page)).toBe(1);
+
+    await page.locator('#confirmModal').getByRole('button', { name: 'Cancelar' }).click();
+    await expect(page.locator('#confirmModal')).not.toHaveClass(/show/);
+    await expect(page.locator('#eventModal')).toHaveClass(/show/);
+    await expect.poll(() => getPersistedEventCount(page)).toBe(1);
+
+    await page.getByRole('button', { name: 'Salvar evento / ação' }).click();
+    await expect(page.locator('#confirmModal')).toHaveClass(/show/);
+    await page.locator('#confirmModal').getByRole('button', { name: 'Confirmar' }).click();
+
+    await expect(page.locator('#eventModal')).not.toHaveClass(/show/);
+    await expect(page.locator('#eventsList .event-card')).toHaveCount(2);
+    await expect.poll(() => getPersistedEventCount(page)).toBe(2);
   });
 
   test('NPS persiste score e observações com debounce após reload', async ({ page }) => {

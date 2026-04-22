@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
-Data: 2026-04-18
-Última atualização: 2026-04-18 18:22:20 -03
+Data: 2026-04-22
+Última atualização: 2026-04-22 16:08:54 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -80,6 +80,8 @@ Regra:
 
 - se uma tarefa levar mais de 7 minutos e terminar em estado correto, ela deve ser commitada na branch `VSCODEX` ativa
 - ao finalizar a tarefa, atualizar este arquivo e o núcleo vivo da `.cortex/`
+- a branch ativa também deve existir no GitHub como trilho remoto oficial da sessão
+- o diretório local é a frente de trabalho principal; ao fim do dia, branch local e branch remota devem ficar alinhadas por commit + push
 
 ### Regra operacional
 
@@ -126,38 +128,61 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-04-18 18:22:20 -03
+Data/hora: 2026-04-22 16:08:54 -03
 
 - Branch atual: `VSCODEX1807`
-- Último commit conhecido: `0496003`
+- Último commit conhecido: `8c57fb4`
 - Estado do worktree ao fim desta tarefa:
   - `.cortex/AGENT_HANDOFF.md` modificado
   - `.cortex/CURRENT_STATUS.md` modificado
   - `.cortex/RETOMADA_MASTER.md` modificado
   - `.cortex/TASK_LEDGER.md` modificado
   - `Docs/RETOMADA_SEGURA.md` modificado
+  - `AGENTS.md` commitado em `694e8ed`
+  - `Docs/GUIA_CODE_REVIEW_PROJETO.md` commitado em `694e8ed`
+  - `sw.js` commitado em `8c57fb4`
+  - `index.html` commitado em `8c57fb4`
+  - `manifest.json` commitado em `8c57fb4`
+  - `tests/e2e/service-worker.spec.js` commitado em `8c57fb4`
+  - `tests/e2e/visual-states.spec.js` commitado em `d847a27`
+  - `tests/e2e/visual.spec.js` commitado em `d847a27`
+  - `tests/helpers/fixed-browser-clock.js` commitado em `d847a27`
 - Contexto recuperado e consolidado:
   - o trilho salvo no repositório é de retomada segura, baseline estável e estabilização incremental
   - o PR/planejamento de Supabase não deve ser usado como continuação desta linha
   - a `.cortex/` agora foi convertida de snapshot estático para camada viva de continuidade
   - a branch oficial de retomada desta sessão passa a ser `VSCODEX1807`
 - Tarefa concluída nesta sessão:
-  - inclusão de um teste explícito de retomada entre sessões
-  - registro da frase de confirmação que a próxima sessão deve emitir ao reconstruir o contexto corretamente
+  - estabilização dos snapshots visuais com congelamento determinístico do relógio do browser
+  - criação de um guia de code review específico do projeto e ligação dele ao fluxo de contribuição
+  - hardening do service worker para escopo seguro em root/subpath, fetch `network-first` do app shell e recarga orientada a update
+  - adição de teste Playwright dedicado para registro do service worker e shell offline
 - Arquivos tocados nesta tarefa:
+  - `tests/e2e/visual-states.spec.js`
+  - `tests/e2e/visual.spec.js`
+  - `tests/helpers/fixed-browser-clock.js`
+  - `Docs/GUIA_CODE_REVIEW_PROJETO.md`
+  - `AGENTS.md`
+  - `sw.js`
+  - `index.html`
+  - `manifest.json`
+  - `tests/e2e/service-worker.spec.js`
   - `Docs/RETOMADA_SEGURA.md`
   - `.cortex/CURRENT_STATUS.md`
   - `.cortex/AGENT_HANDOFF.md`
   - `.cortex/RETOMADA_MASTER.md`
   - `.cortex/TASK_LEDGER.md`
 - Validação executada:
-  - confirmação da branch ativa `VSCODEX1807`
-  - confirmação do commit-base local `623b50a`
-  - gravação do gatilho de resposta nos arquivos vivos de retomada
+  - `node --check sw.js` OK
+  - `npm test` OK com `129 passed`
+  - `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK com `2 passed`
+  - `npm run test:e2e` OK sem issues em desktop, tablet e mobile
+  - `npx playwright test tests/e2e/app.spec.js --reporter=line` OK com `23 passed`
 - Pendências imediatas:
-  - opcionalmente commitar este teste de handoff antes de iniciar a nova sessão
-  - na próxima sessão, usar os comandos de retomada e verificar se a resposta começa com a frase esperada
+  - commitar este checkpoint de continuidade
+  - fazer `push` para manter `origin/VSCODEX1807` alinhada com a branch local
+  - validar update/rollback em navegador já usado quando houver preview ou release candidata
 - Próximo passo exato mais seguro:
-  - iniciar a nova sessão
-  - rodar os comandos de retomada
-  - verificar se a sessão reconstruída responde com `AHAA, CONSEGUI!`
+  - fazer `push` deste checkpoint
+  - iniciar a Etapa 3
+  - revisar `rankSnapshot`, comparação de duplicidade de eventos e rollback em falha de persistência

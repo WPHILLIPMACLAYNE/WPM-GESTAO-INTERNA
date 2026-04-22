@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-04-18 18:22:20 -03
+Last updated: 2026-04-22 16:08:54 -03
 
 ## Current handoff
 
@@ -9,9 +9,17 @@ This repository already has a functioning CORTEX layer and it must now be mainta
 Current state:
 
 - baseline branch in use: `VSCODEX1807`
-- current HEAD reference: `0496003`
+- current HEAD reference: `8c57fb4`
+- previous continuity base commit: `623b50a`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
+- local executable baseline validated successfully in this session
+- visual Playwright suites now freeze browser time to keep snapshots stable
+- project-specific review guidance now lives in `Docs/GUIA_CODE_REVIEW_PROJETO.md`
+- service worker cache identity now derives from version + precache manifest hash
+- service worker registration and precache scope are now safe for root or subpath deploys
+- service worker now uses network-first app-shell fetching plus offline shell coverage
+- `VSCODEX1807` now exists on GitHub and tracks `origin/VSCODEX1807`
 
 ## What must happen after each completed task
 
@@ -61,4 +69,8 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Stay on `VSCODEX1807`, validate the baseline, and record the actual results before starting hardening work.
+Push this continuity checkpoint to `origin/VSCODEX1807`, then start Etapa 3 on the logical-bug line:
+
+1. validate `rankSnapshot` semantics in `src/core/seed.js`
+2. validate duplicate-event comparison behavior
+3. validate rollback behavior on persistence failure paths

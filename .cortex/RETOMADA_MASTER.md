@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-04-18 18:22:20 -03
+Last updated: 2026-04-22 16:08:54 -03
 
 ## Purpose
 
@@ -11,16 +11,20 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 ## Active recovery identity
 
 - Recovery branch: `VSCODEX1807`
+- Remote recovery branch: `origin/VSCODEX1807`
 - Branch created at: `2026-04-18 18:07:46 -03`
 - Current HEAD reference at creation: `0496003`
+- Current live HEAD: `8c57fb4`
+- Previous continuity base commit: `623b50a`
 - Timezone for all continuity records: `America/Sao_Paulo`
 
 ## Current project state
 
-- The live working line is baseline stabilization and recovery-safe continuity
+- The live working line is baseline stabilization, service-worker hardening, and recovery-safe continuity
 - The saved repo line to continue is not the Supabase/backend PR branch
 - The app baseline is `v34`
-- The repo still requires validation-first work before new functional expansion
+- The repo now has a project-specific review guide and a local PWA/offline validation path
+- The repo still requires logic-hardening work before new functional expansion
 
 ## Mandatory read order on resume
 
@@ -66,13 +70,27 @@ This phrase is a continuity test marker and should be used only when the new ses
 - created `VSCODEX1807` as the active recovery branch
 - established the timestamped recovery-branch rule `VSCODEXHHMM`
 - synchronized the continuity protocol across the main recovery files
+- validated the local executable baseline end-to-end
+- stabilized Playwright visual snapshots by freezing browser time in the visual suites
+- tied the service worker cache identity to `APP_VERSION` + precache-manifest hash
+- added a project-specific code review guide linked from `AGENTS.md`
+- hardened the service worker with scope-safe app-shell caching, network-first fetching, and update messaging
+- added dedicated Playwright coverage for service-worker registration and offline shell behavior
+- published the active recovery branch to GitHub with upstream tracking enabled
 
 ## Exact next step
 
-Validate the executable baseline on `VSCODEX1807`:
+Close the current checkpoint cleanly, then move to Etapa 3:
 
-1. `node --check src/main.js`
-2. `npm test`
-3. `npx playwright test --reporter=line`
+1. commit and push this continuity checkpoint to `origin/VSCODEX1807`
+2. start the logic-hardening line before backend expansion
+3. first inspect `src/core/seed.js` `rankSnapshot`
+4. then validate duplicate-event logic and persistence rollback paths
 
-Then record the exact result with Sao Paulo timestamp in all living continuity files before moving to the next task.
+The latest validation already recorded for this session is:
+
+1. `node --check sw.js` OK
+2. `npm test` OK with `129 passed`
+3. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
+4. `npm run test:e2e` OK with no issues across all viewports
+5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `23 passed`

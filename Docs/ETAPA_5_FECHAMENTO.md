@@ -1,5 +1,8 @@
 # Fechamento da Etapa 5 — Modularização do WPM Gestão Interna
 
+> **Aviso:** este documento é um snapshot histórico do fechamento inicial da Etapa 5 em `2026-04-05`.
+> O retrato estrutural atual do runtime está em `MODULE_MAP.md` e `QWEN.md`.
+
 **Data:** 5 de abril de 2026
 **Projeto:** WPM Gestão Interna — SPA single-file, browser-only, script tags
 **Arquitetura:** SPA de arquivo único com `<script>` tags sequenciais (sem ES modules, sem build step)

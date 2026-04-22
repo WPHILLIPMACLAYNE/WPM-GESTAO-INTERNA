@@ -1,5 +1,8 @@
 # Etapa 5 — Finalização e Correção de Integração
 
+> **Aviso:** este arquivo registra o fechamento histórico inicial da Etapa 5 em `2026-04-05`.
+> Para o mapa estrutural e a ordem de carga atuais, use `MODULE_MAP.md` e `QWEN.md`.
+
 **Data:** 5 de abril de 2026
 **Projeto:** WPM Gestão Interna — SPA single-file, browser-only, script tags
 **Arquitetura:** SPA de arquivo único com `<script>` tags sequenciais (sem ES modules, sem build step)

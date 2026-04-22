@@ -2,6 +2,9 @@ const APP_VERSION = 'v34';
 const SW_CACHE_STRATEGY_VERSION = 'runtime-v2';
 const APP_SCOPE_URL = new URL('./', self.location.href);
 const APP_SCOPE_HREF = APP_SCOPE_URL.href;
+const CACHE_PREFIX = `wpm-${APP_VERSION}-`;
+const META_CACHE_NAME = `wpm-meta-${APP_VERSION}`;
+const ACTIVE_CACHE_META_URL = new URL('__meta__/active-cache', APP_SCOPE_URL).href;
 
 const PRECACHE_ASSET_PATHS = [
   'index.html',
@@ -60,18 +63,27 @@ function hashCacheManifest(input) {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+function hashByteArray(bytes) {
+  let hash = 2166136261;
+  for (let index = 0; index < bytes.length; index += 1) {
+    hash ^= bytes[index];
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
 // CDN URLs — network-only (não cachear)
 function isCdnRequest(url) {
   return url.includes('cdn.jsdelivr.net');
 }
 
-const CACHE_MANIFEST_VERSION = hashCacheManifest([
+const CACHE_NAME_FALLBACK = `${CACHE_PREFIX}${hashCacheManifest([
   APP_VERSION,
   SW_CACHE_STRATEGY_VERSION,
   APP_SCOPE_HREF,
   ...PRECACHE_ASSET_PATHS
-].join('|'));
-const CACHE_NAME = `wpm-${APP_VERSION}-${CACHE_MANIFEST_VERSION}`;
+].join('|'))}`;
+let activeCacheNamePromise = null;
 
 function isAppScopeRequest(url) {
   return url.origin === APP_SCOPE_URL.origin && url.href.startsWith(APP_SCOPE_HREF);
@@ -97,17 +109,74 @@ function shouldCacheResponse(response) {
   return Boolean(response && response.ok && (response.type === 'basic' || response.type === 'default'));
 }
 
-async function putInCache(request, response, { storeDocumentFallback = false } = {}) {
+async function readActiveCacheNameFromMeta() {
+  const metaCache = await caches.open(META_CACHE_NAME);
+  const metaResponse = await metaCache.match(ACTIVE_CACHE_META_URL);
+  if (!metaResponse) return null;
+  const text = (await metaResponse.text()).trim();
+  return text || null;
+}
+
+async function writeActiveCacheName(cacheName) {
+  const metaCache = await caches.open(META_CACHE_NAME);
+  await metaCache.put(ACTIVE_CACHE_META_URL, new Response(String(cacheName), {
+    headers: { 'content-type': 'text/plain; charset=utf-8' }
+  }));
+  activeCacheNamePromise = Promise.resolve(cacheName);
+}
+
+async function getActiveCacheName() {
+  if (!activeCacheNamePromise) {
+    activeCacheNamePromise = readActiveCacheNameFromMeta().then((cacheName) => cacheName || CACHE_NAME_FALLBACK);
+  }
+  return activeCacheNamePromise;
+}
+
+async function openActiveCache() {
+  const cacheName = await getActiveCacheName();
+  return caches.open(cacheName);
+}
+
+async function fetchPrecacheEntry(url) {
+  const request = new Request(url, { cache: 'reload' });
+  const response = await fetch(request);
+  if (!shouldCacheResponse(response)) {
+    throw new Error(`Falha ao baixar asset do precache: ${url}`);
+  }
+
+  const buffer = await response.clone().arrayBuffer();
+  return {
+    request,
+    response,
+    contentHash: hashByteArray(new Uint8Array(buffer))
+  };
+}
+
+async function buildPrecacheBundle() {
+  const entries = await Promise.all(PRECACHE_ASSETS.map(fetchPrecacheEntry));
+  const revision = hashCacheManifest([
+    APP_VERSION,
+    SW_CACHE_STRATEGY_VERSION,
+    ...entries.map(({ request, contentHash }) => `${request.url}:${contentHash}`)
+  ].join('|'));
+
+  return {
+    cacheName: `${CACHE_PREFIX}${revision}`,
+    entries
+  };
+}
+
+async function putInCache(request, response, { storeDocumentFallback = false, cache = null } = {}) {
   if (!shouldCacheResponse(response)) return;
-  const cache = await caches.open(CACHE_NAME);
-  await cache.put(request, response.clone());
+  const targetCache = cache || await openActiveCache();
+  await targetCache.put(request, response.clone());
   if (storeDocumentFallback) {
-    await cache.put(DOCUMENT_FALLBACK_URL, response.clone());
+    await targetCache.put(DOCUMENT_FALLBACK_URL, response.clone());
   }
 }
 
 async function networkFirst(request, { documentFallback = false } = {}) {
-  const cache = await caches.open(CACHE_NAME);
+  const cache = await openActiveCache();
   try {
     const response = await fetch(request);
     await putInCache(request, response, { storeDocumentFallback: documentFallback });
@@ -124,7 +193,7 @@ async function networkFirst(request, { documentFallback = false } = {}) {
 }
 
 async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
+  const cache = await openActiveCache();
   const cached = await cache.match(request);
   if (cached) return cached;
   const response = await fetch(request);
@@ -135,9 +204,12 @@ async function cacheFirst(request) {
 // Install: pre-cache de assets estáticos
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(async (cache) => {
-        await cache.addAll(PRECACHE_ASSETS);
+    buildPrecacheBundle()
+      .then(async ({ cacheName, entries }) => {
+        const cache = await caches.open(cacheName);
+        await Promise.all(entries.map(({ request, response }) => cache.put(request, response.clone())));
+        await cache.put(DOCUMENT_FALLBACK_URL, entries.find(({ request }) => request.url === DOCUMENT_FALLBACK_URL)?.response.clone());
+        await writeActiveCacheName(cacheName);
       })
       .then(() => self.skipWaiting())
   );
@@ -146,12 +218,15 @@ self.addEventListener('install', (event) => {
 // Activate: limpar caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
+    getActiveCacheName()
+      .then((activeCacheName) => caches.keys()
+        .then((keys) => Promise.all(
+          keys
+            .filter((key) => key !== META_CACHE_NAME)
+            .filter((key) => !(key === activeCacheName))
+            .filter((key) => key.startsWith(CACHE_PREFIX) || key.startsWith('wpm-'))
+            .map((key) => caches.delete(key))
+        )))
       .then(async () => {
         if (self.registration.navigationPreload) {
           await self.registration.navigationPreload.enable();

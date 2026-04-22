@@ -32,6 +32,17 @@ test.describe('Service worker', () => {
     expect(swInfo.controllerScriptUrl).toBe(swInfo.activeScriptUrl);
   });
 
+  test('usa cache versionado por revisao de precache e nao por nome fixo legado', async ({ page }) => {
+    await waitForServiceWorkerControl(page);
+
+    const cacheKeys = await page.evaluate(async () => caches.keys());
+    const appCaches = cacheKeys.filter((key) => key.startsWith('wpm-v34-'));
+
+    expect(appCaches.length).toBe(1);
+    expect(appCaches[0]).toMatch(/^wpm-v34-[a-f0-9]{8}$/);
+    expect(cacheKeys).not.toContain('wpm-v1');
+  });
+
   test('mantem o app shell disponivel offline apos o primeiro carregamento', async ({ page }) => {
     await waitForServiceWorkerControl(page);
 

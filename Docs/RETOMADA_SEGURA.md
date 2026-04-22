@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-04-22 16:26:40 -03
+Última atualização: 2026-04-22 16:38:51 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,10 +128,10 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-04-22 16:26:40 -03
+Data/hora: 2026-04-22 16:38:51 -03
 
 - Branch atual: `VSCODEX1807`
-- Último commit conhecido: `eaa4559`
+- Último commit conhecido: `5eb1324`
 - Estado do worktree ao fim desta tarefa:
   - `.cortex/AGENT_HANDOFF.md` modificado
   - `.cortex/CURRENT_STATUS.md` modificado
@@ -139,34 +139,36 @@ Data/hora: 2026-04-22 16:26:40 -03
   - `.cortex/TASK_LEDGER.md` modificado
   - `Docs/RETOMADA_SEGURA.md` modificado
   - `Docs/PROXIMOS_PASSOS.md` modificado
-  - `src/utils/helpers.js` commitado em `eaa4559`
-  - `src/core/seed.js` commitado em `eaa4559`
-  - `src/core/lifecycle.js` commitado em `eaa4559`
-  - `src/domain/selectors.js` commitado em `eaa4559`
-  - `src/features/crud.js` commitado em `eaa4559`
-  - `src/ui/render-events.js` commitado em `eaa4559`
-  - `tests/unit/selectors-real.test.js` commitado em `eaa4559`
-  - `tests/e2e/workflows.spec.js` commitado em `eaa4559`
+  - `README.md` modificado
+  - `MODULE_MAP.md` modificado
+  - `index.html` commitado em `5eb1324`
+  - `sw.js` commitado em `5eb1324`
+  - `playwright.config.js` commitado em `5eb1324`
+  - `tests/e2e/app.spec.js` commitado em `5eb1324`
+  - `src/core/env-bootstrap.js` commitado em `5eb1324`
+  - `src/core/pwa.js` commitado em `5eb1324`
+  - `src/ui/back-to-top.js` commitado em `5eb1324`
 - Contexto recuperado e consolidado:
   - o trilho salvo no repositório é de retomada segura, baseline estável e estabilização incremental
   - o PR/planejamento de Supabase não deve ser usado como continuação desta linha
   - a `.cortex/` agora foi convertida de snapshot estático para camada viva de continuidade
   - a branch oficial de retomada desta sessão passa a ser `VSCODEX1807`
 - Tarefa concluída nesta sessão:
-  - conclusão da Etapa 3 de hardening lógico antes de backend
-  - correção de `rankSnapshot` de NPS para o contrato `{ mentionId: position }`
-  - normalização de snapshots legados sem ids de menção
-  - confirmação de evento duplicado antes de persistir, com comparação normalizada por título/data/horário
-  - rollback de CRUD e operações diretas de evento quando a persistência falha
+  - início da Etapa 4 de segurança mínima antes de backend
+  - remoção de scripts inline do app shell e extração para arquivos versionados
+  - remoção de `'unsafe-inline'` de `script-src`
+  - adição de SRI e `crossorigin="anonymous"` aos scripts CDN DOMPurify/Chart.js
+  - isolamento do servidor HTTP do Playwright na porta `4173`
 - Arquivos tocados nesta tarefa:
-  - `src/utils/helpers.js`
-  - `src/core/seed.js`
-  - `src/core/lifecycle.js`
-  - `src/domain/selectors.js`
-  - `src/features/crud.js`
-  - `src/ui/render-events.js`
-  - `tests/unit/selectors-real.test.js`
-  - `tests/e2e/workflows.spec.js`
+  - `index.html`
+  - `sw.js`
+  - `playwright.config.js`
+  - `tests/e2e/app.spec.js`
+  - `src/core/env-bootstrap.js`
+  - `src/core/pwa.js`
+  - `src/ui/back-to-top.js`
+  - `README.md`
+  - `MODULE_MAP.md`
   - `Docs/PROXIMOS_PASSOS.md`
   - `Docs/RETOMADA_SEGURA.md`
   - `.cortex/CURRENT_STATUS.md`
@@ -174,16 +176,17 @@ Data/hora: 2026-04-22 16:26:40 -03
   - `.cortex/RETOMADA_MASTER.md`
   - `.cortex/TASK_LEDGER.md`
 - Validação executada:
-  - `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
-  - `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK com `7 passed`
-  - `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK com `1 passed`
+  - `npm audit --audit-level=moderate` OK com `0 vulnerabilities`
+  - `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
   - `npm test -- --run --reporter=dot` OK com `130 passed`
-  - `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK com `8 passed`
+  - `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK com `2 passed`
+  - `npx playwright test tests/e2e/app.spec.js --reporter=line` OK com `25 passed`
+  - `npm run test:e2e` OK sem issues em desktop, tablet e mobile
 - Pendências imediatas:
-  - commitar este checkpoint de continuidade sobre `eaa4559`
+  - commitar este checkpoint de continuidade sobre `5eb1324`
   - fazer `push` para manter `origin/VSCODEX1807` alinhada com a branch local
   - validar update/rollback em navegador já usado quando houver preview ou release candidata
 - Próximo passo exato mais seguro:
   - commitar e fazer `push` deste checkpoint
-  - iniciar a Etapa 4
-  - começar por `npm audit --audit-level=moderate`, SRI/local hosting para CDN e planejamento de CSP
+  - continuar a Etapa 4
+  - tratar ou escopar `style-src 'unsafe-inline'`, configurar headers de produção e adicionar testes XSS por entidade

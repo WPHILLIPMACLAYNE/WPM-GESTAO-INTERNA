@@ -263,3 +263,42 @@ This file records one durable checkpoint per completed task.
   - start Etapa 4 security hardening before backend expansion
   - run `npm audit --audit-level=moderate`
   - plan SRI or local hosting for DOMPurify/Chart.js and CSP cleanup
+
+### Task 010
+
+- Date/time: 2026-04-22 16:38:51 -03
+- Branch: `VSCODEX1807`
+- HEAD: `5eb1324`
+- Task: start Etapa 4 security hardening by removing app-shell inline scripts, tightening `script-src`, adding SRI to CDN scripts, and isolating Playwright's HTTP server
+- Files touched:
+  - `index.html`
+  - `sw.js`
+  - `playwright.config.js`
+  - `tests/e2e/app.spec.js`
+  - `src/core/env-bootstrap.js`
+  - `src/core/pwa.js`
+  - `src/ui/back-to-top.js`
+  - `README.md`
+  - `MODULE_MAP.md`
+  - `Docs/PROXIMOS_PASSOS.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - `npm audit --audit-level=moderate` OK with `0 vulnerabilities`
+  - `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
+  - `npm test -- --run --reporter=dot` OK with `130 passed`
+  - `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
+  - `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `25 passed`
+  - `npm run test:e2e` OK with no issues across all viewports
+- Pending:
+  - commit this continuity checkpoint on top of `5eb1324`
+  - push `VSCODEX1807` so local and remote align again
+  - validate deploy/update/rollback in a reused browser when a preview or release candidate exists
+  - finish remaining Etapa 4 items
+- Next step:
+  - address or explicitly scope remaining `style-src 'unsafe-inline'`
+  - add production CSP/clickjacking headers for the selected deploy platform
+  - add XSS regression tests for aluno, pendência, evento, recado, NPS and configurações

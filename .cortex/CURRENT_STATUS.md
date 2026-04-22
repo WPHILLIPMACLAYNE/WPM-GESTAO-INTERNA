@@ -1,16 +1,16 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-04-22
-Last updated: 2026-04-22 16:26:40 -03
+Last updated: 2026-04-22 16:38:51 -03
 
 ## Live status
 
 - Branch: `VSCODEX1807`
-- HEAD: `eaa4559`
+- HEAD: `5eb1324`
 - Baseline in production: `origin/main`
 - App version: `v34`
 - Store version: `4`
-- Runtime model: browser-only SPA with 30 classic `<script>` files in fixed order
+- Runtime model: browser-only SPA with classic `<script>` files in fixed order
 - Active recovery branch: `VSCODEX1807`
 - Recovery branch created at: `2026-04-18 18:07:46 -03`
 - Previous continuity base commit: `623b50a`
@@ -37,23 +37,29 @@ Confirmed live facts:
 - duplicate-event confirmation now runs before persistence and compares normalized titles plus date/time
 - CRUD rollback now restores `state`, `storage.periods`, selector cache, and affected render targets when persistence fails
 - direct event delete/duplicate paths now restore their previous event collection on persistence failure
+- Etapa 4 security hardening started in `5eb1324`
+- `script-src` no longer depends on `'unsafe-inline'`
+- DOMPurify and Chart.js CDN tags now use SRI plus `crossorigin="anonymous"`
+- former inline app-shell scripts now live in `src/core/env-bootstrap.js`, `src/ui/back-to-top.js`, and `src/core/pwa.js`
+- Playwright HTTP tests now use an isolated `127.0.0.1:4173` server and never reuse an unrelated process
 
 ## Current safe next step
 
-After the validated baseline, service-worker hardening, and Etapa 3 logic hardening:
+After the validated baseline, service-worker hardening, Etapa 3 logic hardening, and the first Etapa 4 CSP hardening slice:
 
 1. stay on `VSCODEX1807` for recovery-safe work
 2. commit this continuity checkpoint
 3. push `VSCODEX1807` so local and remote converge again
-4. begin Etapa 4 security work before backend expansion
+4. continue Etapa 4 with style/CSP headers and XSS tests before backend expansion
 
 Latest validation result:
 
-1. `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
-2. `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK with `7 passed`
-3. `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK with `1 passed`
-4. `npm test -- --run --reporter=dot` OK with `130 passed`
-5. `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK with `8 passed`
+1. `npm audit --audit-level=moderate` OK with `0 vulnerabilities`
+2. `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
+3. `npm test -- --run --reporter=dot` OK with `130 passed`
+4. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
+5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `25 passed`
+6. `npm run test:e2e` OK with no issues across all viewports
 
 ## CORTEX operating rule
 
@@ -88,5 +94,6 @@ For present-state decisions, trust these in order:
 - storage, backup, and lifecycle centrality
 - documentation drift across historical docs
 - deploy/rollback validation in a reused browser is still pending outside local tests
-- CSP/CDN hardening gap
-- Etapa 4 security hardening is the next high-priority line
+- `style-src 'unsafe-inline'` still remains because of inline style attributes/templates
+- production CSP/clickjacking headers still need deploy-platform implementation
+- XSS regression tests per entity still need to be added

@@ -18,6 +18,10 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > PWA/service worker foi endurecido em `8c57fb4`; hardening lógico de NPS/eventos/rollback
 > foi concluído em `eaa4559`. A próxima linha segura é a Etapa 4.
 
+> **Atualização 2026-04-22 16:38** — Etapa 4 iniciada em `5eb1324`.
+> `script-src` não depende mais de `'unsafe-inline'`, DOMPurify/Chart.js têm SRI,
+> scripts inline foram extraídos e Playwright HTTP usa porta isolada.
+
 ## Etapa 0 — Proteger baseline
 
 Prioridade: imediata.
@@ -104,6 +108,8 @@ Critério de aceite:
 ## Etapa 4 — Segurança mínima para backend
 
 Prioridade: alta.
+
+Status 2026-04-22: iniciada em `5eb1324`. Concluído nesta fatia: `npm audit --audit-level=moderate` sem vulnerabilidades, SRI nos CDNs atuais, extração de scripts inline do app shell, remoção de `'unsafe-inline'` de `script-src` e cobertura Playwright para CSP/SRI. Ainda falta resolver `style-src 'unsafe-inline'`, headers de produção e testes XSS por entidade.
 
 Ações:
 

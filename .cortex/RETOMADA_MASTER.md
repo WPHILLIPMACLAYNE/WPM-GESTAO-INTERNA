@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-04-22 16:26:40 -03
+Last updated: 2026-04-22 16:38:51 -03
 
 ## Purpose
 
@@ -14,7 +14,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - Remote recovery branch: `origin/VSCODEX1807`
 - Branch created at: `2026-04-18 18:07:46 -03`
 - Current HEAD reference at creation: `0496003`
-- Current live HEAD: `eaa4559`
+- Current live HEAD: `5eb1324`
 - Previous continuity base commit: `623b50a`
 - Timezone for all continuity records: `America/Sao_Paulo`
 
@@ -24,7 +24,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - The saved repo line to continue is not the Supabase/backend PR branch
 - The app baseline is `v34`
 - The repo now has a project-specific review guide and a local PWA/offline validation path
-- The repo completed the Etapa 3 logic-hardening line and should move to security hardening before backend expansion
+- The repo completed Etapa 3 and started Etapa 4 security hardening before backend expansion
 
 ## Mandatory read order on resume
 
@@ -79,21 +79,25 @@ This phrase is a continuity test marker and should be used only when the new ses
 - fixed NPS `rankSnapshot` generation/normalization to use `mentionId -> position`
 - moved duplicate-event confirmation before persistence and normalized the duplicate title comparison
 - strengthened CRUD and direct event rollback behavior when persistence fails
+- removed inline JavaScript from the app shell and tightened `script-src`
+- added SRI to DOMPurify/Chart.js CDN scripts
+- isolated the Playwright HTTP server on port `4173`
 - published the active recovery branch to GitHub with upstream tracking enabled
 
 ## Exact next step
 
-Close the current checkpoint cleanly, then move to Etapa 4:
+Close the current checkpoint cleanly, then continue Etapa 4:
 
 1. commit this continuity checkpoint and push to `origin/VSCODEX1807`
-2. start the security-hardening line before backend expansion
-3. run `npm audit --audit-level=moderate`
-4. plan SRI/local hosting for CDN libraries and CSP cleanup
+2. address or explicitly scope the remaining `style-src 'unsafe-inline'`
+3. add production CSP/clickjacking headers
+4. add XSS regression tests per user-editable entity
 
 The latest validation already recorded for this session is:
 
-1. `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
-2. `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK with `7 passed`
-3. `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK with `1 passed`
-4. `npm test -- --run --reporter=dot` OK with `130 passed`
-5. `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK with `8 passed`
+1. `npm audit --audit-level=moderate` OK with `0 vulnerabilities`
+2. `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
+3. `npm test -- --run --reporter=dot` OK with `130 passed`
+4. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
+5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `25 passed`
+6. `npm run test:e2e` OK with no issues across all viewports

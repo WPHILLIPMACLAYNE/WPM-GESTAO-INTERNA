@@ -181,7 +181,7 @@ Acesse **http://localhost:3000**.
 
 ### Runtime de ambiente (`env.js`)
 
-- O app sempre inicia com defaults seguros de `window.__APP_ENV__` embutidos no `index.html`.
+- O app sempre inicia com defaults seguros de `window.__APP_ENV__` em `src/core/env-bootstrap.js`.
 - O arquivo `env.js` é opcional e carregado somente em runtime local (`localhost`, `127.0.0.1` ou `file://`).
 - Em deploy remoto (como GitHub Pages), `env.js` não é requisitado, evitando ruído de `404` no boot.
 

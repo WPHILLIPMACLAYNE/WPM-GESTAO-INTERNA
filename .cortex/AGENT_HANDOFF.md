@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-04-22 16:26:40 -03
+Last updated: 2026-04-22 16:38:51 -03
 
 ## Current handoff
 
@@ -9,7 +9,7 @@ This repository already has a functioning CORTEX layer and it must now be mainta
 Current state:
 
 - baseline branch in use: `VSCODEX1807`
-- current HEAD reference: `eaa4559`
+- current HEAD reference: `5eb1324`
 - previous continuity base commit: `623b50a`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
@@ -23,6 +23,11 @@ Current state:
 - NPS `rankSnapshot` now uses `mentionId -> position` and legacy invalid snapshots are normalized
 - duplicate-event confirmation now happens before persistence and uses normalized title/date/time comparison
 - CRUD/event rollback paths now restore in-memory state after persistence failure
+- Etapa 4 security hardening started in `5eb1324`
+- `script-src` no longer includes `'unsafe-inline'`
+- DOMPurify/Chart.js keep CDN loading but now require SRI
+- app-shell inline scripts were extracted to `src/core/env-bootstrap.js`, `src/ui/back-to-top.js`, and `src/core/pwa.js`
+- Playwright HTTP validation now uses isolated port `4173`
 - `VSCODEX1807` now exists on GitHub and tracks `origin/VSCODEX1807`
 
 ## What must happen after each completed task
@@ -73,8 +78,8 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Commit this continuity checkpoint, push `VSCODEX1807`, then start Etapa 4 on the security-hardening line:
+Commit this continuity checkpoint, push `VSCODEX1807`, then continue Etapa 4:
 
-1. run `npm audit --audit-level=moderate` and decide whether a dedicated audit-fix branch is needed
-2. plan DOMPurify/Chart.js SRI or local hosting
-3. plan CSP cleanup for inline scripts and production headers
+1. address remaining `style-src 'unsafe-inline'` or document the exact blockers
+2. add production CSP/clickjacking headers for the selected deploy platform
+3. add XSS regression tests for aluno, pendência, evento, recado, NPS and configurações

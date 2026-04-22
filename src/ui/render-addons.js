@@ -9,7 +9,7 @@
       const activeReceptionistSet = new Set(activeReceptionists);
       const addonPeople = getAddonPeople(state);
       document.getElementById('monthDaysSelector').value = String(days);
-      document.getElementById('addonsGrid').innerHTML = addonPeople.map(person => {
+      aplicarHtmlSeMudou(document.getElementById('addonsGrid'), addonPeople.map(person => {
         const isHistorical = !activeReceptionistSet.has(person);
         const personTypes = [...new Set([...state.settings.addonTypes, ...Object.keys(state.addons[person] || {})])];
         const personTitle = isHistorical ? 'Atendente removido do cadastro ativo. Histórico preservado em modo somente leitura.' : '';
@@ -24,8 +24,8 @@
             const arr = state.addons[person]?.[type] || Array.from({length:days},()=>0);
             const total = arr.reduce((a,b) => a + Number(b || 0), 0);
             return `
-              <div class="chart-box" style="margin-bottom:12px;">
-                <div class="toolbar" style="margin-bottom:10px;">
+              <div class="chart-box chart-box--spaced">
+                <div class="toolbar toolbar--compact">
                   <strong>${esc(type)}</strong>
                   <span class="pill">Total: ${total}</span>
                 </div>
@@ -42,7 +42,7 @@
           }).join('')}
         </div>
       `;
-      }).join('') || '<div class="empty"><strong>Sem atendentes cadastrados</strong>Abra <em>Configurações</em> e cadastre a equipe para liberar o lançamento diário de addons por tipo.</div>';
+      }).join('') || '<div class="empty"><strong>Sem atendentes cadastrados</strong>Abra <em>Configurações</em> e cadastre a equipe para liberar o lançamento diário de addons por tipo.</div>');
 
       const rankingHost = document.getElementById('addonsTopSellers');
       if (!rankingHost) return;

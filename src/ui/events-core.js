@@ -32,7 +32,7 @@
       estadoAcessibilidade.focoRetornoModal[id] = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('body-scroll-locked');
       const destino = modal.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])') || modal.querySelector('.modal-content');
       destino?.focus({ preventScroll: true });
     }
@@ -45,7 +45,7 @@
       modal.setAttribute('aria-hidden', 'true');
       const modalAberto = document.querySelector('.modal.show');
       if (!modalAberto) {
-        document.body.style.overflow = '';
+        document.body.classList.remove('body-scroll-locked');
         const retorno = estadoAcessibilidade.focoRetornoModal[id];
         if (retorno && retorno.isConnected) retorno.focus({ preventScroll: true });
       } else {
@@ -572,8 +572,10 @@
       let y = clientY + offset;
       if (x > maxX) x = Math.max(12, clientX - tooltip.offsetWidth - offset);
       if (y > maxY) y = Math.max(12, clientY - tooltip.offsetHeight - offset);
-      tooltip.style.left = `${Math.max(12, Math.min(maxX, x))}px`;
-      tooltip.style.top = `${Math.max(12, Math.min(maxY, y))}px`;
+      setRuntimeStyle(tooltip, {
+        left: `${Math.max(12, Math.min(maxX, x))}px`,
+        top: `${Math.max(12, Math.min(maxY, y))}px`
+      });
     }
 
     /** @returns {void} */

@@ -245,7 +245,7 @@
               <span class="muted">${esc(formatBytes(usage.bytes))} de ${esc(formatBytes(usage.quotaBytes))}</span>
             </div>
             <div class="settings-storage-bar" aria-hidden="true">
-              <div class="settings-storage-fill" style="width:${Math.min(100, usage.ratio * 100)}%"></div>
+              <div class="settings-storage-fill" data-style-width-pct="${Math.min(100, usage.ratio * 100)}"></div>
             </div>
             <div class="settings-storage-meta">
               <span>Uso estimado do espelho local <strong>${usage.error ? '—' : `${(usage.ratio * 100).toFixed(1)}%`}</strong></span>

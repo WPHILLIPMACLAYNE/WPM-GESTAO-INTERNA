@@ -82,7 +82,7 @@
           <td>${npsPill(s.avisoNps)}</td>
           <td>${esc(s.atendimento || '-')}</td>
           <td>${studentStatusPill(s.feedback)}</td>
-          <td>${s.addon ? `<span class="pill info">${esc(s.addon)}</span>` : '<span class="pill" style="background:rgba(255,255,255,0.06);color:var(--muted-2);">Nenhum</span>'}</td>
+          <td>${s.addon ? `<span class="pill info">${esc(s.addon)}</span>` : '<span class="pill muted">Nenhum</span>'}</td>
           <td>${renderEllipsisCell(s.observacoes, '-')}</td>
           <td class="right">
             <button class="btn btn-ghost btn-xs" data-action="edit-student" data-id="${s.id}" aria-label="Editar atendimento de ${esc(s.nome)}">Editar</button>

@@ -187,6 +187,29 @@ test.describe('Segurança: CSP', () => {
     await expect(page.locator('script:not([src])')).toHaveCount(0);
   });
 
+  test('style-src nao deve depender de unsafe-inline', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const content = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+    const styleSrc = content?.split(';').map(part => part.trim()).find(part => part.startsWith('style-src')) || '';
+    expect(styleSrc).toContain("style-src 'self'");
+    expect(styleSrc).not.toContain("'unsafe-inline'");
+  });
+
+  test('nao deve registrar violacoes de CSP para estilos inline', async ({ page }) => {
+    const violations = [];
+    page.on('console', message => {
+      const text = message.text();
+      if (/inline style violates|Refused to apply inline style/i.test(text)) {
+        violations.push(text);
+      }
+    });
+
+    await page.goto(FILE_URL, { waitUntil: 'load' });
+    await page.waitForTimeout(600);
+
+    expect(violations).toEqual([]);
+  });
+
   test('deve carregar main.js via tag script src', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     const scriptTag = page.locator('script[src="src/main.js"]');

@@ -10,10 +10,10 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
-  <!-- style-src ainda mantém 'unsafe-inline' por causa de estilos inline legados no HTML/templates. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <!-- O app shell não depende mais de estilos inline estáticos; ajustes dinâmicos são aplicados via JS. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" data-runtime-stylesheet />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
           integrity="sha384-JEyTNhjM6R1ElGoJns4U2Ln4ofPcqzSsynQkmEc/KGy6336qAZl70tDLufbkla+3"
@@ -62,7 +62,7 @@
 <body>
   <a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
   <noscript>
-    <div style="padding:16px;background:#111;color:#fff;border-bottom:1px solid rgba(255,255,255,.12);font:600 14px/1.5 Montserrat,system-ui,sans-serif;">
+    <div class="noscript-banner">
       Este aplicativo precisa de JavaScript habilitado para funcionar corretamente.
     </div>
   </noscript>
@@ -390,7 +390,7 @@
               <p>Registre funcionários citados nas pesquisas e acompanhe a movimentação do ranking.</p>
             </div>
           </div>
-          <div class="field-grid" style="grid-template-columns:1.2fr .5fr auto;">
+          <div class="field-grid field-grid--mention">
             <div class="field">
               <label>Funcionário citado</label>
               <input id="npsMentionName" list="teamSuggestions" placeholder="Ex: Maria Silva" />
@@ -399,7 +399,7 @@
               <label>Qtd. citações</label>
               <input id="npsMentionCount" type="number" min="1" value="1" />
             </div>
-            <div class="field" style="justify-content:end;">
+            <div class="field field--end">
               <label>&nbsp;</label>
               <button class="btn btn-primary" data-action="register-mention">Registrar citação</button>
             </div>
@@ -872,7 +872,7 @@
           <select id="student_addon"><option value="">Nenhum</option></select>
         </div>
       </div>
-      <div class="field-stack" style="margin-top:12px;"><label>Observações</label><textarea id="student_observacoes"></textarea></div>
+      <div class="field-stack field-stack--top-gap"><label>Observações</label><textarea id="student_observacoes"></textarea></div>
       <div class="inline-actions">
         <button type="button" class="btn btn-success" data-action="save-student">Salvar atendimento</button>
       </div>
@@ -898,7 +898,7 @@
           </select>
         </div>
       </div>
-      <div class="field-stack" style="margin-top:12px;"><label>Pendência</label><textarea id="pending_desc"></textarea></div>
+      <div class="field-stack field-stack--top-gap"><label>Pendência</label><textarea id="pending_desc"></textarea></div>
       <div class="field-stack"><label>Resposta</label><textarea id="pending_resposta"></textarea></div>
       <div class="inline-actions">
         <button type="button" class="btn btn-success" data-action="save-pending">Salvar pendência</button>
@@ -926,13 +926,13 @@
         <div class="field"><label>Recepcionista</label><input id="scale_receptionist" placeholder="Ex: WALLACE" /></div>
         <div class="field"><label>Troca recepção</label><input id="scale_receptionSwap" placeholder="Se houver" /></div>
       </div>
-      <div class="field-stack" style="margin-top:12px;">
+      <div class="field-stack field-stack--top-gap">
         <label>Observações do dia</label>
         <textarea id="scale_note" placeholder="Ex: Troca autorizada pelo líder, feriado, férias, atestado..."></textarea>
       </div>
-      <div class="toolbar" style="margin-top:12px;">
+      <div class="toolbar toolbar--top-gap">
         <div class="toolbar-title">
-          <h2 style="font-size:16px;margin:0;">Professores escalados</h2>
+          <h2 class="heading-compact">Professores escalados</h2>
           <p>Adicione quantas linhas forem necessárias para o dia.</p>
         </div>
         <button class="btn btn-ghost btn-xs" type="button" data-action="add-scale-shift-row">+ Linha de professor</button>
@@ -975,7 +975,7 @@
         <div class="field"><label>Local</label><input id="event_place" placeholder="Ex: Unidade / Mall / Online" /></div>
         <div class="field"><label>Responsável</label><input id="event_owner" placeholder="Ex: Marketing / Recepção" /></div>
       </div>
-      <div class="field-stack" style="margin-top:12px;">
+      <div class="field-stack field-stack--top-gap">
         <label>Descrição</label>
         <textarea id="event_description" placeholder="Detalhes do evento, ação, campanha ou orientação operacional."></textarea>
       </div>

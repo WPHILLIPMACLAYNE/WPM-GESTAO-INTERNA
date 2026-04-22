@@ -54,14 +54,15 @@
       const score = clamp(Number(state.nps.score || 0), 0, 100);
       const band = getRiskBand(score);
       const rankingNps = selecionarRankingNps();
-      const pointerLeft = `calc(${score}% - ${score === 100 ? 12 : 0}px)`;
+      const pointerLeft = clamp(score, 0, 100);
+      const pointerOffset = score === 100 ? 12 : 0;
 
       const monthlyGoal = clamp(Number(state.nps.monthlyGoal ?? 75), 0, 100);
       const semesterGoal = clamp(Number(state.nps.semesterGoal ?? 80), 0, 100);
       const monthlyProgress = getNpsGoalProgress(score, monthlyGoal);
       const semesterProgress = getNpsGoalProgress(score, semesterGoal);
       const historyRows = getNpsHistoryRows();
-      document.getElementById('npsMeterBox').innerHTML = `
+      aplicarHtmlSeMudou(document.getElementById('npsMeterBox'), `
         <div class="score-hero">
           <div class="nps-score-copy">
             <div class="score-number">${score}</div>
@@ -74,7 +75,7 @@
           </div>
         </div>
         <div class="risk-meter-wrap">
-          <div class="risk-pointer" style="left:${pointerLeft};">
+          <div class="risk-pointer" data-style-left-pct="${pointerLeft}" data-style-left-offset-px="${pointerOffset}">
             <div class="marker-value">${score}</div>
             <div class="marker"></div>
           </div>
@@ -120,18 +121,18 @@
                 <div class="nps-progress-title">Progresso da meta mensal</div>
                 <div class="nps-progress-meta">${score}/${monthlyGoal} • ${Math.round(monthlyProgress)}%${monthlyProgress >= 100 ? ' ✓' : ''}</div>
               </div>
-              <div class="nps-progress-track"><div class="nps-progress-fill" style="width:${Math.min(100, monthlyProgress)}%"></div></div>
+              <div class="nps-progress-track"><div class="nps-progress-fill" data-style-width-pct="${Math.min(100, monthlyProgress)}"></div></div>
             </div>
             <div class="nps-progress-card">
               <div class="nps-progress-head">
                 <div class="nps-progress-title">Progresso da meta semestral</div>
                 <div class="nps-progress-meta">${score}/${semesterGoal} • ${Math.round(semesterProgress)}%${semesterProgress >= 100 ? ' ✓' : ''}</div>
               </div>
-              <div class="nps-progress-track"><div class="nps-progress-fill" style="width:${Math.min(100, semesterProgress)}%"></div></div>
+              <div class="nps-progress-track"><div class="nps-progress-fill" data-style-width-pct="${Math.min(100, semesterProgress)}"></div></div>
             </div>
           </div>
         </div>
-      `;
+      `);
 
       aplicarHtmlSeMudou(document.getElementById('npsHistoryBox'), historyRows.length ? `
         <div class="nps-history-panel">

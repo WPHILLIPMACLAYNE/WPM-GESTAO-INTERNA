@@ -56,6 +56,9 @@
       display: flex;
       flex-direction: column;
     }
+    body.body-scroll-locked {
+      overflow: hidden;
+    }
     .app {
       width: 100%;
       max-width: 1560px;
@@ -64,6 +67,13 @@
       flex: 1 0 auto;
       display: flex;
       flex-direction: column;
+    }
+    .noscript-banner {
+      padding: 16px;
+      background: #111111;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      font: 600 14px/1.5 Montserrat, system-ui, sans-serif;
     }
     .glass {
       background: var(--glass);
@@ -423,10 +433,16 @@
       line-height: 1;
       color: var(--primary);
     }
+    .mini-stat-value--period {
+      font-size: 22px;
+    }
     .mini-stat .hint, .card .card-foot, .muted {
       color: #dddddd;
       font-size: 13px;
       line-height: 1.64;
+    }
+    .pending-response-label {
+      color: var(--muted);
     }
 
     .tabs {
@@ -526,6 +542,12 @@
       flex-wrap: wrap;
       margin-bottom: 16px;
     }
+    .toolbar--top-gap {
+      margin-top: 12px;
+    }
+    .toolbar--compact {
+      margin-bottom: 10px;
+    }
     .toolbar-title {
       display: grid;
       gap: 10px;
@@ -554,6 +576,10 @@
       letter-spacing: .022em;
       text-transform: uppercase;
     }
+    .heading-compact {
+      margin: 0;
+      font-size: 16px;
+    }
     .toolbar-title p {
       margin: 0;
       color: #d4d4d4;
@@ -566,12 +592,21 @@
       grid-template-columns: repeat(4, minmax(160px, 1fr));
       gap: 14px;
     }
+    .field-grid--mention {
+      grid-template-columns: 1.2fr .5fr auto;
+    }
     .field, .field-stack {
       display: flex;
       flex-direction: column;
       gap: 7px;
     }
+    .field--end {
+      justify-content: end;
+    }
     .field-stack { margin-bottom: 14px; }
+    .field-stack--top-gap {
+      margin-top: 12px;
+    }
     label {
       color: #d9d9d9;
       font-size: 12px;
@@ -719,6 +754,7 @@
     .pill.warn { background: var(--warning-soft); color: #ffd08a; border-color: rgba(255,159,10,.22); }
     .pill.bad { background: var(--danger-soft); color: #ffc8c9; border-color: rgba(255,77,79,.22); }
     .pill.info { background: var(--primary-soft); color: #ffdf7f; border-color: rgba(255,194,15,.24); }
+    .pill.muted { background: rgba(255,255,255,.06); color: var(--muted-2); border-color: rgba(255,255,255,.08); }
     .pill.open-pill {
       color: #ffe5e5;
       border-color: rgba(255,77,79,.3);
@@ -854,6 +890,9 @@
     }
 
     .chart-box { padding: var(--space-md); }
+    .chart-box--spaced {
+      margin-bottom: 12px;
+    }
     .chart {
       height: 260px;
       display: flex;
@@ -2665,6 +2704,9 @@
       line-height: 1.5;
       overflow-wrap: anywhere;
       word-break: break-word;
+    }
+    .scale-board-note--spaced {
+      margin-top: 12px;
     }
     .scale-board-actions {
       display: flex;
@@ -6221,4 +6263,3 @@
     /* ════════════════════════════════════════════════════════════════
        FIM — WPM DESIGN SYSTEM POLISH LAYER v1
        ════════════════════════════════════════════════════════════════ */
-

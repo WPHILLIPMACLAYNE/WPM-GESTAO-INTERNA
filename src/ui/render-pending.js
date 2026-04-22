@@ -88,7 +88,7 @@
             <div class="title" data-tooltip="${esc(item.nome)}">${esc(item.nome)}</div>
             <div class="meta">${buildPendingMeta(item)}</div>
             <div class="desc" data-tooltip="${esc(item.pendencia)}">${esc(shortText(item.pendencia, 115))}</div>
-            ${item.resposta ? `<div class="desc muted" data-tooltip="${esc(item.resposta)}"><strong style="color:var(--muted)">Resposta:</strong> ${esc(shortText(item.resposta, 85))}</div>` : ''}
+            ${item.resposta ? `<div class="desc muted" data-tooltip="${esc(item.resposta)}"><strong class="pending-response-label">Resposta:</strong> ${esc(shortText(item.resposta, 85))}</div>` : ''}
             <div class="foot">
               <span class="drag-hint"><span class="drag-grip" aria-hidden="true">⋮⋮</span>ARRASTE PARA MOVER</span>
               <div class="ticket-actions">

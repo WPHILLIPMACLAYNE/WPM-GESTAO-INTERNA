@@ -227,3 +227,39 @@ This file records one durable checkpoint per completed task.
   - push to `origin/VSCODEX1807`
   - start Etapa 3 on the logic-hardening line
   - inspect `rankSnapshot`, duplicate-event comparison, and persistence rollback behavior
+
+### Task 009
+
+- Date/time: 2026-04-22 16:26:40 -03
+- Branch: `VSCODEX1807`
+- HEAD: `eaa4559`
+- Task: complete Etapa 3 logic hardening for NPS ranking snapshots, duplicate-event confirmation, and rollback on persistence failure
+- Files touched:
+  - `src/utils/helpers.js`
+  - `src/core/seed.js`
+  - `src/core/lifecycle.js`
+  - `src/domain/selectors.js`
+  - `src/features/crud.js`
+  - `src/ui/render-events.js`
+  - `tests/unit/selectors-real.test.js`
+  - `tests/e2e/workflows.spec.js`
+  - `Docs/PROXIMOS_PASSOS.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
+  - `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK with `7 passed`
+  - `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK with `1 passed`
+  - `npm test -- --run --reporter=dot` OK with `130 passed`
+  - `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK with `8 passed`
+- Pending:
+  - commit this continuity checkpoint on top of `eaa4559`
+  - push `VSCODEX1807` so local and remote align again
+  - validate deploy/update/rollback in a reused browser when a preview or release candidate exists
+- Next step:
+  - start Etapa 4 security hardening before backend expansion
+  - run `npm audit --audit-level=moderate`
+  - plan SRI or local hosting for DOMPurify/Chart.js and CSP cleanup

@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-04-22 16:08:54 -03
+Última atualização: 2026-04-22 16:26:40 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,61 +128,62 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-04-22 16:08:54 -03
+Data/hora: 2026-04-22 16:26:40 -03
 
 - Branch atual: `VSCODEX1807`
-- Último commit conhecido: `8c57fb4`
+- Último commit conhecido: `eaa4559`
 - Estado do worktree ao fim desta tarefa:
   - `.cortex/AGENT_HANDOFF.md` modificado
   - `.cortex/CURRENT_STATUS.md` modificado
   - `.cortex/RETOMADA_MASTER.md` modificado
   - `.cortex/TASK_LEDGER.md` modificado
   - `Docs/RETOMADA_SEGURA.md` modificado
-  - `AGENTS.md` commitado em `694e8ed`
-  - `Docs/GUIA_CODE_REVIEW_PROJETO.md` commitado em `694e8ed`
-  - `sw.js` commitado em `8c57fb4`
-  - `index.html` commitado em `8c57fb4`
-  - `manifest.json` commitado em `8c57fb4`
-  - `tests/e2e/service-worker.spec.js` commitado em `8c57fb4`
-  - `tests/e2e/visual-states.spec.js` commitado em `d847a27`
-  - `tests/e2e/visual.spec.js` commitado em `d847a27`
-  - `tests/helpers/fixed-browser-clock.js` commitado em `d847a27`
+  - `Docs/PROXIMOS_PASSOS.md` modificado
+  - `src/utils/helpers.js` commitado em `eaa4559`
+  - `src/core/seed.js` commitado em `eaa4559`
+  - `src/core/lifecycle.js` commitado em `eaa4559`
+  - `src/domain/selectors.js` commitado em `eaa4559`
+  - `src/features/crud.js` commitado em `eaa4559`
+  - `src/ui/render-events.js` commitado em `eaa4559`
+  - `tests/unit/selectors-real.test.js` commitado em `eaa4559`
+  - `tests/e2e/workflows.spec.js` commitado em `eaa4559`
 - Contexto recuperado e consolidado:
   - o trilho salvo no repositório é de retomada segura, baseline estável e estabilização incremental
   - o PR/planejamento de Supabase não deve ser usado como continuação desta linha
   - a `.cortex/` agora foi convertida de snapshot estático para camada viva de continuidade
   - a branch oficial de retomada desta sessão passa a ser `VSCODEX1807`
 - Tarefa concluída nesta sessão:
-  - estabilização dos snapshots visuais com congelamento determinístico do relógio do browser
-  - criação de um guia de code review específico do projeto e ligação dele ao fluxo de contribuição
-  - hardening do service worker para escopo seguro em root/subpath, fetch `network-first` do app shell e recarga orientada a update
-  - adição de teste Playwright dedicado para registro do service worker e shell offline
+  - conclusão da Etapa 3 de hardening lógico antes de backend
+  - correção de `rankSnapshot` de NPS para o contrato `{ mentionId: position }`
+  - normalização de snapshots legados sem ids de menção
+  - confirmação de evento duplicado antes de persistir, com comparação normalizada por título/data/horário
+  - rollback de CRUD e operações diretas de evento quando a persistência falha
 - Arquivos tocados nesta tarefa:
-  - `tests/e2e/visual-states.spec.js`
-  - `tests/e2e/visual.spec.js`
-  - `tests/helpers/fixed-browser-clock.js`
-  - `Docs/GUIA_CODE_REVIEW_PROJETO.md`
-  - `AGENTS.md`
-  - `sw.js`
-  - `index.html`
-  - `manifest.json`
-  - `tests/e2e/service-worker.spec.js`
+  - `src/utils/helpers.js`
+  - `src/core/seed.js`
+  - `src/core/lifecycle.js`
+  - `src/domain/selectors.js`
+  - `src/features/crud.js`
+  - `src/ui/render-events.js`
+  - `tests/unit/selectors-real.test.js`
+  - `tests/e2e/workflows.spec.js`
+  - `Docs/PROXIMOS_PASSOS.md`
   - `Docs/RETOMADA_SEGURA.md`
   - `.cortex/CURRENT_STATUS.md`
   - `.cortex/AGENT_HANDOFF.md`
   - `.cortex/RETOMADA_MASTER.md`
   - `.cortex/TASK_LEDGER.md`
 - Validação executada:
-  - `node --check sw.js` OK
-  - `npm test` OK com `129 passed`
-  - `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK com `2 passed`
-  - `npm run test:e2e` OK sem issues em desktop, tablet e mobile
-  - `npx playwright test tests/e2e/app.spec.js --reporter=line` OK com `23 passed`
+  - `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
+  - `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK com `7 passed`
+  - `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK com `1 passed`
+  - `npm test -- --run --reporter=dot` OK com `130 passed`
+  - `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK com `8 passed`
 - Pendências imediatas:
-  - commitar este checkpoint de continuidade
+  - commitar este checkpoint de continuidade sobre `eaa4559`
   - fazer `push` para manter `origin/VSCODEX1807` alinhada com a branch local
   - validar update/rollback em navegador já usado quando houver preview ou release candidata
 - Próximo passo exato mais seguro:
-  - fazer `push` deste checkpoint
-  - iniciar a Etapa 3
-  - revisar `rankSnapshot`, comparação de duplicidade de eventos e rollback em falha de persistência
+  - commitar e fazer `push` deste checkpoint
+  - iniciar a Etapa 4
+  - começar por `npm audit --audit-level=moderate`, SRI/local hosting para CDN e planejamento de CSP

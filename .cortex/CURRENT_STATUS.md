@@ -1,12 +1,12 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-04-22
-Last updated: 2026-04-22 16:08:54 -03
+Last updated: 2026-04-22 16:26:40 -03
 
 ## Live status
 
 - Branch: `VSCODEX1807`
-- HEAD: `8c57fb4`
+- HEAD: `eaa4559`
 - Baseline in production: `origin/main`
 - App version: `v34`
 - Store version: `4`
@@ -32,24 +32,28 @@ Confirmed live facts:
 - `sw.js` cache identity is now tied to `APP_VERSION` plus a hash of the active precache manifest
 - service worker registration, manifest scope, and precache paths are now safe for root or subpath deploys
 - the app shell now uses network-first fetches with cached offline fallback
-- `src/core/seed.js` still appears to keep a `rankSnapshot` semantic mismatch candidate
+- Etapa 3 logic hardening is now completed locally in `eaa4559`
+- `rankSnapshot` now normalizes to `{ mentionId: position }` in generated and legacy-normalized NPS data
+- duplicate-event confirmation now runs before persistence and compares normalized titles plus date/time
+- CRUD rollback now restores `state`, `storage.periods`, selector cache, and affected render targets when persistence fails
+- direct event delete/duplicate paths now restore their previous event collection on persistence failure
 
 ## Current safe next step
 
-After the validated baseline and service-worker hardening:
+After the validated baseline, service-worker hardening, and Etapa 3 logic hardening:
 
 1. stay on `VSCODEX1807` for recovery-safe work
-2. push the continuity checkpoint so local and remote converge again
-3. begin Etapa 3 before backend expansion
-4. first validate `rankSnapshot`, duplicate-event logic, and persistence rollback behavior
+2. commit this continuity checkpoint
+3. push `VSCODEX1807` so local and remote converge again
+4. begin Etapa 4 security work before backend expansion
 
 Latest validation result:
 
-1. `node --check sw.js` OK
-2. `npm test` OK with `129 passed`
-3. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
-4. `npm run test:e2e` OK with no issues across all viewports
-5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `23 passed`
+1. `node --check src/utils/helpers.js src/core/seed.js src/core/lifecycle.js src/domain/selectors.js src/features/crud.js src/ui/render-events.js` OK
+2. `npx vitest run tests/unit/selectors-real.test.js --reporter=dot` OK with `7 passed`
+3. `npx playwright test tests/e2e/workflows.spec.js -g "eventos fazem rollback" --reporter=line` OK with `1 passed`
+4. `npm test -- --run --reporter=dot` OK with `130 passed`
+5. `npx playwright test tests/e2e/workflows.spec.js --reporter=line` OK with `8 passed`
 
 ## CORTEX operating rule
 
@@ -85,4 +89,4 @@ For present-state decisions, trust these in order:
 - documentation drift across historical docs
 - deploy/rollback validation in a reused browser is still pending outside local tests
 - CSP/CDN hardening gap
-- `rankSnapshot` semantics still require explicit validation
+- Etapa 4 security hardening is the next high-priority line

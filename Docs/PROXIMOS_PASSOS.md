@@ -1,6 +1,6 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10 · Última atualização: 2026-04-18
+Data: 2026-04-10 · Última atualização: 2026-04-22
 Baseline estável em produção: `origin/main` @ `bc6307f` (GitHub Pages v34)
 Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 
@@ -13,6 +13,10 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > **Atualização 2026-04-18** — baseline oficial consolidado no `origin/main` (`bc6307f`).
 > Qodana removido do fluxo para simplificar CI e reduzir ruído operacional.
 > Fluxo seguro documentado em [`RETOMADA_SEGURA.md`](./RETOMADA_SEGURA.md).
+
+> **Atualização 2026-04-22** — Etapas 2 e 3 concluídas na branch `VSCODEX1807`.
+> PWA/service worker foi endurecido em `8c57fb4`; hardening lógico de NPS/eventos/rollback
+> foi concluído em `eaa4559`. A próxima linha segura é a Etapa 4.
 
 ## Etapa 0 — Proteger baseline
 
@@ -76,6 +80,8 @@ Critério de aceite:
 ## Etapa 3 — Corrigir bugs lógicos antes do backend
 
 Prioridade: alta.
+
+Status 2026-04-22: concluída localmente em `eaa4559`. `todayISO()` já usava data local antes desta etapa; os demais itens foram corrigidos e cobertos por unitários/workflows.
 
 Ações:
 

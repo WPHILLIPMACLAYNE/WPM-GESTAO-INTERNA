@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-04-22 16:08:54 -03
+Last updated: 2026-04-22 16:26:40 -03
 
 ## Current handoff
 
@@ -9,7 +9,7 @@ This repository already has a functioning CORTEX layer and it must now be mainta
 Current state:
 
 - baseline branch in use: `VSCODEX1807`
-- current HEAD reference: `8c57fb4`
+- current HEAD reference: `eaa4559`
 - previous continuity base commit: `623b50a`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
@@ -19,6 +19,10 @@ Current state:
 - service worker cache identity now derives from version + precache manifest hash
 - service worker registration and precache scope are now safe for root or subpath deploys
 - service worker now uses network-first app-shell fetching plus offline shell coverage
+- Etapa 3 logic hardening is complete in `eaa4559`
+- NPS `rankSnapshot` now uses `mentionId -> position` and legacy invalid snapshots are normalized
+- duplicate-event confirmation now happens before persistence and uses normalized title/date/time comparison
+- CRUD/event rollback paths now restore in-memory state after persistence failure
 - `VSCODEX1807` now exists on GitHub and tracks `origin/VSCODEX1807`
 
 ## What must happen after each completed task
@@ -69,8 +73,8 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Push this continuity checkpoint to `origin/VSCODEX1807`, then start Etapa 3 on the logical-bug line:
+Commit this continuity checkpoint, push `VSCODEX1807`, then start Etapa 4 on the security-hardening line:
 
-1. validate `rankSnapshot` semantics in `src/core/seed.js`
-2. validate duplicate-event comparison behavior
-3. validate rollback behavior on persistence failure paths
+1. run `npm audit --audit-level=moderate` and decide whether a dedicated audit-fix branch is needed
+2. plan DOMPurify/Chart.js SRI or local hosting
+3. plan CSP cleanup for inline scripts and production headers

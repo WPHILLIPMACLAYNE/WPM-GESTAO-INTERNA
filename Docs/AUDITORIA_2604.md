@@ -1,5 +1,8 @@
 # AUDITORIA_2604 — WPM Gestão Interna
 
+> **Aviso:** este arquivo registra uma auditoria histórica de `2026-04-10`.
+> O mapa estrutural e a baseline documental correntes estão em `MODULE_MAP.md`, `QWEN.md` e `MIGRATION_STATUS.md`.
+
 Data da auditoria: 2026-04-10
 Projeto: WPM Gestão Interna
 Local analisado: `/home/acewallthemac/storage/APPSPAGESTAOWPM/APLICATIVOFINALIZADO`
@@ -400,4 +403,3 @@ As entidades e estruturas estão detalhadas em `Docs/MAPA_ENTIDADES.md`.
 - Fechamento de mês e arquivos de backup precisam virar transações atômicas.
 - Datas precisam ser normalizadas com fuso explícito.
 - Recados legados em chaves separadas precisam ser consolidados antes da migração.
-

@@ -142,20 +142,23 @@ Critério de aceite:
 
 ## Etapa 5 — Atualizar documentação estrutural
 
+Status: **concluída em 2026-04-22**.
+
 Prioridade: média.
 
 Ações:
 
-- Atualizar `QWEN.md` para refletir a estrutura atual.
-- Atualizar `MODULE_MAP.md` com `render-*`, `events-*`, `backup.js` e `lifecycle.js`.
-- Decidir destino de `MODULE_STATUS.md`: criar ou remover da rotina.
-- Remover/mover `src/ui/render.js` se for legado.
-- Documentar `src/types.js` como JSDoc não-runtime.
+- `QWEN.md` atualizado para refletir a estrutura atual.
+- `MODULE_MAP.md` alinhado ao runtime carregado por `index.html`.
+- `MIGRATION_STATUS.md` promovido a snapshot corrente da baseline documental.
+- `src/ui/render.js` deixou de existir no tree ativo.
+- `src/types.js` documentado como artefato JSDoc não-runtime.
+- Documentos históricos da Etapa 5 e auditorias antigas passaram a indicar explicitamente que não representam o runtime atual.
 
 Critério de aceite:
 
-- Mapa de módulos bate com `index.html`.
-- Nenhum arquivo legado em `src/` confunde runtime.
+- Mapa de módulos bate com `index.html`. ✅
+- Nenhum arquivo legado em `src/` confunde runtime. ✅
 
 ## Etapa 6 — Desenhar backend canônico
 

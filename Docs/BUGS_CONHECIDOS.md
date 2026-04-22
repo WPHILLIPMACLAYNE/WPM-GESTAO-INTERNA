@@ -1,12 +1,13 @@
 # BUGS_CONHECIDOS — WPM Gestão Interna
 
 Data original: 2026-04-10
-Última revisão de contexto: 2026-04-18
+Última revisão de contexto: 2026-04-22
 Baseline atual em produção: `origin/main` (`bc6307f`)
 Escopo: inventário histórico de bugs/riscos levantados em auditorias anteriores.
 
 > Status dos itens pode ter mudado desde a auditoria original.
 > Antes de executar qualquer correção, revalidar cada item no baseline atual.
+> Referência estrutural corrente: `MODULE_MAP.md`, `QWEN.md` e `MIGRATION_STATUS.md`.
 
 ## CRÍTICO
 
@@ -162,11 +163,13 @@ Correção sugerida: inicializar snapshot por `id -> position` ou deixar `{}` no
 
 Arquivos: `MODULE_MAP.md`, `QWEN.md`
 
-Evidência: documentação ainda cita estrutura antiga com `src/ui/render.js` e `src/ui/events.js` centrais.
+Status atual: **resolvido em 2026-04-22**.
 
-Impacto: manutenção pode seguir mapa errado e quebrar ordem de scripts.
+Evidência atual: `MODULE_MAP.md` e `QWEN.md` já refletem o runtime com `render-*`, `events-*`, `env-bootstrap`, `observability`, `supabase`, `back-to-top` e `pwa`.
 
-Correção sugerida: atualizar docs estruturais após esta auditoria.
+Impacto residual: nenhum no baseline documental corrente.
+
+Correção aplicada: atualização dos docs estruturais e do snapshot em `MIGRATION_STATUS.md`.
 
 ## LOW
 
@@ -174,9 +177,13 @@ Correção sugerida: atualizar docs estruturais após esta auditoria.
 
 Arquivo: `src/ui/render.js`
 
-Impacto: não é carregado, mas confunde auditorias e buscas.
+Status atual: **resolvido em 2026-04-22**.
 
-Correção sugerida: remover ou mover para `Legacy/` em commit dedicado.
+Evidência atual: o arquivo não existe mais no diretório `src/ui/`.
+
+Impacto residual: nenhum no runtime atual.
+
+Correção aplicada: remoção do resíduo legado do tree ativo.
 
 ### `src/types.js` não é carregado pelo app
 
@@ -190,19 +197,25 @@ Correção sugerida: documentar explicitamente no mapa modular ou integrar a too
 
 Arquivo: `package.json`
 
-Impacto: campo sem efeito prático no SPA, mas desatualizado.
+Status atual: **resolvido em 2026-04-22**.
 
-Correção sugerida: remover ou ajustar para evitar ruído em tooling.
+Evidência atual: `package.json` não possui mais campo `main`.
+
+Impacto residual: nenhum.
+
+Correção aplicada: limpeza do manifesto do pacote no baseline atual.
 
 ### Cobertura Vitest mira `app.js`
 
 Arquivo: `vitest.config.js`
 
-Evidência: `coverage.include = ['app.js']`.
+Status atual: **resolvido em 2026-04-22**.
 
-Impacto: `vitest run` passa, mas cobertura não mede o código modular real.
+Evidência atual: `coverage.include = ['src/**/*.js']`.
 
-Correção sugerida: trocar para `src/**/*.js` e ajustar exclusões.
+Impacto residual: cobertura já mira o código modular real.
+
+Correção aplicada: include trocado para `src/**/*.js` com exclusão de `node_modules/` e `tests/`.
 
 ### Tabelas e calendário dependem de scroll horizontal em mobile
 

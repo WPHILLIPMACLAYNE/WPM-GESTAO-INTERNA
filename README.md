@@ -346,6 +346,7 @@ O app funciona offline após a primeira visita:
 
 - **Service Worker** (`sw.js`) pré-cacheia `index.html`, `styles.css`, módulos `src/**/*.js`, `manifest.json` e ícones.
 - **IndexedDB** guarda todo o `state` — atendimentos, pendências, escalas, NPS, eventos, configurações.
+- **Sync local-first guardada**: quando autenticado no Supabase, o app envia o store local para o backend apenas se o checkpoint remoto da unidade ainda bate com a última leitura/sincronização conhecida.
 - **Backup JSON** por um clique em *Configurações* → ideal para migrar entre navegadores ou arquivar o mês.
 - **Detecção online/offline**: toast notifica quando conexão cai ou volta.
 
@@ -378,7 +379,7 @@ O app funciona offline após a primeira visita:
 - [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
 - [ ] **Cache-busting do Service Worker** — versionamento por commit hash
 - [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
-- [~] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida e homologação operacional real prontos; faltam conflitos finos e concorrência multi-dispositivo
+- [~] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, homologação operacional real e guarda de conflito por checkpoint prontos; ainda falta merge fino por entidade
 - [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
 - [ ] **Relatórios exportáveis** — PDF mensal consolidado
 

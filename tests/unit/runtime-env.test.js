@@ -3,6 +3,60 @@ import { loadRealApp } from '../helpers/load-real-app.js';
 
 let cleanup = () => {};
 
+function installWritableSupabaseMock(app, rpcHandler) {
+  const rpc = vi.fn(rpcHandler);
+  app.window.supabase = {
+    createClient() {
+      return {
+        auth: {
+          onAuthStateChange() {},
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: {
+                  id: 'user-1',
+                  email: 'admin@wpm.local',
+                  user_metadata: { full_name: 'Admin WPM' }
+                }
+              }
+            },
+            error: null
+          })
+        },
+        from(table) {
+          if (table !== 'unit_members') throw new Error(`Tabela inesperada no mock: ${table}`);
+          return {
+            select: vi.fn().mockResolvedValue({
+              data: [
+                {
+                  id: 'member-1',
+                  display_name: 'Admin',
+                  role: 'admin',
+                  active: true,
+                  unit: {
+                    id: 'unit-1',
+                    name: 'WPM Unidade Local',
+                    slug: 'wpm-unidade-local',
+                    timezone: 'America/Sao_Paulo',
+                    active: true
+                  }
+                }
+              ],
+              error: null
+            })
+          };
+        },
+        rpc
+      };
+    }
+  };
+  app.window.__APP_ENV__.SUPABASE_URL = 'https://fake.supabase.co';
+  app.window.__APP_ENV__.SUPABASE_ANON_KEY = 'fake-anon-key';
+  app.window.__APP_ENV__.SUPABASE_UNIT_SLUG = 'wpm-unidade-local';
+  app.window.__APP_INTERNALS__.backend.resetSupabaseClient();
+  return rpc;
+}
+
 afterEach(() => {
   cleanup();
   cleanup = () => {};
@@ -162,6 +216,117 @@ describe('Backend (Supabase) — fallback offline', () => {
 
     expect(saved).toBe(true);
     expect(app.window.queueSupabaseStoreSync).not.toHaveBeenCalled();
+  });
+
+  it('saveStoreToSupabase usa RPC guardada por checkpoint quando o backend ainda esta vazio', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const emptyCheckpoint = {
+      revision: '',
+      maxUpdatedAt: '',
+      periodCount: 0,
+      auditCount: 0
+    };
+    const syncedCheckpoint = {
+      revision: '2026-04-23 09:00:00+00:1:4:1',
+      maxUpdatedAt: '2026-04-23 09:00:00+00',
+      periodCount: 1,
+      auditCount: 1
+    };
+    const rpc = installWritableSupabaseMock(app, async (fn, params) => {
+      if (fn === 'get_unit_sync_checkpoint') {
+        return {
+          data: rpc.mock.calls.filter(call => call[0] === 'get_unit_sync_checkpoint').length === 1
+            ? emptyCheckpoint
+            : syncedCheckpoint,
+          error: null
+        };
+      }
+      if (fn === 'import_backup_transaction_guarded') {
+        return {
+          data: { kind: 'app-backup', processedPeriods: 1 },
+          error: null
+        };
+      }
+      return { data: null, error: new Error(`RPC inesperada: ${fn}`) };
+    });
+
+    const result = await backend.saveStoreToSupabase(structuredClone(baseStore));
+    const guardedCall = rpc.mock.calls.find(call => call[0] === 'import_backup_transaction_guarded');
+
+    expect(result.ok).toBe(true);
+    expect(guardedCall).toBeTruthy();
+    expect(guardedCall[1]).toEqual(expect.objectContaining({
+      p_unit_id: 'unit-1',
+      p_expected_checkpoint: emptyCheckpoint
+    }));
+    expect(backend.getSupabaseBackendState().lastRemoteCheckpoint).toEqual(syncedCheckpoint);
+  });
+
+  it('saveStoreToSupabase bloqueia sobrescrita quando ha remoto existente sem baseline local', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const rpc = installWritableSupabaseMock(app, async fn => {
+      if (fn === 'get_unit_sync_checkpoint') {
+        return {
+          data: {
+            revision: '2026-04-23 09:10:00+00:1:5:1',
+            maxUpdatedAt: '2026-04-23 09:10:00+00',
+            periodCount: 1,
+            auditCount: 1
+          },
+          error: null
+        };
+      }
+      return { data: null, error: null };
+    });
+
+    const result = await backend.saveStoreToSupabase(structuredClone(baseStore));
+
+    expect(result.ok).toBe(false);
+    expect(result.conflict).toBe(true);
+    expect(result.reason).toBe('remote-baseline-missing');
+    expect(rpc.mock.calls.some(call => call[0] === 'import_backup_transaction_guarded')).toBe(false);
+    expect(backend.getSupabaseBackendState().syncStatus).toBe('conflict');
+  });
+
+  it('saveStoreToSupabase reporta conflito quando o checkpoint remoto diverge durante a RPC', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    installWritableSupabaseMock(app, async fn => {
+      if (fn === 'get_unit_sync_checkpoint') {
+        return {
+          data: {
+            revision: '',
+            maxUpdatedAt: '',
+            periodCount: 0,
+            auditCount: 0
+          },
+          error: null
+        };
+      }
+      if (fn === 'import_backup_transaction_guarded') {
+        return {
+          data: null,
+          error: new Error('WPM_SYNC_CONFLICT: checkpoint remoto divergente; recarregue do backend antes de sincronizar.')
+        };
+      }
+      return { data: null, error: null };
+    });
+
+    const result = await backend.saveStoreToSupabase(structuredClone(baseStore));
+
+    expect(result.ok).toBe(false);
+    expect(result.conflict).toBe(true);
+    expect(result.reason).toBe('remote-conflict');
+    expect(backend.getSupabaseBackendState().syncStatus).toBe('conflict');
+    expect(backend.getSupabaseBackendState().conflictStatus).toBe('detected');
   });
 
   it('runMigrationDryRun consolida recados legados em clone e gera relatorio local', async () => {

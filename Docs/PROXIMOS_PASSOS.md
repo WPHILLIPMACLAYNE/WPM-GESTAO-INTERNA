@@ -50,6 +50,12 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > limpo no backend. No fechamento do dia, a regressão do histórico de NPS também foi corrigida
 > para olhar apenas meses anteriores ao período ativo.
 
+> **Atualização 2026-04-23** — Etapa 8 fechada como sync local-first guardada.
+> O envio remoto agora usa checkpoint de unidade (`get_unit_sync_checkpoint`) e a RPC
+> `import_backup_transaction_guarded(...)`. Se outro dispositivo alterar o backend desde a última
+> leitura/sync conhecida, o app entra em estado de conflito e exige `Recarregar do backend` antes
+> de tentar novo envio, evitando sobrescrita silenciosa.
+
 ## Etapa 0 — Proteger baseline
 
 Prioridade: imediata.
@@ -262,31 +268,36 @@ Critério de aceite:
 
 Prioridade: média.
 
-Status 2026-04-22: direção escolhida, mas não encerrada.
-O runtime atual ficou híbrido: o login preserva a base local, o `Recarregar do backend` troca
-explicitamente para a base remota e o Supabase opera com espelho local em IndexedDB/localStorage.
-Ainda falta fechar política de conflito por entidade e comportamento explícito para edição
-concorrente em múltiplos dispositivos.
+Status 2026-04-23: concluída no nível operacional atual.
+Estratégia escolhida: **local-first com checkpoint remoto guardado**. O IndexedDB/localStorage
+continua sendo o primeiro commit do navegador; o Supabase é o espelho remoto canônico quando há
+sessão autenticada e perfil gravável. Antes de importar o store completo no backend, o cliente
+compara o checkpoint remoto conhecido com o checkpoint atual da unidade. Divergência bloqueia o
+envio e mostra estado de conflito até o operador recarregar do backend.
 
 Ações:
 
-- Escolher online-first ou offline-first.
+- Escolher online-first ou offline-first. ✅
 - Se online-first:
   - backend como fonte primária;
   - IndexedDB/localStorage apenas cache;
   - conflitos tratados no servidor.
 - Se offline-first:
-  - fila de mutações;
-  - IDs estáveis client-side;
-  - `updatedAt`/version por registro;
-  - resolução de conflito explícita.
-- Definir comportamento multiaba/multidispositivo.
+  - fila de mutações; ✅ fila/debounce de store completo
+  - IDs estáveis client-side; ✅ preservados por entidade no store atual
+  - `updatedAt`/version por registro; substituído por checkpoint agregado de unidade nesta fase ✅
+  - resolução de conflito explícita. ✅ recarregar backend antes de novo envio
+- Definir comportamento multiaba/multidispositivo. ✅ broadcast local + conflito remoto por checkpoint
 
 Critério de aceite:
 
-- Sem perda silenciosa de dados.
-- Conflitos têm regra previsível.
-- UI mostra estado offline/sincronizando/erro.
+- Sem perda silenciosa de dados. ✅
+- Conflitos têm regra previsível. ✅
+- UI mostra estado offline/sincronizando/erro/conflito. ✅
+
+Limite consciente: a resolução ainda é por store completo, não por merge entidade-a-entidade. Quando
+houver conflito remoto, a decisão segura é recarregar do backend, revisar a base atual e reaplicar a
+edição local se necessário.
 
 ## Etapa 9 — Evoluir UI mobile onde há tabelas largas
 

@@ -23,6 +23,8 @@
     let __supabasePendingSyncStore = null;
     /** @type {Promise<Object>|null} */
     let __supabaseSyncPromise = null;
+    /** @type {Object|null} */
+    let __supabaseLastRemoteCheckpoint = null;
 
     const SUPABASE_WRITABLE_ROLES = new Set(['admin', 'gestor']);
     const SUPABASE_ROLE_PRIORITY = {
@@ -43,8 +45,11 @@
       activeUnit: null,
       writable: false,
       source: 'local',
+      syncPolicy: 'local-first-guarded',
       syncStatus: 'idle',
+      conflictStatus: 'clear',
       lastSyncAt: null,
+      lastRemoteCheckpoint: null,
       lastError: null
     };
 
@@ -74,10 +79,74 @@
         ...supabaseBackendState,
         user: supabaseBackendState.user ? { ...supabaseBackendState.user } : null,
         activeUnit: supabaseBackendState.activeUnit ? { ...supabaseBackendState.activeUnit } : null,
+        lastRemoteCheckpoint: supabaseBackendState.lastRemoteCheckpoint
+          ? cloneSerializable(supabaseBackendState.lastRemoteCheckpoint)
+          : null,
         memberships: Array.isArray(supabaseBackendState.memberships)
           ? supabaseBackendState.memberships.map(item => ({ ...item }))
           : []
       });
+    }
+
+    /**
+     * @param {any} value
+     * @returns {any}
+     */
+    function normalizeSupabaseCheckpoint(value) {
+      const raw = Array.isArray(value) ? value[0] : value;
+      if (!raw || typeof raw !== 'object') return null;
+      return {
+        revision: String(raw.revision || raw.maxUpdatedAt || raw.max_updated_at || ''),
+        maxUpdatedAt: String(raw.maxUpdatedAt || raw.max_updated_at || ''),
+        periodCount: Number(raw.periodCount ?? raw.period_count ?? 0),
+        auditCount: Number(raw.auditCount ?? raw.audit_count ?? 0)
+      };
+    }
+
+    /**
+     * @param {any} value
+     * @returns {boolean}
+     */
+    function isEmptySupabaseCheckpoint(value) {
+      const checkpoint = normalizeSupabaseCheckpoint(value);
+      return !checkpoint || (checkpoint.periodCount === 0 && checkpoint.auditCount === 0 && !checkpoint.revision);
+    }
+
+    /**
+     * @param {any} value
+     * @returns {void}
+     */
+    function rememberSupabaseRemoteCheckpoint(value) {
+      const checkpoint = normalizeSupabaseCheckpoint(value);
+      __supabaseLastRemoteCheckpoint = checkpoint ? cloneSerializable(checkpoint) : null;
+      updateSupabaseBackendState({
+        conflictStatus: 'clear',
+        lastRemoteCheckpoint: checkpoint ? cloneSerializable(checkpoint) : null
+      }, false);
+    }
+
+    /**
+     * @param {any} error
+     * @returns {boolean}
+     */
+    function isSupabaseSyncConflictError(error) {
+      const message = String(error?.message || error?.details || error?.hint || '');
+      return error?.code === 'WPM01'
+        || /WPM_SYNC_CONFLICT|checkpoint remoto divergente|recarregue do backend/i.test(message);
+    }
+
+    /**
+     * @param {any} client
+     * @param {string} unitId
+     * @returns {Promise<Object|null>}
+     */
+    async function readSupabaseSyncCheckpoint(client, unitId) {
+      if (!client?.rpc || !unitId) return null;
+      const { data, error } = await client.rpc('get_unit_sync_checkpoint', {
+        p_unit_id: unitId
+      });
+      if (error) throw error;
+      return normalizeSupabaseCheckpoint(data);
     }
 
     /**
@@ -425,8 +494,11 @@
             activeUnit: null,
             writable: false,
             source: 'local',
-            syncStatus: 'idle'
+            syncStatus: 'idle',
+            conflictStatus: 'clear',
+            lastRemoteCheckpoint: null
           });
+          __supabaseLastRemoteCheckpoint = null;
           return;
         }
         if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
@@ -530,7 +602,9 @@
           memberships: [],
           activeUnit: null,
           writable: false,
-          source: 'local'
+          source: 'local',
+          conflictStatus: 'clear',
+          lastRemoteCheckpoint: null
         });
       }
 
@@ -551,6 +625,8 @@
           activeUnit: null,
           writable: false,
           source: 'local',
+          conflictStatus: 'clear',
+          lastRemoteCheckpoint: null,
           lastError: null
         });
       }
@@ -589,6 +665,7 @@
           activeUnit: null,
           writable: false,
           source: 'local',
+          conflictStatus: 'clear',
           lastError: error?.message || 'Falha ao carregar memberships do usuário.'
         });
       }
@@ -620,9 +697,12 @@
 
         const periodRows = Array.isArray(periods) ? periods : [];
         if (!periodRows.length) {
+          const emptyCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);
+          rememberSupabaseRemoteCheckpoint(emptyCheckpoint);
           updateSupabaseBackendState({
             syncStatus: 'idle',
-            source: 'local'
+            source: 'local',
+            conflictStatus: 'clear'
           });
           return null;
         }
@@ -746,10 +826,13 @@
           periods: periodsMap,
           archives
         });
+        const checkpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);
+        rememberSupabaseRemoteCheckpoint(checkpoint);
 
         updateSupabaseBackendState({
           source: 'supabase',
           syncStatus: 'idle',
+          conflictStatus: 'clear',
           lastSyncAt: new Date().toISOString(),
           lastError: null
         });
@@ -759,6 +842,7 @@
         updateSupabaseBackendState({
           source: 'local',
           syncStatus: 'error',
+          conflictStatus: 'clear',
           lastError: error?.message || 'Falha ao carregar store remoto.'
         });
         if (typeof console !== 'undefined') {
@@ -788,28 +872,70 @@
 
       updateSupabaseBackendState({
         syncStatus: 'saving',
+        conflictStatus: 'clear',
         lastError: null
       });
 
       try {
         const payload = buildSupabaseBackupPayload(storeLike);
-        const { data, error } = await client.rpc('import_backup_transaction', {
+        const currentCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(error => {
+          if (typeof console !== 'undefined') {
+            console.warn('[supabase] não foi possível ler checkpoint remoto antes da sincronização:', error);
+          }
+          return null;
+        });
+        if (!__supabaseLastRemoteCheckpoint
+          && !isEmptySupabaseCheckpoint(currentCheckpoint)
+          && backendState.source !== 'supabase') {
+          updateSupabaseBackendState({
+            source: 'local',
+            syncStatus: 'conflict',
+            conflictStatus: 'baseline-missing',
+            lastRemoteCheckpoint: normalizeSupabaseCheckpoint(currentCheckpoint),
+            lastError: 'Backend já possui dados. Recarregue do backend antes de sincronizar este dispositivo.'
+          });
+          return {
+            ok: false,
+            skipped: true,
+            conflict: true,
+            reason: 'remote-baseline-missing'
+          };
+        }
+
+        const expectedCheckpoint = __supabaseLastRemoteCheckpoint
+          ? cloneSerializable(__supabaseLastRemoteCheckpoint)
+          : normalizeSupabaseCheckpoint(currentCheckpoint);
+        const { data, error } = await client.rpc('import_backup_transaction_guarded', {
           p_unit_id: backendState.activeUnit.unitId,
-          p_payload: payload
+          p_payload: payload,
+          p_expected_checkpoint: expectedCheckpoint
         });
         if (error) throw error;
+        const nextCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);
+        rememberSupabaseRemoteCheckpoint(nextCheckpoint);
 
         updateSupabaseBackendState({
           source: 'supabase',
           syncStatus: 'idle',
+          conflictStatus: 'clear',
           lastSyncAt: new Date().toISOString(),
           lastError: null
         });
-        return { ok: true, data };
+        return { ok: true, data, checkpoint: getSupabaseBackendState().lastRemoteCheckpoint };
       } catch (error) {
+        if (isSupabaseSyncConflictError(error)) {
+          updateSupabaseBackendState({
+            source: 'local',
+            syncStatus: 'conflict',
+            conflictStatus: 'detected',
+            lastError: error?.message || 'Conflito remoto detectado. Recarregue do backend antes de sincronizar.'
+          });
+          return { ok: false, conflict: true, reason: 'remote-conflict', error };
+        }
         updateSupabaseBackendState({
           source: 'local',
           syncStatus: 'error',
+          conflictStatus: 'clear',
           lastError: error?.message || 'Falha ao sincronizar store com Supabase.'
         });
         return { ok: false, error };
@@ -868,6 +994,8 @@
       if (options.showToast !== false && typeof showToast === 'function') {
         if (result?.ok) {
           showToast('Sincronização com o backend concluída.', 'success');
+        } else if (result?.conflict) {
+          showToast('Conflito remoto detectado. Recarregue do backend antes de sincronizar novamente.', 'warning', 6500);
         } else if (!result?.skipped) {
           showToast('Falha ao sincronizar o estado atual com o backend.', 'warning', 4500);
         }
@@ -981,8 +1109,11 @@
         writable: false,
         source: 'local',
         syncStatus: 'idle',
+        conflictStatus: 'clear',
+        lastRemoteCheckpoint: null,
         lastError: null
       });
+      __supabaseLastRemoteCheckpoint = null;
       return { ok: true };
     }
 
@@ -1019,6 +1150,7 @@
       __supabaseAuthListenerBound = false;
       __supabasePendingSyncStore = null;
       __supabaseSyncPromise = null;
+      __supabaseLastRemoteCheckpoint = null;
       updateSupabaseBackendState({
         enabled: false,
         hasEnv: false,
@@ -1030,7 +1162,9 @@
         writable: false,
         source: 'local',
         syncStatus: 'idle',
+        conflictStatus: 'clear',
         lastSyncAt: null,
+        lastRemoteCheckpoint: null,
         lastError: null
       }, false);
     }

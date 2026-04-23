@@ -496,6 +496,7 @@
       if (status === 'authenticated' || status === 'idle') return 'ok';
       if (status === 'loading' || status === 'saving' || status === 'queued') return 'warn';
       if (status === 'anonymous' || status === 'offline') return 'info';
+      if (status === 'conflict') return 'warn';
       return 'bad';
     }
 
@@ -520,6 +521,7 @@
       if (status === 'loading') return 'Carregando';
       if (status === 'saving') return 'Sincronizando';
       if (status === 'queued') return 'Na fila';
+      if (status === 'conflict') return 'Conflito';
       if (status === 'error') return 'Erro';
       return 'Ocioso';
     }
@@ -545,6 +547,8 @@
           sessionStatus: status.sessionStatus,
           source: 'local',
           syncStatus: 'idle',
+          conflictStatus: 'clear',
+          syncPolicy: 'local-first-guarded',
           writable: false,
           memberships: [],
           activeUnit: null,
@@ -556,6 +560,8 @@
       let helperText = 'Configure `SUPABASE_URL` e `SUPABASE_ANON_KEY` em `env.js` para habilitar autenticação e leitura remota.';
       if (status.hasEnv && !status.hasSdk) {
         helperText = 'O contrato de ambiente existe, mas o SDK do Supabase não foi carregado neste runtime.';
+      } else if (backendState.syncStatus === 'conflict') {
+        helperText = 'O backend mudou desde a última leitura deste dispositivo. Recarregue do backend antes de tentar sincronizar novamente.';
       } else if (backendState.sessionStatus === 'authenticated') {
         helperText = backendState.source === 'supabase'
           ? 'A base ativa está vindo do backend com espelho local preservado.'
@@ -661,7 +667,7 @@
           </div>
           <div>
             <div class="name">Estratégia atual</div>
-            <div class="muted">${backendState.source === 'supabase' ? 'leitura remota + espelho local' : 'local-first com fallback pronto'}</div>
+            <div class="muted">${backendState.syncPolicy === 'local-first-guarded' ? 'local-first com checkpoint remoto' : backendState.source === 'supabase' ? 'leitura remota + espelho local' : 'local-first com fallback pronto'}</div>
           </div>
           <div>
             <div class="name">Último erro</div>

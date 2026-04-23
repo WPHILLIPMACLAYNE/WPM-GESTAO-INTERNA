@@ -15,9 +15,9 @@ Este documento fecha a Etapa 6 no nível de modelagem lógica. O foco aqui é:
 
 Não define ainda:
 
-- estratégia final de sincronização online-first/offline-first;
-- tecnologia obrigatória de implementação;
-- detalhes de fila offline ou replicação entre dispositivos.
+- merge fino por entidade em edição concorrente;
+- tecnologia obrigatória de implementação fora do Supabase atual;
+- detalhes de fila offline por mutação individual.
 
 ## Decisões canônicas
 
@@ -30,6 +30,12 @@ Não define ainda:
 - Operações destrutivas ou compostas geram `audit_events`.
 - O backend não migra estado efêmero de UI.
 - O backend não depende de strings livres como fonte de verdade para pessoas; strings atuais viram snapshot histórico.
+- A sincronização operacional atual é local-first com checkpoint remoto guardado:
+  - o navegador salva primeiro no store local;
+  - o Supabase recebe importação transacional de store completo;
+  - `get_unit_sync_checkpoint(unit_id)` resume o estado remoto por unidade;
+  - `import_backup_transaction_guarded(unit_id, payload, expected_checkpoint)` bloqueia sobrescrita quando o checkpoint remoto diverge;
+  - conflito exige recarregar do backend antes de novo envio.
 
 ## ERD lógico mínimo
 

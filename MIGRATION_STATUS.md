@@ -10,6 +10,9 @@
   - `node --check sw.js src/core/pwa.js` → `OK`
   - `npx playwright test tests/e2e/service-worker.spec.js --project=chromium` → `3/3`
 - Último marco funcional fechado nesta trilha: `bd0216c` (`fix(pwa): versionar cache do service worker por revisao`).
+- Avanço pós-homologação: sync Supabase local-first guardada por checkpoint remoto de unidade
+  (`get_unit_sync_checkpoint` + `import_backup_transaction_guarded`) para bloquear sobrescrita
+  silenciosa em edição concorrente multi-dispositivo.
 - Neste ambiente local, Playwright pode falhar por dependência de sistema ausente (`libatk-1.0.so.0`); validar E2E em CI/runner com deps completas.
 - Fluxo seguro para evoluções: `Docs/RETOMADA_SEGURA.md`.
 

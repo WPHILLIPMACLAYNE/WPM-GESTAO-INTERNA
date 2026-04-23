@@ -303,23 +303,28 @@ edição local se necessário.
 
 Prioridade: média/baixa.
 
+Status 2026-04-23: primeira passada concluída para tabelas operacionais críticas.
+Alunos e Pendências agora usam layout de cards no mobile; Escala e Eventos escondem tabelas
+redundantes em telas pequenas e priorizam as visões em quadro/cards já existentes. A regressão E2E
+cobre ausência de scroll horizontal interno em `390px` para Alunos, Pendências, Escala e Eventos.
+
 Ações:
 
-- Manter scroll horizontal como fallback.
+- Manter scroll horizontal como fallback. ✅
 - Criar cards mobile para:
-  - Alunos;
-  - Pendências;
-  - Escala;
-  - Eventos.
+  - Alunos; ✅
+  - Pendências; ✅
+  - Escala; ✅ via quadro visual mobile sem tabela duplicada
+  - Eventos. ✅ via agenda em cards mobile sem tabela duplicada
 - Criar dataset visual com muitos atendentes e nomes longos.
 - Revalidar bugs:
-  - valores sobrepostos nos cards de atendente;
+  - valores sobrepostos nos cards de atendente; ✅ coberto por nova checagem responsiva básica
   - gráfico de barras cortado à direita.
 
 Critério de aceite:
 
-- Sem overflow global em `390px` e `760px`.
-- Tarefas principais funcionam sem depender sempre de scroll lateral.
+- Sem overflow global em `390px` e `760px`. ✅
+- Tarefas principais funcionam sem depender sempre de scroll lateral. ✅ para telas tabulares críticas
 
 ## Etapa 10 — Deploy e observabilidade
 

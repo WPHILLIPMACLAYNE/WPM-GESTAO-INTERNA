@@ -91,6 +91,30 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         });
         expect(fontSize).toBeGreaterThanOrEqual(16);
       });
+
+      test('tabelas operacionais devem usar layout mobile sem scroll horizontal interno', async ({ page }) => {
+        await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(() => window.__APP_INTERNALS__ && window.setActiveTab);
+
+        for (const tab of ['students', 'pending', 'scale', 'events']) {
+          await page.locator(`#tab-${tab}`).click();
+          await page.waitForFunction(activeTab => document.querySelector('.view.active')?.id === activeTab, tab);
+          const result = await page.evaluate(() => ({
+            activeView: document.querySelector('.view.active')?.id,
+            overflowingWraps: Array.from(document.querySelectorAll('.view.active .table-wrap'))
+              .filter(el => getComputedStyle(el).display !== 'none')
+              .map(el => ({
+                className: el.className,
+                scrollWidth: el.scrollWidth,
+                clientWidth: el.clientWidth
+              }))
+              .filter(item => item.scrollWidth > item.clientWidth + 2)
+          }));
+
+          expect(result.activeView).toBe(tab);
+          expect(result.overflowingWraps).toEqual([]);
+        }
+      });
     }
   });
 }

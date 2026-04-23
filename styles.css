@@ -6260,6 +6260,157 @@
       .btn-primary:hover { box-shadow: 0 10px 20px rgba(255,194,15,.22); }
     }
 
+    /* ── Etapa 9: tabelas operacionais viram cards no mobile ── */
+    @media (max-width: 760px) {
+      #students .table-wrap,
+      #pending .table-wrap {
+        overflow: visible;
+        background: transparent;
+        box-shadow: none;
+        padding-right: 0;
+      }
+
+      #students .student-table,
+      #pending .pending-table {
+        display: block;
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: auto;
+        border-spacing: 0;
+      }
+
+      #students .student-table thead,
+      #pending .pending-table thead {
+        display: none;
+      }
+
+      #students .student-table tbody,
+      #pending .pending-table tbody {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      #students .student-table tr,
+      #pending .pending-table tr {
+        display: grid;
+        gap: 10px;
+        width: 100%;
+        padding: 14px;
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: var(--radius-md);
+        background:
+          radial-gradient(circle at top left, rgba(255,194,15,.07), transparent 42%),
+          rgba(255,255,255,.026);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      }
+
+      #students .student-table td,
+      #pending .pending-table td {
+        display: grid;
+        grid-template-columns: minmax(92px, .42fr) minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        padding: 0 !important;
+        border-bottom: 0;
+        background: transparent !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+
+      #students .student-table td::before,
+      #pending .pending-table td::before {
+        color: var(--muted-2);
+        content: "";
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: .12em;
+        line-height: 1.25;
+        text-transform: uppercase;
+      }
+
+      #students .student-table td[colspan],
+      #pending .pending-table td[colspan] {
+        display: block;
+      }
+
+      #students .student-table td[colspan]::before,
+      #pending .pending-table td[colspan]::before {
+        content: none;
+      }
+
+      #students .student-table td:nth-child(1)::before { content: "Nome"; }
+      #students .student-table td:nth-child(2)::before { content: "Matrícula"; }
+      #students .student-table td:nth-child(3)::before { content: "Última visita"; }
+      #students .student-table td:nth-child(4)::before { content: "Hora visita"; }
+      #students .student-table td:nth-child(5)::before { content: "Início"; }
+      #students .student-table td:nth-child(6)::before { content: "Aviso NPS"; }
+      #students .student-table td:nth-child(7)::before { content: "Atendimento"; }
+      #students .student-table td:nth-child(8)::before { content: "Feedback"; }
+      #students .student-table td:nth-child(9)::before { content: "Addon"; }
+      #students .student-table td:nth-child(10)::before { content: "Observações"; }
+      #students .student-table td:nth-child(11)::before { content: "Ações"; }
+
+      #pending .pending-table td:nth-child(1)::before { content: "Nome"; }
+      #pending .pending-table td:nth-child(2)::before { content: "Matrícula"; }
+      #pending .pending-table td:nth-child(3)::before { content: "Pendência"; }
+      #pending .pending-table td:nth-child(4)::before { content: "Solicitação"; }
+      #pending .pending-table td:nth-child(5)::before { content: "Hostess"; }
+      #pending .pending-table td:nth-child(6)::before { content: "Resposta"; }
+      #pending .pending-table td:nth-child(7)::before { content: "Status"; }
+      #pending .pending-table td:nth-child(8)::before { content: "Ações"; }
+
+      #students .student-table td.right,
+      #pending .pending-table td.right {
+        display: grid;
+        grid-template-columns: minmax(92px, .42fr) minmax(0, 1fr);
+        text-align: left;
+      }
+
+      #students .student-table td.right > .btn,
+      #pending .pending-table td.right > .btn {
+        width: 100%;
+      }
+
+      #students .student-table td.right {
+        grid-template-columns: 1fr;
+      }
+
+      #students .student-table td.right::before {
+        grid-column: 1 / -1;
+      }
+
+      #students .student-table td.right .btn + .btn,
+      #pending .pending-table td.right .btn + .btn {
+        margin-left: 0;
+        margin-top: 8px;
+      }
+
+      #students .student-table .table-input {
+        min-width: 0 !important;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      #students .student-table .cell-ellipsis,
+      #students .student-table .cell-text,
+      #pending .pending-table .cell-ellipsis,
+      #pending .pending-table .cell-text {
+        max-width: none;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      #scale .schedule-matrix,
+      #events .event-consolidated-card:has(#eventsTableBody) {
+        display: none;
+      }
+    }
+
     /* ════════════════════════════════════════════════════════════════
        FIM — WPM DESIGN SYSTEM POLISH LAYER v1
        ════════════════════════════════════════════════════════════════ */

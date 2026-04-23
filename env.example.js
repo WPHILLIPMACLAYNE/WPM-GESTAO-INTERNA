@@ -43,6 +43,10 @@ window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
   SENTRY_RELEASE: null,
 
   // ── App ────────────────────────────────────────────────────────
+  // Commit SHA público do deploy atual.
+  APP_COMMIT: null,
+  // Timestamp ISO público gerado no build/deploy.
+  APP_BUILD_TIME: null,
   // Permite forçar runtime em testes/preview. null = autodetectar.
   APP_RUNTIME_OVERRIDE: null
 });

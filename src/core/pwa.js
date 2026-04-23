@@ -40,11 +40,17 @@
       });
 
       window.addEventListener('online', () => {
-        reg.update().catch(() => {
+        reg.update().catch(error => {
+          if (typeof captureError === 'function') {
+            captureError(error, { feature: 'pwa', stage: 'service-worker-update' });
+          }
           console.log('[PWA] Falha ao verificar atualizacao do service worker');
         });
       });
-    }).catch(() => {
+    }).catch(error => {
+      if (typeof captureError === 'function') {
+        captureError(error, { feature: 'pwa', stage: 'service-worker-register', swUrl: swUrl.href });
+      }
       console.log('[PWA] Service worker indisponivel (file:// ou sem suporte)');
     });
 

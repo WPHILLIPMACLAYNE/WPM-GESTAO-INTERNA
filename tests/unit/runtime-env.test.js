@@ -72,6 +72,8 @@ describe('Contrato runtime: window.__APP_ENV__', () => {
     expect(env.SUPABASE_ANON_KEY).toBeNull();
     expect(env.SUPABASE_UNIT_SLUG).toBeNull();
     expect(env.SENTRY_DSN).toBeNull();
+    expect(env.APP_COMMIT).toBeNull();
+    expect(env.APP_BUILD_TIME).toBeNull();
   });
 
   it('permite forçar o runtime via APP_RUNTIME_OVERRIDE', async () => {
@@ -81,6 +83,20 @@ describe('Contrato runtime: window.__APP_ENV__', () => {
     cleanup = app.cleanup;
     expect(app.window.__APP_INTERNALS__.config.APP_RUNTIME).toBe('production');
     expect(app.window.__APP_INTERNALS__.config.DEFAULT_INITIALIZE_MONTHS_WITH_TEST_DATA).toBe(false);
+  });
+
+  it('expõe metadados públicos de release no APP_INTERNALS', async () => {
+    const app = await loadRealApp({
+      appEnv: {
+        APP_COMMIT: 'abcdef1234567890',
+        APP_BUILD_TIME: '2026-04-23T20:00:00.000Z'
+      }
+    });
+    cleanup = app.cleanup;
+    const { config } = app.window.__APP_INTERNALS__;
+    expect(config.APP_COMMIT).toBe('abcdef1234567890');
+    expect(config.APP_BUILD_TIME).toBe('2026-04-23T20:00:00.000Z');
+    expect(config.APP_RELEASE_LABEL).toBe('v34 (abcdef1)');
   });
 });
 
@@ -537,6 +553,25 @@ describe('Observability (Sentry) — no-op condicional', () => {
     expect(initCalledWith.environment).toBe('staging');
     expect(initCalledWith.release).toBe('v34-test');
     expect(observability.getObservabilityStatus().initialized).toBe(true);
+  });
+
+  it('usa versão e commit como release Sentry quando SENTRY_RELEASE não é definido', async () => {
+    const app = await loadRealApp({
+      appEnv: { APP_COMMIT: 'abcdef1234567890' }
+    });
+    cleanup = app.cleanup;
+    const { observability } = app.window.__APP_INTERNALS__;
+    let initCalledWith = null;
+    app.window.Sentry = {
+      init(opts) { initCalledWith = opts; },
+      captureException() {},
+      captureMessage() {}
+    };
+    app.window.__APP_ENV__.SENTRY_DSN = 'https://abc@xyz.ingest.sentry.io/123';
+    observability.resetObservability();
+    expect(observability.initSentry()).toBe(true);
+    expect(initCalledWith.release).toBe('v34@abcdef1234567890');
+    expect(observability.getObservabilityStatus().release).toBe('v34@abcdef1234567890');
   });
 
   it('captureError é seguro de chamar mesmo sem inicialização', async () => {

@@ -18,6 +18,23 @@
     const LEGACY_STORAGE_KEYS = ['recepcao-smartfit-dashboard-v33', 'recepcao-smartfit-dashboard-v24'];
     /** @type {string} Human-readable app version label. */
     const APP_VERSION = 'v34';
+    const APP_COMMIT = (() => {
+      try {
+        return String(window?.__APP_ENV__?.APP_COMMIT || '').trim() || 'local';
+      } catch {
+        return 'local';
+      }
+    })();
+    const APP_BUILD_TIME = (() => {
+      try {
+        return String(window?.__APP_ENV__?.APP_BUILD_TIME || '').trim() || null;
+      } catch {
+        return null;
+      }
+    })();
+    const APP_RELEASE_LABEL = APP_COMMIT && APP_COMMIT !== 'local'
+      ? `${APP_VERSION} (${APP_COMMIT.slice(0, 7)})`
+      : APP_VERSION;
     const APP_RUNTIME = (() => {
       try {
         const runtimeOverride = String(window?.__APP_ENV__?.APP_RUNTIME_OVERRIDE || '').toLowerCase();

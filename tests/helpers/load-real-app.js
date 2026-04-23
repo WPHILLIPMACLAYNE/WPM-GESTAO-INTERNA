@@ -82,6 +82,8 @@ export async function loadRealApp(options = {}) {
     SENTRY_DSN: null,
     SENTRY_ENVIRONMENT: null,
     SENTRY_RELEASE: null,
+    APP_COMMIT: null,
+    APP_BUILD_TIME: null,
     APP_RUNTIME_OVERRIDE: null
   }, window.__APP_ENV__ || {}, options.appEnv || {});
 

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "smoke:deploy": "playwright test tests/e2e/post-deploy-smoke.spec.js --project=chromium",
     "test:e2e": "node Scripts/responsive-test.mjs",
     "test:visual": "node Scripts/visual-check.mjs",
     "test:all": "npm run test && npm run test:e2e"

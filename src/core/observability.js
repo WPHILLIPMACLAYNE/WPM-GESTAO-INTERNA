@@ -29,10 +29,13 @@
     function readSentryEnv() {
       const env = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
       const fallbackEnvironment = (typeof APP_RUNTIME !== 'undefined' && APP_RUNTIME) || 'production';
+      const fallbackRelease = typeof APP_COMMIT !== 'undefined' && APP_COMMIT && APP_COMMIT !== 'local'
+        ? `${APP_VERSION || 'app'}@${APP_COMMIT}`
+        : (typeof APP_VERSION !== 'undefined' && APP_VERSION) || null;
       return {
         dsn: env.SENTRY_DSN || null,
         environment: env.SENTRY_ENVIRONMENT || fallbackEnvironment,
-        release: env.SENTRY_RELEASE || null
+        release: env.SENTRY_RELEASE || fallbackRelease
       };
     }
 
@@ -114,7 +117,7 @@
 
     /**
      * Diagnóstico para painel de Configurações e testes.
-     * @returns {{initialized: boolean, hasDsn: boolean, hasSdk: boolean, reason: string|null}}
+     * @returns {{initialized: boolean, hasDsn: boolean, hasSdk: boolean, reason: string|null, release: string|null}}
      */
     function getObservabilityStatus() {
       const cfg = readSentryEnv();
@@ -122,7 +125,8 @@
         initialized: __sentryInitialized,
         hasDsn: Boolean(cfg.dsn),
         hasSdk: isSentrySdkLoaded(),
-        reason: __sentryStatusReason
+        reason: __sentryStatusReason,
+        release: cfg.release || null
       };
     }
 

@@ -334,16 +334,16 @@ Prioridade: média.
 
 Ações:
 
-- Expor versão/commit no app.
-- Criar smoke pós-deploy:
-  - app inicializa;
-  - Chart.js carrega;
-  - service worker registra;
-  - backup exporta;
-  - import valida payload inválido;
-  - mês ativo troca.
-- Registrar erros de inicialização e importação.
-- Documentar rollback seguro, incluindo cache.
+- [x] Expor versão/commit no app.
+- [x] Criar smoke pós-deploy:
+  - [x] app inicializa;
+  - [x] Chart.js carrega;
+  - [x] service worker registra;
+  - [x] backup exporta;
+  - [x] import valida payload inválido;
+  - [x] mês ativo troca.
+- [x] Registrar erros de inicialização e importação.
+- [x] Documentar rollback seguro, incluindo cache.
 
 Critério de aceite:
 

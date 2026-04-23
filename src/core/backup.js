@@ -627,7 +627,21 @@
       if (file.size > 50 * 1024 * 1024) { showToast('Arquivo muito grande (máximo: 50MB).', 'danger'); return; }
       if (file.type !== 'application/json' && !file.name.endsWith('.json')) { showToast('Formato inválido. Selecione um arquivo .json.', 'warning'); return; }
       const reader = new FileReader();
-      reader.onerror = () => showToast('Erro ao ler o arquivo. Tente novamente.', 'danger');
+      const importContext = {
+        feature: 'backup-import',
+        fileName: file.name || 'backup.json',
+        fileSize: file.size || 0,
+        fileType: file.type || 'application/json'
+      };
+      reader.onerror = () => {
+        if (typeof captureError === 'function') {
+          captureError(reader.error || new Error('Falha ao ler arquivo de importação'), {
+            ...importContext,
+            stage: 'read-file'
+          });
+        }
+        showToast('Erro ao ler o arquivo. Tente novamente.', 'danger');
+      };
       reader.onload = async () => {
         try {
           const parsed = JSON.parse(reader.result);
@@ -646,10 +660,22 @@
                 : `Backup importado: ${summary.periods} períodos • ${summary.students} alunos • ${summary.pending} pendências • ${summary.events} eventos.`;
               showToast(successMessage, 'success', 5000);
             } catch (err) {
+              if (typeof captureError === 'function') {
+                captureError(err, {
+                  ...importContext,
+                  stage: 'apply'
+                });
+              }
               showToast('Erro ao aplicar backup: ' + (err.message || 'erro desconhecido'), 'danger');
             }
           });
         } catch (err) {
+          if (typeof captureError === 'function') {
+            captureError(err, {
+              ...importContext,
+              stage: 'validate'
+            });
+          }
           showToast('Arquivo inválido. Importe um backup JSON gerado pelo app. Detalhe: ' + (err.message || 'erro desconhecido'), 'danger', 5000);
         }
       };

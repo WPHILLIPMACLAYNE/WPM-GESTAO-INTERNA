@@ -221,7 +221,15 @@
           <div class="settings-about-grid">
             <div class="settings-about-item">
               <div class="name">Versão</div>
-              <div class="value">${esc(APP_VERSION)}</div>
+              <div class="value">${esc(APP_RELEASE_LABEL)}</div>
+            </div>
+            <div class="settings-about-item">
+              <div class="name">Commit</div>
+              <div class="value">${esc(APP_COMMIT || 'local')}</div>
+            </div>
+            <div class="settings-about-item">
+              <div class="name">Build</div>
+              <div class="value">${esc(APP_BUILD_TIME || 'runtime local')}</div>
             </div>
             <div class="settings-about-item">
               <div class="name">Autor</div>

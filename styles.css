@@ -5335,6 +5335,14 @@
         flex-shrink: 0;
         width: auto;
       }
+      #dashboard .dashboard-section--feedback .bar-col {
+        flex: 0 0 88px;
+        min-width: 88px;
+        max-width: 88px;
+      }
+      #dashboard .dashboard-section--feedback .bar-label {
+        max-width: 100%;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {

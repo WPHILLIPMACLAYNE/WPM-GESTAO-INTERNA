@@ -28,6 +28,105 @@ const TABS = [
   { id: 'tab-settings', name: 'settings', label: 'Configurações' }
 ];
 
+async function seedLongReceptionistDashboard(page) {
+  await page.evaluate(async () => {
+    const periodKey = '2026-04';
+    const receptionists = [
+      'Ana Carolina Albuquerque da Recepção Premium',
+      'Bruno Henrique Atendimento Consultivo Norte',
+      'Camila Vitória dos Santos Operação Comercial',
+      'Diego Rafael Pereira Experiência do Aluno',
+      'Emanuelle Cristina Relacionamento Pós-Venda',
+      'Fernanda Marques Retenção e Boas-Vindas',
+      'Gabriel Souza Onboarding Smart Fit Unidade',
+      'Helena Beatriz Coordenação de Atendimento'
+    ];
+    const addonTypes = ['Bioimpedância Avançada', 'Plano Nutrição', 'Acompanhamento Premium'];
+    const buildStudents = () => Array.from({ length: 48 }, (_, index) => {
+      const atendimento = receptionists[index % receptionists.length];
+      return {
+        id: crypto.randomUUID(),
+        nome: `Aluno com Nome Operacional Muito Longo ${String(index + 1).padStart(2, '0')}`,
+        matricula: `MAT-${10000 + index}`,
+        ultimaVisita: `2026-04-${String((index % 27) + 1).padStart(2, '0')}`,
+        horaVisita: '08:30',
+        inicio: `2026-04-${String((index % 27) + 1).padStart(2, '0')}`,
+        avisoNps: index % 4 === 0 ? 'Não' : 'Sim',
+        atendimento,
+        feedback: index % 5 === 0 ? 'Não respondeu' : index % 4 === 0 ? 'Pendente' : 'Respondeu',
+        addon: index % 3 === 0 ? addonTypes[index % addonTypes.length] : '',
+        observacoes: 'Observação extensa para validar quebra de texto sem estouro horizontal.'
+      };
+    });
+    const buildAddons = () => {
+      const addons = {};
+      receptionists.forEach((name, personIndex) => {
+        addons[name] = {};
+        addonTypes.forEach((type, typeIndex) => {
+          addons[name][type] = Array.from({ length: state.settings.monthDays || 30 }, (_, day) => (
+            (day + personIndex + typeIndex) % 9 === 0 ? 1 : 0
+          ));
+        });
+      });
+      return addons;
+    };
+
+    const period = buildCleanPeriodFromTemplate(null, periodKey);
+    period.settings.receptionists = receptionists;
+    period.settings.team = receptionists;
+    period.settings.addonTypes = addonTypes;
+    period.nps.score = 87;
+    period.students = buildStudents();
+    period.addons = {};
+    receptionists.forEach((name, personIndex) => {
+      period.addons[name] = {};
+      addonTypes.forEach((type, typeIndex) => {
+        period.addons[name][type] = Array.from({ length: period.settings.monthDays }, (_, day) => (
+          (day + personIndex + typeIndex) % 9 === 0 ? 1 : 0
+        ));
+      });
+    });
+
+    const store = {
+      version: window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: periodKey,
+      periods: { [periodKey]: period },
+      archives: {}
+    };
+    localStorage.clear();
+    if (typeof storageCache !== 'undefined' && typeof storageCache.clear === 'function') {
+      storageCache.clear();
+    }
+    await syncAppState(store);
+    saveUIState({
+      activeTab: 'dashboard',
+      studentSearch: '',
+      studentFilterAtendente: '',
+      studentFilterFeedback: '',
+      pendingSearch: '',
+      eventSearch: '',
+      eventTypeFilter: '',
+      eventStatusFilter: '',
+      scaleSearch: ''
+    });
+    await saveData({ silent: true, broadcast: false, eventType: 'playwright-long-receptionist-seed' });
+    await window.__APP_INTERNALS__.actions.switchPeriod(periodKey, { silent: true });
+    state.settings.receptionists = [...receptionists];
+    state.settings.team = [...receptionists];
+    state.settings.addonTypes = [...addonTypes];
+    state.students = buildStudents();
+    state.addons = buildAddons();
+    state.nps.score = 87;
+    storage.periods[periodKey] = state;
+    normalizeData(state);
+    limparCacheSelectores();
+    await saveData({ silent: true, broadcast: false, eventType: 'playwright-long-receptionist-active-state' });
+    setActiveTab('dashboard', true);
+    renderAll();
+    syncPeriodControls();
+  });
+}
+
 test.describe('App: Estrutura', () => {
   test('deve carregar com título correto', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -114,6 +213,44 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
           expect(result.activeView).toBe(tab);
           expect(result.overflowingWraps).toEqual([]);
         }
+      });
+
+      test('dashboard deve acomodar muitos atendentes e nomes longos no mobile', async ({ page }) => {
+        await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(() => window.__APP_INTERNALS__ && window.buildCleanPeriodFromTemplate);
+        await seedLongReceptionistDashboard(page);
+        await page.waitForFunction(() => document.querySelectorAll('#summaryList .summary-item--dashboard-person').length >= 8);
+
+        const metrics = await page.evaluate(() => {
+          const chartBox = document.querySelector('#dashboard .dashboard-section--feedback .chart-box');
+          const chart = document.getElementById('feedbackChart');
+          const visibleChartBoxWidth = chartBox?.clientWidth || 0;
+          const barWidths = Array.from(document.querySelectorAll('#feedbackChart .bar-col'))
+            .map(el => Math.round(el.getBoundingClientRect().width));
+          const clippedDashboardItems = Array.from(document.querySelectorAll(
+            '#dashboard .summary-item--dashboard-person, #dashboard .summary-main .name, #dashboard .metric, #dashboard .metric strong, #dashboard .metric span'
+          )).filter(el => el.scrollWidth > el.clientWidth + 2);
+
+          return {
+            pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            chartCanScroll: chartBox ? chartBox.scrollWidth > visibleChartBoxWidth : false,
+            chartWidth: chart?.scrollWidth || 0,
+            visibleChartBoxWidth,
+            maxBarWidth: Math.max(0, ...barWidths),
+            clippedDashboardItems: clippedDashboardItems.map(el => ({
+              className: el.className,
+              text: el.textContent.trim().slice(0, 80),
+              scrollWidth: el.scrollWidth,
+              clientWidth: el.clientWidth
+            }))
+          };
+        });
+
+        expect(metrics.pageOverflow).toBeLessThanOrEqual(2);
+        expect(metrics.chartCanScroll).toBe(true);
+        expect(metrics.chartWidth).toBeLessThan(900);
+        expect(metrics.maxBarWidth).toBeLessThanOrEqual(90);
+        expect(metrics.clippedDashboardItems).toEqual([]);
       });
     }
   });

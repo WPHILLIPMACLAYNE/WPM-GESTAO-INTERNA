@@ -307,6 +307,8 @@ Status 2026-04-23: primeira passada concluída para tabelas operacionais crític
 Alunos e Pendências agora usam layout de cards no mobile; Escala e Eventos escondem tabelas
 redundantes em telas pequenas e priorizam as visões em quadro/cards já existentes. A regressão E2E
 cobre ausência de scroll horizontal interno em `390px` para Alunos, Pendências, Escala e Eventos.
+Segunda passada: dataset E2E com 8 atendentes e nomes longos cobre cards de atendente no Dashboard
+e limita o gráfico de feedback positivo para rolagem interna controlada, sem cortar a direita.
 
 Ações:
 
@@ -316,10 +318,10 @@ Ações:
   - Pendências; ✅
   - Escala; ✅ via quadro visual mobile sem tabela duplicada
   - Eventos. ✅ via agenda em cards mobile sem tabela duplicada
-- Criar dataset visual com muitos atendentes e nomes longos.
+- Criar dataset visual com muitos atendentes e nomes longos. ✅
 - Revalidar bugs:
   - valores sobrepostos nos cards de atendente; ✅ coberto por nova checagem responsiva básica
-  - gráfico de barras cortado à direita.
+  - gráfico de barras cortado à direita. ✅
 
 Critério de aceite:
 

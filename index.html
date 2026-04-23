@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <!-- Content Security Policy: previne XSS, clickjacking e injeção de código -->
   <!-- O app shell não depende mais de estilos inline estáticos; ajustes dinâmicos são aplicados via JS. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://*.sentry-cdn.com; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:54321 http://localhost:54321 ws://127.0.0.1:54321 ws://localhost:54321 https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>WPM Gestão Interna • v34</title>
   <link rel="stylesheet" href="styles.css" data-runtime-stylesheet />
   <!-- DOMPurify: sanitização de HTML para prevenção de XSS -->
@@ -21,6 +21,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
           integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
           crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
   <script src="src/core/env-bootstrap.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
@@ -742,8 +743,8 @@
                 </div>
                 <div class="summary-item summary-item--col1 settings-help-step">
                   <div>
-                    <div class="name">Os dados ficam locais</div>
-                    <div class="muted">A base usa IndexedDB, cache em memória e sincronização entre abas.</div>
+                    <div class="name">A base é local-first</div>
+                    <div class="muted">O app usa IndexedDB, cache em memória e sincronização entre abas, com backend Supabase opcional.</div>
                   </div>
                 </div>
                 <div class="summary-item summary-item--col1 settings-help-step">
@@ -759,6 +760,47 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="section glass settings-card settings-card--secondary">
+            <div class="settings-card-head">
+              <span class="section-kicker">Backend opcional</span>
+              <h2>Supabase Auth e unidade ativa</h2>
+              <p>Login local, leitura remota do período e sincronização híbrida com fallback para o store local.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="summary-list" id="supabaseAuthPanel"></div>
+            </div>
+            <div class="settings-card-actions" id="supabaseAuthActions"></div>
+          </div>
+
+          <div class="section glass settings-card settings-card--secondary">
+            <div class="settings-card-head">
+              <span class="section-kicker">Etapa 7</span>
+              <h2>Migração assistida</h2>
+              <p>Dry-run comparativo da base local contra o backend e execução assistida com backup antes do envio.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Relatório de migração</h3>
+                  <p>Contagens por entidade, detecção de recados legados e comparação com a unidade remota quando autenticado.</p>
+                </div>
+                <div class="summary-list" id="migrationDryRunList"></div>
+              </div>
+              <div class="settings-subsection">
+                <div class="settings-subsection-head">
+                  <h3>Checklist de homologação real</h3>
+                  <p>Sequência mínima para validar a primeira migração ou uma reimportação assistida com a base legada real.</p>
+                </div>
+                <div class="summary-list" id="migrationHomologationList"></div>
+              </div>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn btn-success" data-action="run-migration-dry-run">Executar dry-run</button>
+              <button class="btn btn-ghost" data-action="run-assisted-migration">Migrar para o backend</button>
+              <button class="btn btn-ghost" data-action="clear-migration-dry-run">Limpar relatório</button>
             </div>
           </div>
 

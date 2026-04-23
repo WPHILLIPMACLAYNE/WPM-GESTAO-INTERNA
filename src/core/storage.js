@@ -117,22 +117,24 @@
 
     /**
      * Normalize persistence options from boolean or object form.
-     * @param {boolean|{silent?: boolean, eventType?: string, broadcast?: boolean}} input - Options or silent flag.
+     * @param {boolean|{silent?: boolean, eventType?: string, broadcast?: boolean, skipRemoteSync?: boolean}} input - Options or silent flag.
      * @param {string} [defaultEventType='save'] - Default event type.
-     * @returns {{silent: boolean, eventType: string, broadcast: boolean}}
+     * @returns {{silent: boolean, eventType: string, broadcast: boolean, skipRemoteSync: boolean}}
      */
     function normalizePersistenceOptions(input, defaultEventType = 'save') {
       if (typeof input === 'boolean') {
         return {
           silent: input,
           eventType: defaultEventType,
-          broadcast: true
+          broadcast: true,
+          skipRemoteSync: false
         };
       }
       return {
         silent: Boolean(input?.silent),
         eventType: String(input?.eventType || defaultEventType),
-        broadcast: input?.broadcast !== false
+        broadcast: input?.broadcast !== false,
+        skipRemoteSync: input?.skipRemoteSync === true
       };
     }
 
@@ -169,6 +171,8 @@
         ...LEGACY_SYSTEM_REPORT_KEYS,
         FLOW_TEST_REPORT_KEY,
         ...LEGACY_FLOW_TEST_REPORT_KEYS,
+        MIGRATION_DRY_RUN_REPORT_KEY,
+        ...LEGACY_MIGRATION_DRY_RUN_REPORT_KEYS,
         UI_KEY,
         ...LEGACY_UI_KEYS
       ];

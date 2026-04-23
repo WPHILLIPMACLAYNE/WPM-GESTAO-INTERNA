@@ -36,24 +36,47 @@
      * Loads the store from primary or legacy keys, falling back to defaults.
      * @returns {Promise<AppStore>}
      */
-    async function loadStore() {
+    async function loadLocalStore() {
       const currentStore = await readStoredStore(STORAGE_KEY);
       if (currentStore) {
-        await saveStore(currentStore, { silent: true, broadcast: false });
+        await saveStore(currentStore, { silent: true, broadcast: false, skipRemoteSync: true });
         return currentStore;
       }
 
       for (const legacyKey of LEGACY_STORAGE_KEYS) {
         const legacyStore = await readStoredStore(legacyKey);
         if (legacyStore) {
-          await saveStore(legacyStore, { silent: true, broadcast: false });
+          await saveStore(legacyStore, { silent: true, broadcast: false, skipRemoteSync: true });
           return legacyStore;
         }
       }
 
       const defaultStore = getDefaultStore();
-      await saveStore(defaultStore, { silent: true, broadcast: false });
+      await saveStore(defaultStore, { silent: true, broadcast: false, skipRemoteSync: true });
       return defaultStore;
+    }
+
+    /**
+     * Loads the store, preferring Supabase when authenticated and available.
+     * @param {{skipRemote?: boolean}} [options]
+     * @returns {Promise<AppStore>}
+     */
+    async function loadStore(options = {}) {
+      const localStore = await loadLocalStore();
+      if (options?.skipRemote || typeof loadStoreFromSupabase !== 'function') {
+        return localStore;
+      }
+
+      const remoteStore = await loadStoreFromSupabase(localStore);
+      if (!remoteStore) return localStore;
+
+      await saveStore(remoteStore, {
+        silent: true,
+        broadcast: false,
+        skipRemoteSync: true,
+        eventType: 'remote-load'
+      });
+      return remoteStore;
     }
 
     /**
@@ -63,7 +86,7 @@
      * @returns {Promise<boolean>}
      */
     async function saveStore(storeLike, options = false) {
-      const { silent, eventType, broadcast } = normalizePersistenceOptions(options, 'save');
+      const { silent, eventType, broadcast, skipRemoteSync } = normalizePersistenceOptions(options, 'save');
       updatePersistenceTechState({
         status: 'sincronizando',
         broadcastAvailable: canUseStorageBroadcast()
@@ -91,6 +114,40 @@
           storeVersion: storeToSave.version || STORE_VERSION,
           broadcastAvailable: canUseStorageBroadcast()
         });
+        const shouldTryRemoteSync = !skipRemoteSync
+          && typeof queueSupabaseStoreSync === 'function'
+          && typeof getSupabaseStatus === 'function'
+          && typeof getSupabaseBackendState === 'function'
+          && getSupabaseStatus().enabled
+          && getSupabaseBackendState().sessionStatus === 'authenticated'
+          && Boolean(getSupabaseBackendState().activeUnit?.unitId)
+          && getSupabaseBackendState().writable === true;
+        if (shouldTryRemoteSync) {
+          const immediate = typeof shouldSyncSupabaseImmediately === 'function'
+            ? shouldSyncSupabaseImmediately(eventType)
+            : false;
+          const syncPromise = queueSupabaseStoreSync(storeToSave, {
+            immediate,
+            delayMs: 900
+          });
+          if (immediate) {
+            const syncResult = await syncPromise;
+            if (!syncResult?.ok && !syncResult?.skipped) {
+              updatePersistenceTechState({
+                status: 'erro',
+                broadcastAvailable: canUseStorageBroadcast()
+              });
+              if (!silent) {
+                showToast('Store local salvo, mas a sincronização com o backend falhou.', 'warning', 4500);
+              }
+              return false;
+            }
+          } else {
+            syncPromise.catch(error => {
+              console.warn('[supabase] falha no agendamento de sincronização remota:', error);
+            });
+          }
+        }
         if (!silent) showSaveToast();
         return true;
       } catch (err) {
@@ -169,13 +226,15 @@
       const persistCurrent = options?.persistCurrent === true;
       const eventType = String(options?.eventType || 'save');
       const broadcast = options?.broadcast === true;
+      const skipRemoteSync = options?.skipRemoteSync === true;
       const candidate = prepareStoreCandidate(storage) || getDefaultStore();
 
       if (persistCurrent) {
         const saved = await saveStore(candidate, {
           silent: true,
           eventType,
-          broadcast
+          broadcast,
+          skipRemoteSync
         });
         if (!saved) throw new Error('Falha ao persistir o estado atual antes de gerar o backup.');
       }
@@ -461,7 +520,8 @@
       const storeSnapshot = await getCommittedStoreSnapshot({
         persistCurrent: options?.persistCurrent !== false,
         eventType: String(options?.eventType || 'save'),
-        broadcast: options?.broadcast === true
+        broadcast: options?.broadcast === true,
+        skipRemoteSync: options?.skipRemoteSync === true
       });
       return buildBackupPayloadFromStore(storeSnapshot);
     }

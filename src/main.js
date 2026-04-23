@@ -122,6 +122,13 @@
       diagnostics: {
         runSystemDiagnostics,
         runFlowSmokeTests,
+        loadMigrationDryRunReport,
+        getMigrationReadiness,
+        runMigrationDryRun,
+        clearMigrationDryRunReport,
+        renderMigrationDryRunPanel,
+        renderMigrationHomologationPanel,
+        runAssistedMigrationToSupabase,
         renderDiagnosticsPanel,
         renderFlowSmokePanel,
         renderPeriodAudit
@@ -130,6 +137,15 @@
         getSupabaseClient,
         isSupabaseEnabled,
         getSupabaseStatus,
+        getSupabaseBackendState,
+        refreshSupabaseBackendState,
+        loadStoreFromSupabase,
+        saveStoreToSupabase,
+        queueSupabaseStoreSync,
+        syncCurrentStoreToSupabase,
+        reloadAppFromSupabaseSession,
+        signInSupabasePassword,
+        signOutSupabase,
         resetSupabaseClient
       },
       observability: {
@@ -144,6 +160,7 @@
     /** @returns {Readonly<Object>} */
     function exposeAppInternals() {
       window.__APP_INTERNALS__ = APP_INTERNALS;
+      globalThis.__APP_INTERNALS__ = APP_INTERNALS;
       return APP_INTERNALS;
     }
 

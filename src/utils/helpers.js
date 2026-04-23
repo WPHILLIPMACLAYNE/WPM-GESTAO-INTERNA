@@ -287,6 +287,18 @@
       return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
     }
 
+    /**
+     * @param {string} key - Candidate period key (YYYY-MM).
+     * @param {string} [referenceKey=currentPeriodKey] - Reference period key (YYYY-MM).
+     * @returns {boolean} True when `key` is a valid period before `referenceKey`.
+     */
+    function isPastPeriodKey(key, referenceKey = currentPeriodKey) {
+      const candidate = String(key || '');
+      const reference = String(referenceKey || '');
+      if (!isValidPeriodKey(candidate) || !isValidPeriodKey(reference)) return false;
+      return candidate.localeCompare(reference) < 0;
+    }
+
     /** @param {string} key - Period key (YYYY-MM). @returns {string} Next month's period key. */
     function getNextPeriodKey(key) {
       const [yearStr, monthStr] = String(key).split('-');

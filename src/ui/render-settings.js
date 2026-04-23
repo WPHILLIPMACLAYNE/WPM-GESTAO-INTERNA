@@ -15,6 +15,9 @@
       renderBackupSummary();
       renderDiagnosticsPanel();
       renderPersistenceTechPanel();
+      renderSupabasePanel();
+      renderMigrationDryRunPanel();
+      renderMigrationHomologationPanel();
       renderPeriodAudit();
       renderFlowSmokePanel();
     }
@@ -114,11 +117,13 @@
           LOCAL_SNAPSHOT_KEY,
           SYSTEM_REPORT_KEY,
           FLOW_TEST_REPORT_KEY,
+          MIGRATION_DRY_RUN_REPORT_KEY,
           UI_KEY,
           ...LEGACY_STORAGE_KEYS,
           ...LEGACY_LOCAL_SNAPSHOT_KEYS,
           ...LEGACY_SYSTEM_REPORT_KEYS,
           ...LEGACY_FLOW_TEST_REPORT_KEYS,
+          ...LEGACY_MIGRATION_DRY_RUN_REPORT_KEYS,
           ...LEGACY_UI_KEYS
         ]);
         for (let index = 0; index < localStorage.length; index++) {
@@ -400,16 +405,31 @@
     function renderPersistenceTechPanel() {
       const host = document.getElementById('persistenceTechList');
       if (!host) return;
+      const backendState = typeof getSupabaseBackendState === 'function'
+        ? getSupabaseBackendState()
+        : null;
+      const effectiveModeLabel = backendState?.sessionStatus === 'authenticated'
+        ? 'híbrido / Supabase + IndexedDB + cache + broadcast'
+        : persistenceTechState.modeLabel;
+      const effectiveBackendLabel = backendState?.sessionStatus === 'authenticated'
+        ? backendState?.source === 'supabase'
+          ? 'Supabase com espelho local'
+          : 'IndexedDB (fallback local)'
+        : persistenceTechState.backendLabel;
 
       const statusPillClass = persistenceTechState.status === 'pronto'
         ? 'ok'
         : persistenceTechState.status === 'sincronizando'
           ? 'warn'
+          : persistenceTechState.status === 'fila'
+            ? 'info'
           : 'bad';
       const statusLabel = persistenceTechState.status === 'pronto'
         ? 'Pronto'
         : persistenceTechState.status === 'sincronizando'
           ? 'Sincronizando'
+          : persistenceTechState.status === 'fila'
+            ? 'Na fila'
           : 'Erro';
       const selfTestClass = persistenceTechState.selfTest.status === 'ok'
         ? 'ok'
@@ -432,7 +452,7 @@
         <div class="summary-item summary-item--col4">
           <div>
             <div class="name">Modo de persistência</div>
-            <div class="muted">${esc(persistenceTechState.modeLabel)}</div>
+            <div class="muted">${esc(effectiveModeLabel)}</div>
           </div>
           <div>
             <div class="name">Status da persistência</div>
@@ -440,7 +460,7 @@
           </div>
           <div>
             <div class="name">Backend principal</div>
-            <div class="muted">${esc(persistenceTechState.backendLabel)}</div>
+            <div class="muted">${esc(effectiveBackendLabel)}</div>
           </div>
           <div>
             <div class="name">Broadcast cross-tab</div>
@@ -466,6 +486,192 @@
           </div>
         </div>
       `;
+    }
+
+    /**
+     * @param {string} status
+     * @returns {string}
+     */
+    function getSupabasePillClass(status) {
+      if (status === 'authenticated' || status === 'idle') return 'ok';
+      if (status === 'loading' || status === 'saving' || status === 'queued') return 'warn';
+      if (status === 'anonymous' || status === 'offline') return 'info';
+      return 'bad';
+    }
+
+    /**
+     * @param {string} status
+     * @returns {string}
+     */
+    function getSupabaseSessionLabel(status) {
+      if (status === 'authenticated') return 'Autenticado';
+      if (status === 'anonymous') return 'Anônimo';
+      if (status === 'offline') return 'Offline';
+      if (status === 'sdk-missing') return 'SDK ausente';
+      if (status === 'error') return 'Erro';
+      return 'Indefinido';
+    }
+
+    /**
+     * @param {string} status
+     * @returns {string}
+     */
+    function getSupabaseSyncLabel(status) {
+      if (status === 'loading') return 'Carregando';
+      if (status === 'saving') return 'Sincronizando';
+      if (status === 'queued') return 'Na fila';
+      if (status === 'error') return 'Erro';
+      return 'Ocioso';
+    }
+
+    /** @returns {void} */
+    function renderSupabasePanel() {
+      const host = document.getElementById('supabaseAuthPanel');
+      if (!host) return;
+
+      const status = typeof getSupabaseStatus === 'function'
+        ? getSupabaseStatus()
+        : {
+          enabled: false,
+          hasEnv: false,
+          hasSdk: false,
+          reason: 'unavailable',
+          unitSlug: null,
+          sessionStatus: 'offline'
+        };
+      const backendState = typeof getSupabaseBackendState === 'function'
+        ? getSupabaseBackendState()
+        : {
+          sessionStatus: status.sessionStatus,
+          source: 'local',
+          syncStatus: 'idle',
+          writable: false,
+          memberships: [],
+          activeUnit: null,
+          user: null,
+          lastSyncAt: null,
+          lastError: null
+        };
+
+      let helperText = 'Configure `SUPABASE_URL` e `SUPABASE_ANON_KEY` em `env.js` para habilitar autenticação e leitura remota.';
+      if (status.hasEnv && !status.hasSdk) {
+        helperText = 'O contrato de ambiente existe, mas o SDK do Supabase não foi carregado neste runtime.';
+      } else if (backendState.sessionStatus === 'authenticated') {
+        helperText = backendState.source === 'supabase'
+          ? 'A base ativa está vindo do backend com espelho local preservado.'
+          : 'Sessão autenticada, mas o app está usando fallback local neste momento.';
+      } else if (status.enabled) {
+        helperText = 'Backend pronto. Faça login para carregar a unidade remota e ativar a sincronização híbrida.';
+      }
+
+      const membershipCount = Array.isArray(backendState.memberships) ? backendState.memberships.length : 0;
+      const activeUnitLabel = backendState.activeUnit?.unitName || 'Nenhuma unidade ativa';
+      const roleLabel = backendState.activeUnit?.role || '—';
+      const sourceLabel = backendState.source === 'supabase' ? 'Supabase' : 'Local';
+      const lastSyncLabel = backendState.lastSyncAt ? new Date(backendState.lastSyncAt).toLocaleString('pt-BR') : 'Ainda não sincronizado';
+      const sessionPill = getSupabasePillClass(backendState.sessionStatus);
+      const syncPill = getSupabasePillClass(backendState.syncStatus);
+      const sourcePill = backendState.source === 'supabase' ? 'ok' : 'info';
+      const authBlock = backendState.sessionStatus === 'authenticated'
+        ? `
+          <div class="summary-item summary-item--col1">
+            <div>
+              <div class="name">Sessão atual</div>
+              <div class="muted">${esc(backendState.user?.fullName || backendState.user?.email || 'Usuário autenticado')}</div>
+              <div class="subtle-note">${esc(backendState.user?.email || '')}</div>
+            </div>
+          </div>
+        `
+        : `
+          <div class="summary-item summary-item--col1">
+            <div class="settings-about-grid">
+              <label class="settings-about-item" for="supabaseEmailInput">
+                <div class="name">E-mail</div>
+                <input id="supabaseEmailInput" class="input" type="email" placeholder="dev.admin@wpm.local" autocomplete="username" />
+              </label>
+              <label class="settings-about-item" for="supabasePasswordInput">
+                <div class="name">Senha</div>
+                <input id="supabasePasswordInput" class="input" type="password" placeholder="••••••••" autocomplete="current-password" />
+              </label>
+            </div>
+          </div>
+        `;
+      const actionButtons = backendState.sessionStatus === 'authenticated'
+        ? `
+          <button class="btn btn-success" data-action="supabase-reload">Recarregar do backend</button>
+          <button class="btn btn-ghost" data-action="supabase-sync-now" ${backendState.writable ? '' : 'disabled aria-disabled="true" title="Perfil somente leitura no backend"'}>Sincronizar agora</button>
+          <button class="btn btn-ghost" data-action="supabase-sign-out">Sair</button>
+        `
+        : `
+          <button class="btn btn-success" data-action="supabase-sign-in" ${status.enabled ? '' : 'disabled aria-disabled="true"'}>Entrar no backend</button>
+        `;
+
+      host.innerHTML = `
+        <div class="summary-item summary-item--col1">
+          <div>
+            <div class="name">Autenticação e sincronização remota</div>
+            <div class="muted">${esc(helperText)}</div>
+          </div>
+        </div>
+        <div class="summary-item summary-item--col4">
+          <div>
+            <div class="name">Ambiente</div>
+            <div class="muted"><span class="pill ${status.hasEnv ? 'ok' : 'info'}">${status.hasEnv ? 'Configurado' : 'Ausente'}</span></div>
+          </div>
+          <div>
+            <div class="name">SDK</div>
+            <div class="muted"><span class="pill ${status.hasSdk ? 'ok' : 'info'}">${status.hasSdk ? 'Carregado' : 'Ausente'}</span></div>
+          </div>
+          <div>
+            <div class="name">Sessão</div>
+            <div class="muted"><span class="pill ${sessionPill}">${esc(getSupabaseSessionLabel(backendState.sessionStatus))}</span></div>
+          </div>
+          <div>
+            <div class="name">Sync remoto</div>
+            <div class="muted"><span class="pill ${syncPill}">${esc(getSupabaseSyncLabel(backendState.syncStatus))}</span></div>
+          </div>
+        </div>
+        ${authBlock}
+        <div class="summary-item summary-item--col4">
+          <div>
+            <div class="name">Fonte ativa</div>
+            <div class="muted"><span class="pill ${sourcePill}">${esc(sourceLabel)}</span></div>
+          </div>
+          <div>
+            <div class="name">Unidade</div>
+            <div class="muted">${esc(activeUnitLabel)}</div>
+          </div>
+          <div>
+            <div class="name">Perfil</div>
+            <div class="muted">${esc(roleLabel)}${backendState.writable ? '' : ' • somente leitura'}</div>
+          </div>
+          <div>
+            <div class="name">Última sync</div>
+            <div class="muted">${esc(lastSyncLabel)}</div>
+          </div>
+        </div>
+        <div class="summary-item summary-item--col4">
+          <div>
+            <div class="name">Memberships visíveis</div>
+            <div class="muted">${esc(String(membershipCount))}</div>
+          </div>
+          <div>
+            <div class="name">Slug preferido</div>
+            <div class="muted">${esc(status.unitSlug || 'automático')}</div>
+          </div>
+          <div>
+            <div class="name">Estratégia atual</div>
+            <div class="muted">${backendState.source === 'supabase' ? 'leitura remota + espelho local' : 'local-first com fallback pronto'}</div>
+          </div>
+          <div>
+            <div class="name">Último erro</div>
+            <div class="muted">${esc(backendState.lastError || 'Nenhum')}</div>
+          </div>
+        </div>
+      `;
+
+      const actionsHost = document.getElementById('supabaseAuthActions');
+      if (actionsHost) actionsHost.innerHTML = actionButtons;
     }
 
     /** @returns {void} */

@@ -30,7 +30,6 @@ const PRECACHE_ASSET_PATHS = [
   'src/features/csv.js',
   'src/features/diagnostics.js',
   'src/features/crud.js',
-  'src/types.js',
   'src/ui/render-core.js',
   'src/ui/render-dashboard.js',
   'src/ui/render-students.js',

@@ -198,6 +198,42 @@ describe('Seletores reais do app modularizado', () => {
     expect(third).not.toBe(first);
   });
 
+  it('histórico de NPS e líderes históricos ignoram meses futuros ao período ativo', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+
+    await app.setStore({
+      version: app.window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: '2026-05',
+      preferences: { initializeMonthsWithTestData: false },
+      periods: {
+        '2026-03': app.window.generatePeriodSeed('2026-03'),
+        '2026-04': app.window.generatePeriodSeed('2026-04'),
+        '2026-05': app.window.buildCleanPeriodFromTemplate(null, '2026-05'),
+        '2026-07': app.window.generatePeriodSeed('2026-07'),
+        '2026-08': app.window.generatePeriodSeed('2026-08')
+      },
+      archives: {}
+    });
+
+    await app.window.__APP_INTERNALS__.actions.switchPeriod('2026-05', { silent: true });
+    app.window.__APP_INTERNALS__.rendering.renderNps();
+
+    const historyPeriods = Array.from(
+      app.window.document.querySelectorAll('#npsHistoryBox .nps-history-period')
+    ).map(node => String(node.textContent || '').trim());
+    const leaderPeriods = Array.from(
+      app.window.document.querySelectorAll('#npsHistLeaders .hist-leaders-period')
+    ).map(node => String(node.textContent || '').trim());
+
+    expect(historyPeriods).toEqual(['Abril/2026', 'Março/2026']);
+    expect(leaderPeriods).toEqual(['Abril/2026', 'Março/2026']);
+    expect(historyPeriods).not.toContain('Julho/2026');
+    expect(historyPeriods).not.toContain('Agosto/2026');
+    expect(leaderPeriods).not.toContain('Julho/2026');
+    expect(leaderPeriods).not.toContain('Agosto/2026');
+  });
+
   it('normalizeData() corrige rankSnapshot legado sem ids de menção', async () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;

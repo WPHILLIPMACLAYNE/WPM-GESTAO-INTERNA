@@ -20,6 +20,8 @@ describe('Configuração de segurança', () => {
     const csp = match[1];
     expect(csp).toContain("script-src 'self'");
     expect(csp).toContain("style-src 'self'");
+    expect(csp).toContain('http://127.0.0.1:54321');
+    expect(csp).toContain('https://*.supabase.co');
     expect(csp).not.toContain("'unsafe-inline'");
   });
 

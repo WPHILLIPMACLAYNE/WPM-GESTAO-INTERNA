@@ -27,5 +27,6 @@ describe('Configuração do service worker', () => {
     expect(sw).toContain('contentHash: hashByteArray(new Uint8Array(buffer))');
     expect(sw).toContain("entries.map(({ request, contentHash }) => `${request.url}:${contentHash}`)");
     expect(sw).toContain('const CACHE_NAME_FALLBACK');
+    expect(sw).not.toContain("'src/types.js'");
   });
 });

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadRealApp } from '../helpers/load-real-app.js';
 
 let cleanup = () => {};
@@ -16,6 +16,7 @@ describe('Contrato runtime: window.__APP_ENV__', () => {
     expect(env).toBeDefined();
     expect(env.SUPABASE_URL).toBeNull();
     expect(env.SUPABASE_ANON_KEY).toBeNull();
+    expect(env.SUPABASE_UNIT_SLUG).toBeNull();
     expect(env.SENTRY_DSN).toBeNull();
   });
 
@@ -30,6 +31,15 @@ describe('Contrato runtime: window.__APP_ENV__', () => {
 });
 
 describe('Backend (Supabase) — fallback offline', () => {
+  it('renderiza o painel de auth/backend nas Configuracoes', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    expect(app.window.document.getElementById('supabaseAuthPanel')).toBeTruthy();
+    expect(app.window.document.getElementById('supabaseAuthActions')).toBeTruthy();
+    expect(app.window.document.getElementById('migrationDryRunList')).toBeTruthy();
+    expect(app.window.document.getElementById('migrationHomologationList')).toBeTruthy();
+  });
+
   it('isSupabaseEnabled retorna false sem env nem SDK', async () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;
@@ -83,6 +93,237 @@ describe('Backend (Supabase) — fallback offline', () => {
       key: 'fake-anon-key'
     });
     expect(backend.getSupabaseClient()).toBe(client);
+  });
+
+  it('loadStore prefere store remoto quando o adapter remoto retorna base valida', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { persistence, config } = app.window.__APP_INTERNALS__;
+    const localStore = await persistence.loadStore({ skipRemote: true });
+    const remoteStore = structuredClone(localStore);
+    remoteStore.activePeriod = '2099-12';
+    remoteStore.periods['2099-12'] = structuredClone(localStore.periods[localStore.activePeriod]);
+    app.window.loadStoreFromSupabase = vi.fn().mockResolvedValue(remoteStore);
+
+    const loaded = await persistence.loadStore();
+    const persisted = await persistence.readStoredStore(config.STORAGE_KEY);
+
+    expect(app.window.loadStoreFromSupabase).toHaveBeenCalledOnce();
+    expect(loaded.activePeriod).toBe('2099-12');
+    expect(persisted.activePeriod).toBe('2099-12');
+  });
+
+  it('saveStore dispara sync remoto imediato em eventos criticos', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    app.window.getSupabaseStatus = () => ({ enabled: true });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      activeUnit: { unitId: 'unit-1' },
+      writable: true
+    });
+    app.window.queueSupabaseStoreSync = vi.fn().mockResolvedValue({ ok: true });
+
+    const saved = await persistence.saveStore(structuredClone(baseStore), {
+      silent: true,
+      broadcast: false,
+      eventType: 'reset'
+    });
+
+    expect(saved).toBe(true);
+    expect(app.window.queueSupabaseStoreSync).toHaveBeenCalledOnce();
+    expect(app.window.queueSupabaseStoreSync).toHaveBeenCalledWith(
+      expect.objectContaining({ activePeriod: baseStore.activePeriod }),
+      expect.objectContaining({ immediate: true })
+    );
+  });
+
+  it('saveStore respeita skipRemoteSync quando o caller pede persistencia apenas local', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    app.window.getSupabaseStatus = () => ({ enabled: true });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      activeUnit: { unitId: 'unit-1' },
+      writable: true
+    });
+    app.window.queueSupabaseStoreSync = vi.fn().mockResolvedValue({ ok: true });
+
+    const saved = await persistence.saveStore(structuredClone(baseStore), {
+      silent: true,
+      broadcast: false,
+      eventType: 'remote-load',
+      skipRemoteSync: true
+    });
+
+    expect(saved).toBe(true);
+    expect(app.window.queueSupabaseStoreSync).not.toHaveBeenCalled();
+  });
+
+  it('runMigrationDryRun consolida recados legados em clone e gera relatorio local', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const originalRecadosCount = (baseStore.periods?.[baseStore.activePeriod]?.recados || []).length;
+    const legacyKey = `wpm_recados_${baseStore.activePeriod}`;
+    app.window.localStorage.setItem(legacyKey, JSON.stringify([
+      {
+        from: 'Wallace',
+        to: 'Todos',
+        text: 'Recado legado',
+        createdAt: '2026-04-22T10:00:00.000Z',
+        read: false
+      }
+    ]));
+
+    const report = await diagnostics.runMigrationDryRun(true);
+
+    expect(report.legacyRecados.periods).toBe(1);
+    expect(report.legacyRecados.total).toBe(1);
+    expect(report.local.totals.recados).toBeGreaterThanOrEqual(originalRecadosCount + 1);
+    expect((baseStore.periods[baseStore.activePeriod].recados || []).length).toBe(originalRecadosCount);
+  });
+
+  it('runMigrationDryRun compara com store remoto quando autenticado', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: 'supabase',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockResolvedValue(structuredClone(baseStore));
+
+    const report = await diagnostics.runMigrationDryRun(true);
+
+    expect(app.window.loadStoreFromSupabase).toHaveBeenCalledOnce();
+    expect(report.remote.periodCount).toBe(baseStore ? Object.keys(baseStore.periods || {}).length : 0);
+    expect(report.comparison.matches).toBe(true);
+    expect(report.comparison.mismatches).toHaveLength(0);
+  });
+
+  it('runMigrationDryRun trata backend vazio como primeira migracao liberada', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics } = app.window.__APP_INTERNALS__;
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: 'local',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockResolvedValue(null);
+
+    const report = await diagnostics.runMigrationDryRun(true);
+    const readiness = diagnostics.getMigrationReadiness(report);
+
+    expect(report.backend.remoteState).toBe('empty');
+    expect(readiness.canMigrate).toBe(true);
+    expect(readiness.label).toBe('Primeira migração liberada');
+  });
+
+  it('runAssistedMigrationToSupabase bloqueia envio quando o dry-run detecta divergencia remota', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const remoteStore = structuredClone(baseStore);
+    remoteStore.periods[baseStore.activePeriod].recados.push({
+      from: 'Backend',
+      to: 'Equipe',
+      text: 'Recado remoto extra',
+      createdAt: '2026-04-22T11:00:00.000Z',
+      read: false
+    });
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: 'supabase',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockResolvedValue(remoteStore);
+    app.window.queueSupabaseStoreSync = vi.fn().mockResolvedValue({ ok: true });
+
+    const result = await diagnostics.runAssistedMigrationToSupabase();
+
+    expect(result.ok).toBe(false);
+    expect(result.skipped).toBe(true);
+    expect(result.reason).toBe('remote-mismatch');
+    expect(app.window.queueSupabaseStoreSync).not.toHaveBeenCalled();
+  });
+
+  it('runAssistedMigrationToSupabase consolida recados legados no store local antes do envio', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { persistence, config } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const activePeriod = baseStore.activePeriod;
+    const legacyKey = `wpm_recados_${activePeriod}`;
+    app.window.localStorage.setItem(legacyKey, JSON.stringify([
+      {
+        from: 'Wallace',
+        to: 'Todos',
+        text: 'Recado legado migrado',
+        createdAt: '2026-04-22T10:00:00.000Z',
+        read: false
+      }
+    ]));
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: 'supabase',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockImplementation(async fallbackStore => structuredClone(fallbackStore));
+    app.window.queueSupabaseStoreSync = vi.fn().mockResolvedValue({ ok: true });
+    app.window.reloadAppFromSupabaseSession = vi.fn().mockResolvedValue(true);
+
+    const result = await app.window.eval('window.__APP_INTERNALS__.diagnostics.runAssistedMigrationToSupabase()');
+    const persisted = await persistence.readStoredStore(config.STORAGE_KEY);
+    const queuedStore = app.window.queueSupabaseStoreSync.mock.calls[0]?.[0];
+
+    expect(result.ok).toBe(true);
+    expect(app.window.queueSupabaseStoreSync).toHaveBeenCalledOnce();
+    expect((queuedStore?.periods?.[activePeriod]?.recados || []).some(item => item.text === 'Recado legado migrado')).toBe(true);
+    expect((persisted?.periods?.[activePeriod]?.recados || []).some(item => item.text === 'Recado legado migrado')).toBe(true);
+    expect(app.window.localStorage.getItem(legacyKey)).toBeNull();
+  });
+
+  it('runAssistedMigrationToSupabase permite primeira migracao quando o backend inicia vazio', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    let migrated = false;
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: migrated ? 'supabase' : 'local',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockImplementation(async fallbackStore => (
+      migrated ? structuredClone(fallbackStore || baseStore) : null
+    ));
+    app.window.queueSupabaseStoreSync = vi.fn().mockImplementation(async () => {
+      migrated = true;
+      return { ok: true };
+    });
+    app.window.reloadAppFromSupabaseSession = vi.fn().mockResolvedValue(true);
+
+    const result = await app.window.eval('window.__APP_INTERNALS__.diagnostics.runAssistedMigrationToSupabase()');
+
+    expect(result.ok).toBe(true);
+    expect(app.window.queueSupabaseStoreSync).toHaveBeenCalledOnce();
+    expect(result.report.backend.remoteState).toBe('present');
+    expect(result.report.comparison.matches).toBe(true);
   });
 });
 

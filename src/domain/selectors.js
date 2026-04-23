@@ -96,7 +96,7 @@
     /** Returns top addon/NPS leaders from past periods. @param {number} [limite] @returns {Array} */
     function selecionarLideresHistoricos(limite = 6) {
       const periods = storage?.periods || {};
-      const keys = Object.keys(periods).filter(k => k && k !== currentPeriodKey);
+      const keys = Object.keys(periods).filter(key => isPastPeriodKey(key, currentPeriodKey));
       const assinatura = criarAssinaturaSelector('hist_leaders', keys, currentPeriodKey);
       return lerSelectorMemorizado('lideres_historicos', assinatura, () => {
         return keys

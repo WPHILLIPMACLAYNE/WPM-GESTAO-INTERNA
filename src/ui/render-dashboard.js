@@ -759,7 +759,8 @@
         saved = await saveStore(targetStore, {
           silent: true,
           broadcast: false,
-          eventType: String(options?.eventType || 'recados-migration')
+          eventType: String(options?.eventType || 'recados-migration'),
+          skipRemoteSync: options?.skipRemoteSync === true
         });
       }
 

@@ -31,6 +31,8 @@ window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
   SUPABASE_URL: null,
   // Chave anônima (publishable). NUNCA a service_role aqui.
   SUPABASE_ANON_KEY: null,
+  // Opcional: força a unidade preferida quando o usuário tiver mais de um vínculo.
+  SUPABASE_UNIT_SLUG: null,
 
   // ── Sentry (frontend monitoring) ───────────────────────────────
   // DSN público do projeto JavaScript do Sentry.

@@ -36,6 +36,7 @@
     const LOCAL_SNAPSHOT_KEY = 'controle_recepcao_app_snapshot_v34';
     const SYSTEM_REPORT_KEY = 'controle_recepcao_app_report_v34';
     const FLOW_TEST_REPORT_KEY = 'controle_recepcao_app_flowtests_v34';
+    const MIGRATION_DRY_RUN_REPORT_KEY = 'controle_recepcao_app_migration_dry_run_v34';
     const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const UI_KEY = 'controle_recepcao_app_ui_v34';
     const IDB_NAME = 'wpm-gestao-interna-db';
@@ -43,6 +44,7 @@
     const LEGACY_LOCAL_SNAPSHOT_KEYS = ['controle_recepcao_app_snapshot_v33'];
     const LEGACY_SYSTEM_REPORT_KEYS = ['controle_recepcao_app_report_v33'];
     const LEGACY_FLOW_TEST_REPORT_KEYS = ['controle_recepcao_app_flowtests_v33'];
+    const LEGACY_MIGRATION_DRY_RUN_REPORT_KEYS = ['controle_recepcao_app_migration_dry_run_v33'];
     const LEGACY_UI_KEYS = ['controle_recepcao_app_ui_v33'];
 
     const DOM = {

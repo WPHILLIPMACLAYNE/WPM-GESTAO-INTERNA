@@ -98,7 +98,7 @@ O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **
 | PWA | Service Worker próprio (`sw.js`) com `manifest.json` |
 | Testes unitários | [Vitest](https://vitest.dev/) |
 | Testes E2E/visuais | [Playwright](https://playwright.dev/) + scripts próprios em `Scripts/` |
-| Backend (planejado) | [Supabase](https://supabase.com/) (adapters já esboçados em `src/core/supabase.js`) |
+| Backend | [Supabase](https://supabase.com/) com auth/session, leitura remota e sync híbrida inicial em `src/core/supabase.js` |
 
 ---
 
@@ -184,6 +184,49 @@ Acesse **http://localhost:3000**.
 - O app sempre inicia com defaults seguros de `window.__APP_ENV__` em `src/core/env-bootstrap.js`.
 - O arquivo `env.js` é opcional e carregado somente em runtime local (`localhost`, `127.0.0.1` ou `file://`).
 - Em deploy remoto (como GitHub Pages), `env.js` não é requisitado, evitando ruído de `404` no boot.
+- Chaves públicas suportadas hoje: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE` e `APP_RUNTIME_OVERRIDE`.
+
+### Backend local (`Supabase`)
+
+O schema canônico e as RPCs de backend vivem em `supabase/migrations/`. Para subir o backend local com seed de desenvolvimento:
+
+```bash
+npx supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+npx supabase db reset --local
+```
+
+O `db reset` aplica as migrations e carrega `supabase/seed.sql`, criando:
+
+- unidade local `WPM Unidade Local`
+- período aberto do mês corrente em `America/Sao_Paulo`
+- usuário admin de desenvolvimento
+
+Credenciais locais seeded:
+
+- e-mail: `dev.admin@wpm.local`
+- senha: `Admin123!`
+
+Para ligar o frontend ao backend local, preencha o `env.js` com os valores públicos do `npx supabase status`:
+
+```js
+window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
+  SUPABASE_URL: 'http://127.0.0.1:54321',
+  SUPABASE_ANON_KEY: 'sb_publishable_...',
+  SUPABASE_UNIT_SLUG: 'wpm-unidade-local'
+});
+```
+
+Bootstrap inicial fora do seed:
+
+- a função `public.bootstrap_unit_admin(...)` cria a primeira `unit`, o vínculo `admin` e o `period_settings` inicial;
+- o uso é restrito a `service_role` ou SQL administrativo;
+- a `service_role` nunca deve ir para `env.js` nem para o browser.
+
+Homologação operacional real da migração assistida:
+
+- o roteiro está em [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md);
+- em 2026-04-22 o fluxo foi validado em navegador real com sessão autenticada, dry-run consistente,
+  snapshot local, pós-migração remoto e fechamento de mês sobre a base remota.
 
 ---
 
@@ -317,6 +360,8 @@ O app funciona offline após a primeira visita:
 | [`Docs/DOCUMENTACAO.md`](./Docs/DOCUMENTACAO.md) | Documentação funcional completa |
 | [`Docs/UI_UX_OVERHAUL.md`](./Docs/UI_UX_OVERHAUL.md) | Design system + polish layer v1 |
 | [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) | Roadmap de evolução (Fase 0 → backend) |
+| [`Docs/BACKEND_CANONICO.md`](./Docs/BACKEND_CANONICO.md) | ERD lógico, papéis e transações canônicas do backend |
+| [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md) | Checklist operacional da migração assistida real |
 | [`Docs/BUGS_CONHECIDOS.md`](./Docs/BUGS_CONHECIDOS.md) | Bugs e riscos rastreados |
 | [`Docs/DIAGNOSTICO_MOBILE.md`](./Docs/DIAGNOSTICO_MOBILE.md) | Análise mobile + Bug 2/Bug 3 |
 | [`Docs/MAPA_ENTIDADES.md`](./Docs/MAPA_ENTIDADES.md) | Modelo de dados para backend |
@@ -333,7 +378,7 @@ O app funciona offline após a primeira visita:
 - [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
 - [ ] **Cache-busting do Service Worker** — versionamento por commit hash
 - [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
-- [ ] **Backend canônico (Supabase)** — schema, auth, RLS
+- [~] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida e homologação operacional real prontos; faltam conflitos finos e concorrência multi-dispositivo
 - [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
 - [ ] **Relatórios exportáveis** — PDF mensal consolidado
 

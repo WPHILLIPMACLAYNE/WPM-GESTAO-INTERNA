@@ -23,7 +23,7 @@
       try {
         const periods = storage?.periods || {};
         return Object.keys(periods)
-          .filter(key => key && key !== currentPeriodKey)
+          .filter(key => isPastPeriodKey(key, currentPeriodKey))
           .sort((a, b) => b.localeCompare(a))
           .map(key => {
             const period = periods[key];

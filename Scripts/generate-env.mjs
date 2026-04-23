@@ -22,6 +22,7 @@ const TARGET = path.join(ROOT, 'env.js');
 const PUBLIC_KEYS = [
   'SUPABASE_URL',
   'SUPABASE_ANON_KEY',
+  'SUPABASE_UNIT_SLUG',
   'SENTRY_DSN',
   'SENTRY_ENVIRONMENT',
   'SENTRY_RELEASE',

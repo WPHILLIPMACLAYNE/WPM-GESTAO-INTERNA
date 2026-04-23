@@ -8,6 +8,7 @@
   window.__APP_ENV__ = Object.assign({
     SUPABASE_URL: null,
     SUPABASE_ANON_KEY: null,
+    SUPABASE_UNIT_SLUG: null,
     SENTRY_DSN: null,
     SENTRY_ENVIRONMENT: null,
     SENTRY_RELEASE: null,

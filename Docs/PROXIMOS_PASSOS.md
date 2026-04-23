@@ -28,6 +28,28 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > com a CSP e a cobertura de segurança passou a incluir testes XSS por entidade,
 > configuração de headers e validação browser-real sem violações de inline style.
 
+> **Atualização 2026-04-22 18:30** — Etapa 6 iniciada.
+> O desenho canônico de backend foi consolidado em [`BACKEND_CANONICO.md`](./BACKEND_CANONICO.md),
+> usando `MAPA_ENTIDADES.md` como base para ERD lógico, papéis e transações obrigatórias.
+
+> **Atualização 2026-04-22 19:05** — Bootstrap local do backend concluído.
+> `supabase/seed.sql` agora cria um usuário admin local, a primeira unidade e o período aberto
+> via `bootstrap_unit_admin(...)`; o próximo passo seguro é integrar leitura/escrita do frontend
+> ao schema canônico sem remover o fallback local.
+
+> **Atualização 2026-04-22 19:34** — Integração inicial do frontend com Supabase concluída.
+> O app já carrega o SDK no browser, expõe login/logout no painel de Configurações, resolve
+> sessão + `unit_members`, prefere leitura remota autenticada, mantém espelho local em
+> IndexedDB/localStorage e já sincroniza o store completo via `import_backup_transaction(...)`.
+> A validação real no navegador passou com `dev.admin@wpm.local`, inclusive reload remoto
+> e sync imediata após o ajuste de unicidade em `addon_sales`.
+
+> **Atualização 2026-04-22 21:05** — Etapa 7 homologada em runtime real.
+> A migração assistida foi validada no navegador real com dry-run consistente, snapshot local,
+> pós-migração remoto, checklist operacional e fechamento de `Abril/2026` abrindo `Maio/2026`
+> limpo no backend. No fechamento do dia, a regressão do histórico de NPS também foi corrigida
+> para olhar apenas meses anteriores ao período ativo.
+
 ## Etapa 0 — Proteger baseline
 
 Prioridade: imediata.
@@ -164,6 +186,10 @@ Critério de aceite:
 
 Prioridade: alta após estabilização.
 
+Status 2026-04-22: concluída no nível de modelagem lógica.
+O desenho canônico, o ERD lógico, os papéis e as transações mínimas já estão documentados em
+[`BACKEND_CANONICO.md`](./BACKEND_CANONICO.md) e sustentam o schema local de `supabase/`.
+
 Ações:
 
 - Usar `Docs/MAPA_ENTIDADES.md` como base do ERD.
@@ -207,6 +233,14 @@ Critério de aceite:
 
 Prioridade: alta quando backend estiver pronto.
 
+Status 2026-04-22: homologada em navegador real.
+Leitura local/legado, contagens comparativas por entidade, dry-run guiado, migração assistida com
+backup, snapshot local, bloqueio por divergência remota e validação pós-migração já passaram no
+fluxo operacional real. O backend preservou o histórico necessário para fechar `Abril/2026` e abrir
+`Maio/2026` zerado na base remota.
+
+Checklist operacional: [`HOMOLOGACAO_MIGRACAO_REAL.md`](./HOMOLOGACAO_MIGRACAO_REAL.md).
+
 Ações:
 
 - Ler IndexedDB primeiro e localStorage como fallback.
@@ -227,6 +261,12 @@ Critério de aceite:
 ## Etapa 8 — Definir estratégia de sincronização
 
 Prioridade: média.
+
+Status 2026-04-22: direção escolhida, mas não encerrada.
+O runtime atual ficou híbrido: o login preserva a base local, o `Recarregar do backend` troca
+explicitamente para a base remota e o Supabase opera com espelho local em IndexedDB/localStorage.
+Ainda falta fechar política de conflito por entidade e comportamento explícito para edição
+concorrente em múltiplos dispositivos.
 
 Ações:
 

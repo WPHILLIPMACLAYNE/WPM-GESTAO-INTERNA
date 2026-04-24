@@ -4,6 +4,8 @@ Sistema de gestão interna para recepção — controle de atendimentos, pendên
 
 ![Stack](https://img.shields.io/badge/stack-Vanilla%20JS%20%2B%20CSS-f7df1e?style=flat-square)
 ![PWA](https://img.shields.io/badge/PWA-enabled-5a0fc8?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e?style=flat-square)
+![Backend](https://img.shields.io/badge/backend-Supabase%20optional-3ecf8e?style=flat-square)
 ![License](https://img.shields.io/badge/license-ISC-blue?style=flat-square)
 ![Lang](https://img.shields.io/badge/lang-pt--BR-009c3b?style=flat-square)
 
@@ -12,11 +14,13 @@ Sistema de gestão interna para recepção — controle de atendimentos, pendên
 ## Sumário
 
 - [Visão geral](#visão-geral)
+- [Status atual](#status-atual)
 - [Principais recursos](#principais-recursos)
 - [Stack](#stack)
 - [Arquitetura](#arquitetura)
 - [Como rodar localmente](#como-rodar-localmente)
 - [Testes](#testes)
+- [Qualidade, segurança e auditoria](#qualidade-segurança-e-auditoria)
 - [Fluxo Seguro de Evolução](#fluxo-seguro-de-evolução)
 - [Estrutura de diretórios](#estrutura-de-diretórios)
 - [Design system](#design-system)
@@ -38,6 +42,20 @@ O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **
 - **Confiabilidade**: dados persistidos localmente, sem dependência de rede.
 - **Autonomia**: backup/import em um clique, sem servidor obrigatório.
 - **Estética premium**: design system consolidado em tema escuro com acento dourado.
+
+---
+
+## Status atual
+
+Esta linha de release está consolidada como versão candidata para `main` e foi validada em CI com:
+
+- **Testes Unitários + Coverage**: Vitest com provider `@vitest/coverage-v8`.
+- **Testes E2E**: Playwright em Chromium.
+- **Validação de estrutura**: presença de entrypoints, CSP, DOMPurify e módulos críticos.
+- **Teste de responsividade**: script multi-viewport em desktop, tablet e mobile.
+- **Deploy preview**: Vercel ativo para a branch de release.
+
+Auditoria executiva registrada em [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md).
 
 ---
 
@@ -97,8 +115,11 @@ O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **
 | Sanitização | [DOMPurify](https://github.com/cure53/DOMPurify) via CDN |
 | PWA | Service Worker próprio (`sw.js`) com `manifest.json` |
 | Testes unitários | [Vitest](https://vitest.dev/) |
+| Coverage | `@vitest/coverage-v8` |
 | Testes E2E/visuais | [Playwright](https://playwright.dev/) + scripts próprios em `Scripts/` |
 | Backend | [Supabase](https://supabase.com/) com auth/session, leitura remota e sync híbrida inicial em `src/core/supabase.js` |
+| Segurança | CSP sem `unsafe-inline`, DOMPurify, SRI nos CDNs críticos e testes XSS por entidade |
+| CI/CD | GitHub Actions + Vercel preview/deploy |
 
 ---
 
@@ -239,6 +260,9 @@ Homologação operacional real da migração assistida:
 # Unitários (Vitest)
 npm test
 
+# Unitários com coverage
+npm run test:coverage
+
 # E2E responsivo (Playwright headless + múltiplas viewports)
 npm run test:e2e
 
@@ -252,6 +276,46 @@ npm run test:all
 Relatórios ficam em `playwright-report/` e `test-results/`.
 
 > Esses artefatos são locais e estão no `.gitignore`.
+
+### Matriz de CI
+
+O workflow principal (`.github/workflows/ci.yml`) executa:
+
+| Job | Finalidade |
+|---|---|
+| Testes Unitários | `npm run test:coverage`, upload de coverage e Codecov quando token existe |
+| Testes E2E | `npx playwright test --reporter=line` com Chromium |
+| Validação de Estrutura | checa entrypoints, CSP, DOMPurify, reduced motion e modularização |
+| Teste de Responsividade | executa `Scripts/responsive-test.mjs` em múltiplas viewports |
+| Resumo | consolida o status dos jobs no summary do GitHub Actions |
+
+Para smoke pós-deploy real:
+
+```bash
+npm run smoke:deploy
+```
+
+---
+
+## Qualidade, segurança e auditoria
+
+O projeto recebeu hardening específico para uso em produção browser-first:
+
+- CSP sem `unsafe-inline` em `script-src` e `style-src`.
+- DOMPurify com SRI para sanitização dos patches HTML.
+- Chart.js com SRI.
+- Supabase CDN fixado em versão exata.
+- Testes de XSS por entidade cobrindo alunos, pendências, eventos, recados, NPS e configurações.
+- Labels de formulários associados a seus campos, incluindo linhas dinâmicas da escala.
+- Service Worker com estratégia de revisão de assets e testes dedicados.
+- Persistência local-first com fila serializada, IndexedDB, espelho localStorage e broadcast cross-tab.
+- Sync Supabase protegido por checkpoint remoto para evitar sobrescrita silenciosa.
+
+Relatórios e guias principais:
+
+- [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md)
+- [`Docs/GUIA_CODE_REVIEW_PROJETO.md`](./Docs/GUIA_CODE_REVIEW_PROJETO.md)
+- [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md)
 
 ---
 
@@ -347,13 +411,13 @@ Detalhes completos em [`Docs/UI_UX_OVERHAUL.md`](./Docs/UI_UX_OVERHAUL.md).
 
 O app funciona offline após a primeira visita:
 
-- **Service Worker** (`sw.js`) pré-cacheia `index.html`, `styles.css`, módulos `src/**/*.js`, `manifest.json` e ícones.
+- **Service Worker** (`sw.js`) pré-cacheia `index.html`, `styles.css`, módulos `src/**/*.js`, `manifest.json` e ícones, com revisão derivada do conteúdo dos assets.
 - **IndexedDB** guarda todo o `state` — atendimentos, pendências, escalas, NPS, eventos, configurações.
 - **Sync local-first guardada**: quando autenticado no Supabase, o app envia o store local para o backend apenas se o checkpoint remoto da unidade ainda bate com a última leitura/sincronização conhecida.
 - **Backup JSON** por um clique em *Configurações* → ideal para migrar entre navegadores ou arquivar o mês.
 - **Detecção online/offline**: toast notifica quando conexão cai ou volta.
 
-> **Atenção ao cache**: após deploy, o service worker pode manter assets antigos. Plano de mitigação em [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) (Etapa 2).
+> Mudanças em bootstrap, `sw.js`, `index.html` ou ordem de scripts devem ser verificadas junto com [`MODULE_MAP.md`](./MODULE_MAP.md).
 
 ---
 
@@ -362,10 +426,13 @@ O app funciona offline após a primeira visita:
 | Arquivo | Conteúdo |
 |---|---|
 | [`Docs/DOCUMENTACAO.md`](./Docs/DOCUMENTACAO.md) | Documentação funcional completa |
+| [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md) | Execução da auditoria fullstack/UX/segurança da release |
 | [`Docs/UI_UX_OVERHAUL.md`](./Docs/UI_UX_OVERHAUL.md) | Design system + polish layer v1 |
+| [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md) | Checklist de deploy, smoke e observabilidade |
 | [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) | Roadmap de evolução (Fase 0 → backend) |
 | [`Docs/BACKEND_CANONICO.md`](./Docs/BACKEND_CANONICO.md) | ERD lógico, papéis e transações canônicas do backend |
 | [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md) | Checklist operacional da migração assistida real |
+| [`Docs/GUIA_CODE_REVIEW_PROJETO.md`](./Docs/GUIA_CODE_REVIEW_PROJETO.md) | Guia de revisão com severidade, evidência e validação |
 | [`Docs/BUGS_CONHECIDOS.md`](./Docs/BUGS_CONHECIDOS.md) | Bugs e riscos rastreados |
 | [`Docs/DIAGNOSTICO_MOBILE.md`](./Docs/DIAGNOSTICO_MOBILE.md) | Análise mobile + Bug 2/Bug 3 |
 | [`Docs/MAPA_ENTIDADES.md`](./Docs/MAPA_ENTIDADES.md) | Modelo de dados para backend |
@@ -380,9 +447,10 @@ O app funciona offline após a primeira visita:
 
 - [x] **Fase 0** — Infraestrutura de runtime, Supabase base e observabilidade
 - [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
-- [ ] **Cache-busting do Service Worker** — versionamento por commit hash
+- [x] **Cache-busting do Service Worker** — revisão derivada do conteúdo dos assets e teste dedicado
 - [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
-- [~] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, homologação operacional real e guarda de conflito por checkpoint prontos; ainda falta merge fino por entidade
+- [x] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, homologação operacional real e guarda de conflito por checkpoint
+- [ ] **Merge fino por entidade** — reduzir escrita remota de store completo quando houver múltiplos operadores simultâneos
 - [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
 - [ ] **Relatórios exportáveis** — PDF mensal consolidado
 
@@ -395,9 +463,9 @@ Detalhes em [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md).
 Este é um projeto interno da WPM, mas o código segue práticas abertas:
 
 1. Crie uma branch a partir de `main` (`feat/...`, `fix/...`, `docs/...`).
-2. Rode `npm run test:all` antes de abrir PR.
+2. Rode `npm test`, `npm run test:coverage` e `npm run test:e2e` antes de abrir PR.
 3. Siga o padrão de commits: `tipo(escopo): mensagem` em pt-BR.
-4. Para mudanças em `styles.css`, valide em 390 / 480 / 760 / 1200px.
+4. Para mudanças em `styles.css`, rode `npm run test:visual` e valide em 390 / 480 / 760 / 1200px.
 
 O repositório usa o framework **CORTEX** (`.cortex/`) para auditoria e governança — ver [`PROTOCOL.md`](./PROTOCOL.md).
 
@@ -413,4 +481,4 @@ ISC — ver [`package.json`](./package.json).
 
 **Wallace Phillip Maclayne** · [@WPHILLIPMACLAYNE](https://github.com/WPHILLIPMACLAYNE)
 
-Engenharia assistida por Claude · Anthropic
+Engenharia assistida por agentes de código e revisão automatizada

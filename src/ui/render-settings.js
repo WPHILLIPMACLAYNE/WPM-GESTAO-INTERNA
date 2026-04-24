@@ -241,7 +241,7 @@
             </div>
             <div class="settings-about-item">
               <div class="name">Descrição</div>
-              <div class="value">SPA single-file para operação interna da recepção, com controle mensal independente por período.</div>
+              <div class="value">SPA modular browser-only para operação interna da recepção, com controle mensal independente por período.</div>
             </div>
           </div>
         `);

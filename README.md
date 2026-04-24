@@ -125,12 +125,12 @@ Auditoria executiva registrada em [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.m
 
 ## Arquitetura
 
-O projeto é um **SPA de arquivo único (`index.html`)** com módulos JS organizados por responsabilidade. Não há bundler — os módulos são carregados em ordem e conversam via escopo global controlado.
+O projeto é um **SPA browser-only com `index.html` como app shell** e módulos JS organizados por responsabilidade em `src/`. Não há bundler nem `import`/`export` no runtime — os scripts são carregados em ordem pelo HTML e conversam via escopo global controlado.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                        index.html                             │
-│  (topbar · hero · tabs · 8 views · 5 modais · footer)         │
+│                 index.html (app shell)                        │
+│  (CSP · CDNs · ordem de scripts · topbar · tabs · modais)     │
 └────────────────────────────────────────────────────────────────┘
                              │
          ┌───────────────────┼───────────────────┐
@@ -336,7 +336,7 @@ Guia prático completo: [`Docs/RETOMADA_SEGURA.md`](./Docs/RETOMADA_SEGURA.md).
 
 ```
 .
-├── index.html                 # SPA monolítica (entrada principal)
+├── index.html                 # App shell, CSP, CDNs e ordem de carga dos módulos
 ├── styles.css                 # CSS completo + WPM Polish Layer v1
 ├── sw.js                      # Service Worker (PWA)
 ├── manifest.json              # Web App Manifest

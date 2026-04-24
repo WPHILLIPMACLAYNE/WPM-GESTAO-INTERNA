@@ -393,6 +393,13 @@ test.describe('Segurança: CSP', () => {
     await expect(scriptTag).toHaveAttribute('crossorigin', 'anonymous');
   });
 
+  test('deve carregar Supabase com versao exata', async ({ page }) => {
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    const scriptTag = page.locator('script[src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"]');
+    await expect(scriptTag).toHaveCount(1);
+    await expect(scriptTag).toHaveAttribute('crossorigin', 'anonymous');
+  });
+
   test('deve carregar styles.css via link tag', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
     const linkTag = page.locator('link[rel="stylesheet"][href="styles.css"]');

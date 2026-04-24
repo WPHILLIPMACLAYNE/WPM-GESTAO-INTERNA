@@ -96,21 +96,21 @@
         </div>
         <div class="score-slider-row nps-grid-3">
           <div class="field">
-            <label>Pontuação NPS</label>
+            <label for="npsScoreInput">Pontuação NPS</label>
             <input id="npsScoreInput" type="number" min="0" max="100" value="${score}" aria-label="Pontuação NPS" data-input-action="update-nps-score" data-source="input" />
           </div>
           <div class="field">
-            <label>Meta mensal NPS</label>
+            <label for="npsMonthlyGoalInput">Meta mensal NPS</label>
             <input id="npsMonthlyGoalInput" type="number" min="0" max="100" value="${monthlyGoal}" aria-label="Meta mensal de NPS" data-input-action="update-nps-goal" data-field="monthlyGoal" />
           </div>
           <div class="field">
-            <label>Meta semestral NPS</label>
+            <label for="npsSemesterGoalInput">Meta semestral NPS</label>
             <input id="npsSemesterGoalInput" type="number" min="0" max="100" value="${semesterGoal}" aria-label="Meta semestral de NPS" data-input-action="update-nps-goal" data-field="semesterGoal" />
           </div>
         </div>
         <div class="score-slider-row">
           <div class="field">
-            <label>Ajuste rápido</label>
+            <label for="npsScoreRange">Ajuste rápido</label>
             <input id="npsScoreRange" type="range" min="0" max="100" value="${score}" aria-label="Ajuste rápido da pontuação NPS" data-input-action="update-nps-score" data-source="range" />
           </div>
         </div>

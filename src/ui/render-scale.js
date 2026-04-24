@@ -42,9 +42,9 @@
       if (!box) return;
       aplicarHtmlSeMudou(box, scaleShiftDrafts.length ? scaleShiftDrafts.map((shift, index) => `
         <div class="shift-editor-row">
-          <div class="field"><label>Horário</label><input data-scale-shift="time" data-index="${index}" aria-label="Horário do professor na linha ${index + 1}" value="${esc(shift.time || '')}" placeholder="Ex: 08h - 13h" /></div>
-          <div class="field"><label>Professor</label><input data-scale-shift="name" data-index="${index}" aria-label="Professor da linha ${index + 1}" value="${esc(shift.name || '')}" placeholder="Ex: JUNIOR" /></div>
-          <div class="field"><label>Troca</label><input data-scale-shift="swap" data-index="${index}" aria-label="Troca do professor na linha ${index + 1}" value="${esc(shift.swap || '')}" placeholder="Se houver" /></div>
+          <div class="field"><label for="scale_shift_time_${index}">Horário</label><input id="scale_shift_time_${index}" data-scale-shift="time" data-index="${index}" aria-label="Horário do professor na linha ${index + 1}" value="${esc(shift.time || '')}" placeholder="Ex: 08h - 13h" /></div>
+          <div class="field"><label for="scale_shift_name_${index}">Professor</label><input id="scale_shift_name_${index}" data-scale-shift="name" data-index="${index}" aria-label="Professor da linha ${index + 1}" value="${esc(shift.name || '')}" placeholder="Ex: JUNIOR" /></div>
+          <div class="field"><label for="scale_shift_swap_${index}">Troca</label><input id="scale_shift_swap_${index}" data-scale-shift="swap" data-index="${index}" aria-label="Troca do professor na linha ${index + 1}" value="${esc(shift.swap || '')}" placeholder="Se houver" /></div>
           <button class="btn btn-danger btn-xs" type="button" data-action="remove-scale-shift-row" data-index="${index}" aria-label="Excluir linha ${index + 1} de professor">Excluir</button>
         </div>
       `).join('') : '<div class="empty empty--compact"><strong>Sem turnos neste dia</strong>Adicione ao menos uma linha de professor para compor a escala.</div>');

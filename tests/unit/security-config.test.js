@@ -37,4 +37,11 @@ describe('Configuração de segurança', () => {
     expect(headerMap['X-Frame-Options']).toBe('DENY');
     expect(headerMap['X-Content-Type-Options']).toBe('nosniff');
   });
+
+  it('cliente Supabase via CDN usa versao exata e CORS anonimo', () => {
+    const html = readFile('index.html');
+    const match = html.match(/<script src="(https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@[^"]+)"([^>]*)><\/script>/);
+    expect(match?.[1]).toBe('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0');
+    expect(match?.[2]).toContain('crossorigin="anonymous"');
+  });
 });

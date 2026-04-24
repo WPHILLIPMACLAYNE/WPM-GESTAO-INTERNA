@@ -21,7 +21,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
           integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
           crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0" crossorigin="anonymous"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
   <script src="src/core/env-bootstrap.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
@@ -393,15 +393,15 @@
           </div>
           <div class="field-grid field-grid--mention">
             <div class="field">
-              <label>Funcionário citado</label>
+              <label for="npsMentionName">Funcionário citado</label>
               <input id="npsMentionName" list="teamSuggestions" placeholder="Ex: Maria Silva" />
             </div>
             <div class="field">
-              <label>Qtd. citações</label>
+              <label for="npsMentionCount">Qtd. citações</label>
               <input id="npsMentionCount" type="number" min="1" value="1" />
             </div>
             <div class="field field--end">
-              <label>&nbsp;</label>
+              <span class="field-spacer" aria-hidden="true">&nbsp;</span>
               <button class="btn btn-primary" data-action="register-mention">Registrar citação</button>
             </div>
           </div>
@@ -579,17 +579,17 @@
             <div class="settings-card-body">
               <div class="settings-form-grid">
                 <div class="field-stack settings-field-card">
-                  <label>Recepcionistas (uma por linha)</label>
+                  <label for="receptionistEditor">Recepcionistas (uma por linha)</label>
                   <div class="settings-field-help">Base de alunos, pendências e addons.</div>
                   <textarea id="receptionistEditor" placeholder="Uma recepcionista por linha"></textarea>
                 </div>
                 <div class="field-stack settings-field-card">
-                  <label>Professores (um por linha)</label>
+                  <label for="professorEditor">Professores (um por linha)</label>
                   <div class="settings-field-help">Lista usada na escala mensal.</div>
                   <textarea id="professorEditor" placeholder="Um professor por linha"></textarea>
                 </div>
                 <div class="field-stack settings-field-card settings-field-card--full">
-                  <label>Categorias de addon (uma por linha)</label>
+                  <label for="addonTypeEditor">Categorias de addon (uma por linha)</label>
                   <div class="settings-field-help">Disponíveis nos cadastros e totais comerciais.</div>
                   <textarea id="addonTypeEditor"></textarea>
                 </div>
@@ -894,27 +894,27 @@
         <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="studentModal">Fechar</button>
       </div>
       <div class="field-grid">
-        <div class="field"><label>Nome</label><input id="student_nome" /></div>
-        <div class="field"><label>Número da Matrícula</label><input id="student_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
-        <div class="field"><label>Última visita</label><input id="student_ultimaVisita" type="date" /></div>
-        <div class="field"><label>Hora da visita</label><input id="student_horaVisita" type="time" /></div>
-        <div class="field"><label>Início</label><input id="student_inicio" type="date" /></div>
-        <div class="field"><label>Aviso NPS</label>
+        <div class="field"><label for="student_nome">Nome</label><input id="student_nome" /></div>
+        <div class="field"><label for="student_matricula">Número da Matrícula</label><input id="student_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
+        <div class="field"><label for="student_ultimaVisita">Última visita</label><input id="student_ultimaVisita" type="date" /></div>
+        <div class="field"><label for="student_horaVisita">Hora da visita</label><input id="student_horaVisita" type="time" /></div>
+        <div class="field"><label for="student_inicio">Início</label><input id="student_inicio" type="date" /></div>
+        <div class="field"><label for="student_avisoNps">Aviso NPS</label>
           <select id="student_avisoNps">
             <option>Sim</option><option>Não</option><option>Pendente</option>
           </select>
         </div>
-        <div class="field"><label>Atendimento</label><select id="student_atendimento"></select></div>
-        <div class="field"><label>Feedback resposta</label>
+        <div class="field"><label for="student_atendimento">Atendimento</label><select id="student_atendimento"></select></div>
+        <div class="field"><label for="student_feedback">Feedback resposta</label>
           <select id="student_feedback">
             <option>Respondeu</option><option>Não respondeu</option><option>Pendente</option>
           </select>
         </div>
-        <div class="field"><label>Addon</label>
+        <div class="field"><label for="student_addon">Addon</label>
           <select id="student_addon"><option value="">Nenhum</option></select>
         </div>
       </div>
-      <div class="field-stack field-stack--top-gap"><label>Observações</label><textarea id="student_observacoes"></textarea></div>
+      <div class="field-stack field-stack--top-gap"><label for="student_observacoes">Observações</label><textarea id="student_observacoes"></textarea></div>
       <div class="inline-actions">
         <button type="button" class="btn btn-success" data-action="save-student">Salvar atendimento</button>
       </div>
@@ -928,11 +928,11 @@
         <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="pendingModal">Fechar</button>
       </div>
       <div class="field-grid">
-        <div class="field"><label>Nome</label><input id="pending_nome" /></div>
-        <div class="field"><label>Número da Matrícula</label><input id="pending_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
-        <div class="field"><label>Hostess</label><select id="pending_hostess"></select></div>
-        <div class="field"><label>Data solicitação</label><input id="pending_data" type="date" /></div>
-        <div class="field"><label>Status</label>
+        <div class="field"><label for="pending_nome">Nome</label><input id="pending_nome" /></div>
+        <div class="field"><label for="pending_matricula">Número da Matrícula</label><input id="pending_matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Número da Matrícula" /></div>
+        <div class="field"><label for="pending_hostess">Hostess</label><select id="pending_hostess"></select></div>
+        <div class="field"><label for="pending_data">Data solicitação</label><input id="pending_data" type="date" /></div>
+        <div class="field"><label for="pending_status">Status</label>
           <select id="pending_status">
             <option value="aberto">Aberto</option>
             <option value="respondido">Respondido</option>
@@ -940,8 +940,8 @@
           </select>
         </div>
       </div>
-      <div class="field-stack field-stack--top-gap"><label>Pendência</label><textarea id="pending_desc"></textarea></div>
-      <div class="field-stack"><label>Resposta</label><textarea id="pending_resposta"></textarea></div>
+      <div class="field-stack field-stack--top-gap"><label for="pending_desc">Pendência</label><textarea id="pending_desc"></textarea></div>
+      <div class="field-stack"><label for="pending_resposta">Resposta</label><textarea id="pending_resposta"></textarea></div>
       <div class="inline-actions">
         <button type="button" class="btn btn-success" data-action="save-pending">Salvar pendência</button>
       </div>
@@ -956,20 +956,20 @@
         <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="scaleModal">Fechar</button>
       </div>
       <div class="field-grid">
-        <div class="field"><label>Dia</label><input id="scale_date" type="date" /></div>
-        <div class="field"><label>Cor / destaque</label>
+        <div class="field"><label for="scale_date">Dia</label><input id="scale_date" type="date" /></div>
+        <div class="field"><label for="scale_tone">Cor / destaque</label>
           <select id="scale_tone">
             <option value="green">Verde = Sábado</option>
             <option value="red">Vermelho = Feriado</option>
             <option value="neutral">Neutro = Dia normal</option>
           </select>
         </div>
-        <div class="field"><label>Horário recepção</label><input id="scale_receptionTime" placeholder="Ex: 08h - 17h" /></div>
-        <div class="field"><label>Recepcionista</label><input id="scale_receptionist" placeholder="Ex: WALLACE" /></div>
-        <div class="field"><label>Troca recepção</label><input id="scale_receptionSwap" placeholder="Se houver" /></div>
+        <div class="field"><label for="scale_receptionTime">Horário recepção</label><input id="scale_receptionTime" placeholder="Ex: 08h - 17h" /></div>
+        <div class="field"><label for="scale_receptionist">Recepcionista</label><input id="scale_receptionist" placeholder="Ex: WALLACE" /></div>
+        <div class="field"><label for="scale_receptionSwap">Troca recepção</label><input id="scale_receptionSwap" placeholder="Se houver" /></div>
       </div>
       <div class="field-stack field-stack--top-gap">
-        <label>Observações do dia</label>
+        <label for="scale_note">Observações do dia</label>
         <textarea id="scale_note" placeholder="Ex: Troca autorizada pelo líder, feriado, férias, atestado..."></textarea>
       </div>
       <div class="toolbar toolbar--top-gap">
@@ -993,9 +993,9 @@
         <button type="button" class="btn btn-ghost" data-action="close-modal" data-modal-id="eventModal">Fechar</button>
       </div>
       <div class="field-grid">
-        <div class="field"><label>Data</label><input id="event_date" type="date" /></div>
-        <div class="field"><label>Hora</label><input id="event_time" type="time" /></div>
-        <div class="field"><label>Tipo</label>
+        <div class="field"><label for="event_date">Data</label><input id="event_date" type="date" /></div>
+        <div class="field"><label for="event_time">Hora</label><input id="event_time" type="time" /></div>
+        <div class="field"><label for="event_type">Tipo</label>
           <select id="event_type">
             <option>Evento</option>
             <option>Ação</option>
@@ -1005,7 +1005,7 @@
             <option>Outro</option>
           </select>
         </div>
-        <div class="field"><label>Status</label>
+        <div class="field"><label for="event_status">Status</label>
           <select id="event_status">
             <option>Programado</option>
             <option>Confirmado</option>
@@ -1013,12 +1013,12 @@
             <option>Cancelado</option>
           </select>
         </div>
-        <div class="field"><label>Título</label><input id="event_title" /></div>
-        <div class="field"><label>Local</label><input id="event_place" placeholder="Ex: Unidade / Mall / Online" /></div>
-        <div class="field"><label>Responsável</label><input id="event_owner" placeholder="Ex: Marketing / Recepção" /></div>
+        <div class="field"><label for="event_title">Título</label><input id="event_title" /></div>
+        <div class="field"><label for="event_place">Local</label><input id="event_place" placeholder="Ex: Unidade / Mall / Online" /></div>
+        <div class="field"><label for="event_owner">Responsável</label><input id="event_owner" placeholder="Ex: Marketing / Recepção" /></div>
       </div>
       <div class="field-stack field-stack--top-gap">
-        <label>Descrição</label>
+        <label for="event_description">Descrição</label>
         <textarea id="event_description" placeholder="Detalhes do evento, ação, campanha ou orientação operacional."></textarea>
       </div>
       <div class="inline-actions">

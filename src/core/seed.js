@@ -142,7 +142,7 @@
         semesterGoal,
         observations: `Mês ${MONTH_NAMES[month - 1]} com ${totalMentions} citações distribuídas entre recepção e professores. Reforçar retorno ativo em horários de pico e manter abordagem comercial padronizada.`,
         mentions,
-        rankSnapshot: Object.fromEntries(mentions.map(item => [item.name, item.count]))
+        rankSnapshot: buildNpsRankSnapshot(mentions)
       };
 
       for (let day = 1; day <= monthDays; day++) {

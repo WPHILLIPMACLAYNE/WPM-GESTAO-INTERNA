@@ -417,31 +417,31 @@
           <div class="insight-head"><div class="insight-title">Destaque em feedback</div><div class="insight-badge">TOP</div></div>
           <div class="insight-value">${bestFeedback ? esc(bestFeedback.nome) : 'Sem dados'}</div>
           <div class="insight-meta">${bestFeedback ? `${formatPct(bestFeedback.taxaPositiva)} de feedback positivo em ${bestFeedback.total} atendimento${bestFeedback.total === 1 ? '' : 's'}.` : 'Cadastre atendimentos com feedback para gerar o destaque.'}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${bestFeedback ? Math.round(bestFeedback.taxaPositiva * 100) : 0}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" data-style-width-pct="${bestFeedback ? Math.round(bestFeedback.taxaPositiva * 100) : 0}"></div></div>
         </div>
         <div class="insight-card">
           <div class="insight-head"><div class="insight-title">Líder de addons</div><div class="insight-badge">${addonLeaderTotal}</div></div>
           <div class="insight-value">${addonLeaderName ? esc(addonLeaderName) : 'Sem dados'}</div>
           <div class="insight-meta">${addonLeaderName ? `Maior volume acumulado nas vendas complementares deste mês.` : 'A contagem automática aparece quando o addon é marcado no novo atendimento.'}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, addonLeaderTotal * 8)}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" data-style-width-pct="${Math.min(100, addonLeaderTotal * 8)}"></div></div>
         </div>
         <div class="insight-card">
           <div class="insight-head"><div class="insight-title">Líder NPS</div><div class="insight-badge">${topMention ? topMention.count : 0}</div></div>
           <div class="insight-value">${topMention ? esc(topMention.name) : 'Nenhuma citação registrada'}</div>
           <div class="insight-meta">${topMention ? `#1 • ${topMention.count} ${topMention.count === 1 ? 'citação' : 'citações'} no mês.` : 'Nenhuma citação registrada'}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${topMention && totalMentions ? Math.round((topMention.count / totalMentions) * 100) : 0}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" data-style-width-pct="${topMention && totalMentions ? Math.round((topMention.count / totalMentions) * 100) : 0}"></div></div>
         </div>
         <div class="insight-card">
           <div class="insight-head"><div class="insight-title">Urgência operacional</div><div class="insight-badge">${oldest ? `${diffInDays(oldest.data)}d` : 'OK'}</div></div>
           <div class="insight-value">${oldest ? esc(oldest.nome) : 'Sem pendência crítica'}</div>
           <div class="insight-meta">${oldest ? `Aberta desde ${formatDate(oldest.data)} • ${esc(oldest.hostess || 'Sem responsável')}` : 'Nenhuma pendência aberta exigindo escalonamento imediato.'}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, oldest ? diffInDays(oldest.data) * 12 : 0)}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" data-style-width-pct="${Math.min(100, oldest ? diffInDays(oldest.data) * 12 : 0)}"></div></div>
         </div>
         <div class="insight-card">
           <div class="insight-head"><div class="insight-title">Meta NPS</div><div class="insight-badge">${score}</div></div>
           <div class="insight-value">Mensal ${monthlyGoal} • Semestral ${semesterGoal}</div>
           <div class="insight-meta">${score >= monthlyGoal ? 'Meta mensal alcançada.' : `Faltam ${Math.max(0, monthlyGoal - score)} pts para a meta mensal.`} ${score >= semesterGoal ? 'Meta semestral alcançada.' : `Semestral: faltam ${Math.max(0, semesterGoal - score)} pts.`}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${Math.max(monthlyPct, semesterPct)}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" data-style-width-pct="${Math.max(monthlyPct, semesterPct)}"></div></div>
         </div>
       `);
     }
@@ -458,10 +458,10 @@
       const pendingOpen = indicadores.pendenciasAbertas;
       const addons = indicadores.totaisAddons.totalGeral;
       const currentNps = indicadores.npsAtual;
-      document.getElementById('heroSummary').innerHTML = `
+      aplicarHtmlSeMudou(document.getElementById('heroSummary'), `
         <div class="mini-stat">
           <div class="label">Período ativo</div>
-          <div class="value" style="font-size:22px">${esc(getPeriodLabel())}</div>
+          <div class="value mini-stat-value--period">${esc(getPeriodLabel())}</div>
           <div class="hint">${storage.archives[currentPeriodKey] ? 'Mês já fechado anteriormente' : 'Base ativa para lançamento atual'}</div>
         </div>
         <div class="mini-stat">
@@ -484,7 +484,7 @@
           <div class="value">${pendingOpen}</div>
           <div class="hint">Itens que precisam de atenção imediata</div>
         </div>
-      `;
+      `);
     }
 
     /** @returns {void} */
@@ -532,8 +532,9 @@
 
       const maxPositiveRate = Math.max(0.01, ...summary.map(s => s.taxaPositiva));
       const feedbackChart = document.getElementById('feedbackChart');
-      feedbackChart.style.minWidth = `${Math.max(summary.length * 88, 560)}px`;
-      feedbackChart.style.alignItems = 'flex-end';
+      setRuntimeStyle(feedbackChart, {
+        'min-width': `${Math.max(summary.length * 88, 560)}px`
+      });
       if (!summary.length) {
         aplicarHtmlSeMudou(feedbackChart, `<div class="empty"><strong>Sem dados para o gráfico</strong>Registre atendimentos com feedback respondido para visualizar o percentual positivo por atendente.</div>`);
       } else {
@@ -542,7 +543,7 @@
           return `
             <div class="bar-col" data-tooltip="${esc(s.nome)} • ${formatPct(s.taxaPositiva)} positivo">
               <div class="bar-value">${formatPct(s.taxaPositiva)}</div>
-              <div class="bar" style="height:${h}px"></div>
+              <div class="bar" data-style-height-px="${h}"></div>
               <div class="bar-label" title="${esc(s.nome)}">${esc(s.nome)}</div>
             </div>
           `;
@@ -758,7 +759,8 @@
         saved = await saveStore(targetStore, {
           silent: true,
           broadcast: false,
-          eventType: String(options?.eventType || 'recados-migration')
+          eventType: String(options?.eventType || 'recados-migration'),
+          skipRemoteSync: options?.skipRemoteSync === true
         });
       }
 

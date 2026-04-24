@@ -23,7 +23,7 @@
       try {
         const periods = storage?.periods || {};
         return Object.keys(periods)
-          .filter(key => key && key !== currentPeriodKey)
+          .filter(key => isPastPeriodKey(key, currentPeriodKey))
           .sort((a, b) => b.localeCompare(a))
           .map(key => {
             const period = periods[key];
@@ -54,14 +54,15 @@
       const score = clamp(Number(state.nps.score || 0), 0, 100);
       const band = getRiskBand(score);
       const rankingNps = selecionarRankingNps();
-      const pointerLeft = `calc(${score}% - ${score === 100 ? 12 : 0}px)`;
+      const pointerLeft = clamp(score, 0, 100);
+      const pointerOffset = score === 100 ? 12 : 0;
 
       const monthlyGoal = clamp(Number(state.nps.monthlyGoal ?? 75), 0, 100);
       const semesterGoal = clamp(Number(state.nps.semesterGoal ?? 80), 0, 100);
       const monthlyProgress = getNpsGoalProgress(score, monthlyGoal);
       const semesterProgress = getNpsGoalProgress(score, semesterGoal);
       const historyRows = getNpsHistoryRows();
-      document.getElementById('npsMeterBox').innerHTML = `
+      aplicarHtmlSeMudou(document.getElementById('npsMeterBox'), `
         <div class="score-hero">
           <div class="nps-score-copy">
             <div class="score-number">${score}</div>
@@ -74,7 +75,7 @@
           </div>
         </div>
         <div class="risk-meter-wrap">
-          <div class="risk-pointer" style="left:${pointerLeft};">
+          <div class="risk-pointer" data-style-left-pct="${pointerLeft}" data-style-left-offset-px="${pointerOffset}">
             <div class="marker-value">${score}</div>
             <div class="marker"></div>
           </div>
@@ -95,21 +96,21 @@
         </div>
         <div class="score-slider-row nps-grid-3">
           <div class="field">
-            <label>Pontuação NPS</label>
+            <label for="npsScoreInput">Pontuação NPS</label>
             <input id="npsScoreInput" type="number" min="0" max="100" value="${score}" aria-label="Pontuação NPS" data-input-action="update-nps-score" data-source="input" />
           </div>
           <div class="field">
-            <label>Meta mensal NPS</label>
+            <label for="npsMonthlyGoalInput">Meta mensal NPS</label>
             <input id="npsMonthlyGoalInput" type="number" min="0" max="100" value="${monthlyGoal}" aria-label="Meta mensal de NPS" data-input-action="update-nps-goal" data-field="monthlyGoal" />
           </div>
           <div class="field">
-            <label>Meta semestral NPS</label>
+            <label for="npsSemesterGoalInput">Meta semestral NPS</label>
             <input id="npsSemesterGoalInput" type="number" min="0" max="100" value="${semesterGoal}" aria-label="Meta semestral de NPS" data-input-action="update-nps-goal" data-field="semesterGoal" />
           </div>
         </div>
         <div class="score-slider-row">
           <div class="field">
-            <label>Ajuste rápido</label>
+            <label for="npsScoreRange">Ajuste rápido</label>
             <input id="npsScoreRange" type="range" min="0" max="100" value="${score}" aria-label="Ajuste rápido da pontuação NPS" data-input-action="update-nps-score" data-source="range" />
           </div>
         </div>
@@ -120,18 +121,18 @@
                 <div class="nps-progress-title">Progresso da meta mensal</div>
                 <div class="nps-progress-meta">${score}/${monthlyGoal} • ${Math.round(monthlyProgress)}%${monthlyProgress >= 100 ? ' ✓' : ''}</div>
               </div>
-              <div class="nps-progress-track"><div class="nps-progress-fill" style="width:${Math.min(100, monthlyProgress)}%"></div></div>
+              <div class="nps-progress-track"><div class="nps-progress-fill" data-style-width-pct="${Math.min(100, monthlyProgress)}"></div></div>
             </div>
             <div class="nps-progress-card">
               <div class="nps-progress-head">
                 <div class="nps-progress-title">Progresso da meta semestral</div>
                 <div class="nps-progress-meta">${score}/${semesterGoal} • ${Math.round(semesterProgress)}%${semesterProgress >= 100 ? ' ✓' : ''}</div>
               </div>
-              <div class="nps-progress-track"><div class="nps-progress-fill" style="width:${Math.min(100, semesterProgress)}%"></div></div>
+              <div class="nps-progress-track"><div class="nps-progress-fill" data-style-width-pct="${Math.min(100, semesterProgress)}"></div></div>
             </div>
           </div>
         </div>
-      `;
+      `);
 
       aplicarHtmlSeMudou(document.getElementById('npsHistoryBox'), historyRows.length ? `
         <div class="nps-history-panel">

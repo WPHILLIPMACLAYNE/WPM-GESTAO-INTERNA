@@ -222,6 +222,7 @@
       if (!no) throw new Error('Renderização sem nó raiz.');
       no.dataset.chaveRender = String(chave);
       no.dataset.assinaturaRender = assinatura;
+      applyRuntimeStyleData(no);
       return no;
     }
 
@@ -275,6 +276,7 @@
       const assinatura = criarAssinaturaHtml(html);
       if (el.dataset.assinaturaRender === assinatura) return;
       el.innerHTML = sanitizeHtml(html);
+      applyRuntimeStyleData(el);
       el.dataset.assinaturaRender = assinatura;
     }
 
@@ -320,6 +322,7 @@
         // Linhas de tabela já chegam com conteúdo escapado por esc() e markup
         // controlado pelo próprio app; usar innerHTML cru aqui preserva <tr>/<td>.
         container.innerHTML = html;
+        applyRuntimeStyleData(container);
         container.dataset.assinaturaRender = assinatura;
       }
       restaurarEstadoFoco(container, foco);

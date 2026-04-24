@@ -31,6 +31,8 @@ window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
   SUPABASE_URL: null,
   // Chave anônima (publishable). NUNCA a service_role aqui.
   SUPABASE_ANON_KEY: null,
+  // Opcional: força a unidade preferida quando o usuário tiver mais de um vínculo.
+  SUPABASE_UNIT_SLUG: null,
 
   // ── Sentry (frontend monitoring) ───────────────────────────────
   // DSN público do projeto JavaScript do Sentry.
@@ -41,6 +43,10 @@ window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
   SENTRY_RELEASE: null,
 
   // ── App ────────────────────────────────────────────────────────
+  // Commit SHA público do deploy atual.
+  APP_COMMIT: null,
+  // Timestamp ISO público gerado no build/deploy.
+  APP_BUILD_TIME: null,
   // Permite forçar runtime em testes/preview. null = autodetectar.
   APP_RUNTIME_OVERRIDE: null
 });

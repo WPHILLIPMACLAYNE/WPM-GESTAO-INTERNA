@@ -40,14 +40,14 @@
     function renderScaleShiftRows() {
       const box = document.getElementById('scaleShiftRows');
       if (!box) return;
-      box.innerHTML = scaleShiftDrafts.length ? scaleShiftDrafts.map((shift, index) => `
+      aplicarHtmlSeMudou(box, scaleShiftDrafts.length ? scaleShiftDrafts.map((shift, index) => `
         <div class="shift-editor-row">
-          <div class="field"><label>Horário</label><input data-scale-shift="time" data-index="${index}" aria-label="Horário do professor na linha ${index + 1}" value="${esc(shift.time || '')}" placeholder="Ex: 08h - 13h" /></div>
-          <div class="field"><label>Professor</label><input data-scale-shift="name" data-index="${index}" aria-label="Professor da linha ${index + 1}" value="${esc(shift.name || '')}" placeholder="Ex: JUNIOR" /></div>
-          <div class="field"><label>Troca</label><input data-scale-shift="swap" data-index="${index}" aria-label="Troca do professor na linha ${index + 1}" value="${esc(shift.swap || '')}" placeholder="Se houver" /></div>
+          <div class="field"><label for="scale_shift_time_${index}">Horário</label><input id="scale_shift_time_${index}" data-scale-shift="time" data-index="${index}" aria-label="Horário do professor na linha ${index + 1}" value="${esc(shift.time || '')}" placeholder="Ex: 08h - 13h" /></div>
+          <div class="field"><label for="scale_shift_name_${index}">Professor</label><input id="scale_shift_name_${index}" data-scale-shift="name" data-index="${index}" aria-label="Professor da linha ${index + 1}" value="${esc(shift.name || '')}" placeholder="Ex: JUNIOR" /></div>
+          <div class="field"><label for="scale_shift_swap_${index}">Troca</label><input id="scale_shift_swap_${index}" data-scale-shift="swap" data-index="${index}" aria-label="Troca do professor na linha ${index + 1}" value="${esc(shift.swap || '')}" placeholder="Se houver" /></div>
           <button class="btn btn-danger btn-xs" type="button" data-action="remove-scale-shift-row" data-index="${index}" aria-label="Excluir linha ${index + 1} de professor">Excluir</button>
         </div>
-      `).join('') : '<div class="empty empty--compact"><strong>Sem turnos neste dia</strong>Adicione ao menos uma linha de professor para compor a escala.</div>';
+      `).join('') : '<div class="empty empty--compact"><strong>Sem turnos neste dia</strong>Adicione ao menos uma linha de professor para compor a escala.</div>');
     }
 
     /** @param {Object} [values] @returns {void} */
@@ -289,7 +289,7 @@
               <div class="scale-board-side">
                 <div>
                   <div class="scale-tone-pill ${esc(item.rowTone || 'neutral')}">${esc(toneLabel(item.rowTone || 'neutral'))}</div>
-                  ${item.note ? `<div class="scale-board-note" style="margin-top:12px;">${esc(item.note)}</div>` : `<div class="scale-board-note" style="margin-top:12px;">Sem observações registradas.</div>`}
+                  ${item.note ? `<div class="scale-board-note scale-board-note--spaced">${esc(item.note)}</div>` : `<div class="scale-board-note scale-board-note--spaced">Sem observações registradas.</div>`}
                 </div>
                 <div class="scale-board-actions">
                   <button class="btn btn-ghost btn-xs" data-action="edit-scale-day" data-id="${item.id}">Editar</button>

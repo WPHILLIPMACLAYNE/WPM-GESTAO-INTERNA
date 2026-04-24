@@ -1,6 +1,6 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10 · Última atualização: 2026-04-18
+Data: 2026-04-10 · Última atualização: 2026-04-22
 Baseline estável em produção: `origin/main` @ `bc6307f` (GitHub Pages v34)
 Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 
@@ -13,6 +13,48 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > **Atualização 2026-04-18** — baseline oficial consolidado no `origin/main` (`bc6307f`).
 > Qodana removido do fluxo para simplificar CI e reduzir ruído operacional.
 > Fluxo seguro documentado em [`RETOMADA_SEGURA.md`](./RETOMADA_SEGURA.md).
+
+> **Atualização 2026-04-22** — Etapas 2 e 3 concluídas na branch `VSCODEX1807`.
+> PWA/service worker foi endurecido em `8c57fb4`; hardening lógico de NPS/eventos/rollback
+> foi concluído em `eaa4559`. A próxima linha segura é a Etapa 4.
+
+> **Atualização 2026-04-22 16:38** — Etapa 4 iniciada em `5eb1324`.
+> `script-src` não depende mais de `'unsafe-inline'`, DOMPurify/Chart.js têm SRI,
+> scripts inline foram extraídos e Playwright HTTP usa porta isolada.
+
+> **Atualização 2026-04-22 17:36** — Etapa 4 concluída em `32311fd`.
+> `style-src` também deixou de depender de `'unsafe-inline'`, o deploy ganhou
+> headers HTTP no `vercel.json`, estilos dinâmicos migraram para CSSOM compatível
+> com a CSP e a cobertura de segurança passou a incluir testes XSS por entidade,
+> configuração de headers e validação browser-real sem violações de inline style.
+
+> **Atualização 2026-04-22 18:30** — Etapa 6 iniciada.
+> O desenho canônico de backend foi consolidado em [`BACKEND_CANONICO.md`](./BACKEND_CANONICO.md),
+> usando `MAPA_ENTIDADES.md` como base para ERD lógico, papéis e transações obrigatórias.
+
+> **Atualização 2026-04-22 19:05** — Bootstrap local do backend concluído.
+> `supabase/seed.sql` agora cria um usuário admin local, a primeira unidade e o período aberto
+> via `bootstrap_unit_admin(...)`; o próximo passo seguro é integrar leitura/escrita do frontend
+> ao schema canônico sem remover o fallback local.
+
+> **Atualização 2026-04-22 19:34** — Integração inicial do frontend com Supabase concluída.
+> O app já carrega o SDK no browser, expõe login/logout no painel de Configurações, resolve
+> sessão + `unit_members`, prefere leitura remota autenticada, mantém espelho local em
+> IndexedDB/localStorage e já sincroniza o store completo via `import_backup_transaction(...)`.
+> A validação real no navegador passou com `dev.admin@wpm.local`, inclusive reload remoto
+> e sync imediata após o ajuste de unicidade em `addon_sales`.
+
+> **Atualização 2026-04-22 21:05** — Etapa 7 homologada em runtime real.
+> A migração assistida foi validada no navegador real com dry-run consistente, snapshot local,
+> pós-migração remoto, checklist operacional e fechamento de `Abril/2026` abrindo `Maio/2026`
+> limpo no backend. No fechamento do dia, a regressão do histórico de NPS também foi corrigida
+> para olhar apenas meses anteriores ao período ativo.
+
+> **Atualização 2026-04-23** — Etapa 8 fechada como sync local-first guardada.
+> O envio remoto agora usa checkpoint de unidade (`get_unit_sync_checkpoint`) e a RPC
+> `import_backup_transaction_guarded(...)`. Se outro dispositivo alterar o backend desde a última
+> leitura/sync conhecida, o app entra em estado de conflito e exige `Recarregar do backend` antes
+> de tentar novo envio, evitando sobrescrita silenciosa.
 
 ## Etapa 0 — Proteger baseline
 
@@ -77,6 +119,8 @@ Critério de aceite:
 
 Prioridade: alta.
 
+Status 2026-04-22: concluída localmente em `eaa4559`. `todayISO()` já usava data local antes desta etapa; os demais itens foram corrigidos e cobertos por unitários/workflows.
+
 Ações:
 
 - Corrigir rollback de `createCrudHandler()` em falha de persistência.
@@ -99,49 +143,58 @@ Critério de aceite:
 
 Prioridade: alta.
 
+Status 2026-04-22: concluída localmente em `32311fd`. Entregue nesta etapa: `npm audit --audit-level=moderate` sem vulnerabilidades, SRI nos CDNs atuais, extração de scripts inline do app shell, remoção de `'unsafe-inline'` de `script-src` e `style-src`, headers de produção no `vercel.json` e testes XSS/CSP cobrindo renderização e navegador real.
+
 Ações:
 
 - Executar `npm audit fix` em branch dedicada.
 - Adicionar SRI ou hospedar DOMPurify/Chart.js localmente.
 - Mover script inline final de `index.html` para arquivo JS.
-- Planejar CSP sem `'unsafe-inline'`.
+- Planejar CSP sem `'unsafe-inline'`. ✅
 - Configurar headers de produção no Vercel:
-  - `Content-Security-Policy` com `frame-ancestors 'none'`
-  - opcional `X-Frame-Options: DENY`
+  - `Content-Security-Policy` com `frame-ancestors 'none'` ✅
+  - `X-Frame-Options: DENY` ✅
 - Criar testes XSS para:
-  - aluno;
-  - pendência;
-  - evento;
-  - recado;
-  - NPS;
-  - configurações.
+  - aluno; ✅
+  - pendência; ✅
+  - evento; ✅
+  - recado; ✅
+  - NPS; ✅
+  - configurações. ✅
 
 Critério de aceite:
 
-- `npm audit --audit-level=moderate` sem alta/moderada.
-- Browser não acusa `frame-ancestors` ignorado por meta como única proteção.
-- Entradas maliciosas renderizam como texto.
+- `npm audit --audit-level=moderate` sem alta/moderada. ✅
+- Browser não acusa `frame-ancestors` ignorado por meta como única proteção. ✅
+- Entradas maliciosas renderizam como texto. ✅
 
 ## Etapa 5 — Atualizar documentação estrutural
+
+Status: **concluída em 2026-04-22**.
 
 Prioridade: média.
 
 Ações:
 
-- Atualizar `QWEN.md` para refletir a estrutura atual.
-- Atualizar `MODULE_MAP.md` com `render-*`, `events-*`, `backup.js` e `lifecycle.js`.
-- Decidir destino de `MODULE_STATUS.md`: criar ou remover da rotina.
-- Remover/mover `src/ui/render.js` se for legado.
-- Documentar `src/types.js` como JSDoc não-runtime.
+- `QWEN.md` atualizado para refletir a estrutura atual.
+- `MODULE_MAP.md` alinhado ao runtime carregado por `index.html`.
+- `MIGRATION_STATUS.md` promovido a snapshot corrente da baseline documental.
+- `src/ui/render.js` deixou de existir no tree ativo.
+- `src/types.js` documentado como artefato JSDoc não-runtime.
+- Documentos históricos da Etapa 5 e auditorias antigas passaram a indicar explicitamente que não representam o runtime atual.
 
 Critério de aceite:
 
-- Mapa de módulos bate com `index.html`.
-- Nenhum arquivo legado em `src/` confunde runtime.
+- Mapa de módulos bate com `index.html`. ✅
+- Nenhum arquivo legado em `src/` confunde runtime. ✅
 
 ## Etapa 6 — Desenhar backend canônico
 
 Prioridade: alta após estabilização.
+
+Status 2026-04-22: concluída no nível de modelagem lógica.
+O desenho canônico, o ERD lógico, os papéis e as transações mínimas já estão documentados em
+[`BACKEND_CANONICO.md`](./BACKEND_CANONICO.md) e sustentam o schema local de `supabase/`.
 
 Ações:
 
@@ -186,6 +239,14 @@ Critério de aceite:
 
 Prioridade: alta quando backend estiver pronto.
 
+Status 2026-04-22: homologada em navegador real.
+Leitura local/legado, contagens comparativas por entidade, dry-run guiado, migração assistida com
+backup, snapshot local, bloqueio por divergência remota e validação pós-migração já passaram no
+fluxo operacional real. O backend preservou o histórico necessário para fechar `Abril/2026` e abrir
+`Maio/2026` zerado na base remota.
+
+Checklist operacional: [`HOMOLOGACAO_MIGRACAO_REAL.md`](./HOMOLOGACAO_MIGRACAO_REAL.md).
+
 Ações:
 
 - Ler IndexedDB primeiro e localStorage como fallback.
@@ -207,47 +268,65 @@ Critério de aceite:
 
 Prioridade: média.
 
+Status 2026-04-23: concluída no nível operacional atual.
+Estratégia escolhida: **local-first com checkpoint remoto guardado**. O IndexedDB/localStorage
+continua sendo o primeiro commit do navegador; o Supabase é o espelho remoto canônico quando há
+sessão autenticada e perfil gravável. Antes de importar o store completo no backend, o cliente
+compara o checkpoint remoto conhecido com o checkpoint atual da unidade. Divergência bloqueia o
+envio e mostra estado de conflito até o operador recarregar do backend.
+
 Ações:
 
-- Escolher online-first ou offline-first.
+- Escolher online-first ou offline-first. ✅
 - Se online-first:
   - backend como fonte primária;
   - IndexedDB/localStorage apenas cache;
   - conflitos tratados no servidor.
 - Se offline-first:
-  - fila de mutações;
-  - IDs estáveis client-side;
-  - `updatedAt`/version por registro;
-  - resolução de conflito explícita.
-- Definir comportamento multiaba/multidispositivo.
+  - fila de mutações; ✅ fila/debounce de store completo
+  - IDs estáveis client-side; ✅ preservados por entidade no store atual
+  - `updatedAt`/version por registro; substituído por checkpoint agregado de unidade nesta fase ✅
+  - resolução de conflito explícita. ✅ recarregar backend antes de novo envio
+- Definir comportamento multiaba/multidispositivo. ✅ broadcast local + conflito remoto por checkpoint
 
 Critério de aceite:
 
-- Sem perda silenciosa de dados.
-- Conflitos têm regra previsível.
-- UI mostra estado offline/sincronizando/erro.
+- Sem perda silenciosa de dados. ✅
+- Conflitos têm regra previsível. ✅
+- UI mostra estado offline/sincronizando/erro/conflito. ✅
+
+Limite consciente: a resolução ainda é por store completo, não por merge entidade-a-entidade. Quando
+houver conflito remoto, a decisão segura é recarregar do backend, revisar a base atual e reaplicar a
+edição local se necessário.
 
 ## Etapa 9 — Evoluir UI mobile onde há tabelas largas
 
 Prioridade: média/baixa.
 
+Status 2026-04-23: primeira passada concluída para tabelas operacionais críticas.
+Alunos e Pendências agora usam layout de cards no mobile; Escala e Eventos escondem tabelas
+redundantes em telas pequenas e priorizam as visões em quadro/cards já existentes. A regressão E2E
+cobre ausência de scroll horizontal interno em `390px` para Alunos, Pendências, Escala e Eventos.
+Segunda passada: dataset E2E com 8 atendentes e nomes longos cobre cards de atendente no Dashboard
+e limita o gráfico de feedback positivo para rolagem interna controlada, sem cortar a direita.
+
 Ações:
 
-- Manter scroll horizontal como fallback.
+- Manter scroll horizontal como fallback. ✅
 - Criar cards mobile para:
-  - Alunos;
-  - Pendências;
-  - Escala;
-  - Eventos.
-- Criar dataset visual com muitos atendentes e nomes longos.
+  - Alunos; ✅
+  - Pendências; ✅
+  - Escala; ✅ via quadro visual mobile sem tabela duplicada
+  - Eventos. ✅ via agenda em cards mobile sem tabela duplicada
+- Criar dataset visual com muitos atendentes e nomes longos. ✅
 - Revalidar bugs:
-  - valores sobrepostos nos cards de atendente;
-  - gráfico de barras cortado à direita.
+  - valores sobrepostos nos cards de atendente; ✅ coberto por nova checagem responsiva básica
+  - gráfico de barras cortado à direita. ✅
 
 Critério de aceite:
 
-- Sem overflow global em `390px` e `760px`.
-- Tarefas principais funcionam sem depender sempre de scroll lateral.
+- Sem overflow global em `390px` e `760px`. ✅
+- Tarefas principais funcionam sem depender sempre de scroll lateral. ✅ para telas tabulares críticas
 
 ## Etapa 10 — Deploy e observabilidade
 
@@ -255,16 +334,16 @@ Prioridade: média.
 
 Ações:
 
-- Expor versão/commit no app.
-- Criar smoke pós-deploy:
-  - app inicializa;
-  - Chart.js carrega;
-  - service worker registra;
-  - backup exporta;
-  - import valida payload inválido;
-  - mês ativo troca.
-- Registrar erros de inicialização e importação.
-- Documentar rollback seguro, incluindo cache.
+- [x] Expor versão/commit no app.
+- [x] Criar smoke pós-deploy:
+  - [x] app inicializa;
+  - [x] Chart.js carrega;
+  - [x] service worker registra;
+  - [x] backup exporta;
+  - [x] import valida payload inválido;
+  - [x] mês ativo troca.
+- [x] Registrar erros de inicialização e importação.
+- [x] Documentar rollback seguro, incluindo cache.
 
 Critério de aceite:
 

@@ -9,6 +9,9 @@
         STORAGE_KEY,
         STORE_VERSION,
         APP_VERSION,
+        APP_COMMIT,
+        APP_BUILD_TIME,
+        APP_RELEASE_LABEL,
         APP_RUNTIME,
         UI_KEY,
         MONTH_NAMES,
@@ -122,6 +125,13 @@
       diagnostics: {
         runSystemDiagnostics,
         runFlowSmokeTests,
+        loadMigrationDryRunReport,
+        getMigrationReadiness,
+        runMigrationDryRun,
+        clearMigrationDryRunReport,
+        renderMigrationDryRunPanel,
+        renderMigrationHomologationPanel,
+        runAssistedMigrationToSupabase,
         renderDiagnosticsPanel,
         renderFlowSmokePanel,
         renderPeriodAudit
@@ -130,6 +140,15 @@
         getSupabaseClient,
         isSupabaseEnabled,
         getSupabaseStatus,
+        getSupabaseBackendState,
+        refreshSupabaseBackendState,
+        loadStoreFromSupabase,
+        saveStoreToSupabase,
+        queueSupabaseStoreSync,
+        syncCurrentStoreToSupabase,
+        reloadAppFromSupabaseSession,
+        signInSupabasePassword,
+        signOutSupabase,
         resetSupabaseClient
       },
       observability: {
@@ -144,6 +163,7 @@
     /** @returns {Readonly<Object>} */
     function exposeAppInternals() {
       window.__APP_INTERNALS__ = APP_INTERNALS;
+      globalThis.__APP_INTERNALS__ = APP_INTERNALS;
       return APP_INTERNALS;
     }
 
@@ -188,6 +208,15 @@
         setActiveTab(uiState.activeTab || 'dashboard', true);
       } catch (err) {
         console.error('Falha ao inicializar a aplicação:', err);
+        if (typeof captureError === 'function') {
+          captureError(err, {
+            feature: 'bootstrap',
+            stage: 'initializeApp',
+            appVersion: APP_VERSION,
+            appCommit: APP_COMMIT,
+            runtime: APP_RUNTIME
+          });
+        }
         showToast('Falha ao inicializar os dados do aplicativo. Tente recarregar a página ou restaurar um backup.', 'danger', 8000);
         try {
           storage = getDefaultStore();
@@ -199,6 +228,15 @@
           showToast('Dados de exemplo restaurados. Importe um backup para recuperar seus dados.', 'warning', 6000);
         } catch (recoveryErr) {
           console.error('Recovery falhou:', recoveryErr);
+          if (typeof captureError === 'function') {
+            captureError(recoveryErr, {
+              feature: 'bootstrap',
+              stage: 'initializeApp-recovery',
+              appVersion: APP_VERSION,
+              appCommit: APP_COMMIT,
+              runtime: APP_RUNTIME
+            });
+          }
         }
       } finally {
         exposeAppInternals();
@@ -208,6 +246,15 @@
     document.addEventListener('DOMContentLoaded', () => {
       initializeApp().catch(err => {
         console.error('Falha ao inicializar a aplicação:', err);
+        if (typeof captureError === 'function') {
+          captureError(err, {
+            feature: 'bootstrap',
+            stage: 'DOMContentLoaded',
+            appVersion: APP_VERSION,
+            appCommit: APP_COMMIT,
+            runtime: APP_RUNTIME
+          });
+        }
         showToast('Falha ao inicializar os dados do aplicativo.', 'danger', 4500);
       });
     });

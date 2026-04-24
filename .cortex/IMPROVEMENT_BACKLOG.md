@@ -1,5 +1,7 @@
 # IMPROVEMENT_BACKLOG
 
+Last updated: 2026-04-18 18:08:50 -03
+
 Status key:
 
 - `NOW` = safe next work
@@ -7,6 +9,32 @@ Status key:
 - `LATER` = structural work after proof and sequencing
 
 ## NOW
+
+### BL-000 Keep CORTEX live after every completed task
+
+Why:
+Continuity currently depends too much on the active editor/session.
+
+Evidence:
+
+- recent work recovery depended on scattered docs and git history
+- `.cortex/` existed as a static bootstrap snapshot rather than a living handoff layer
+
+Safe outcome:
+Every finished task leaves a persistent checkpoint in both `Docs/RETOMADA_SEGURA.md` and `.cortex/`.
+
+### BL-000A Make the recovery branch protocol explicit
+
+Why:
+Continuity is stronger when the recovery branch naming rule is predictable and timestamp-based.
+
+Evidence:
+
+- recovery work was previously happening on `main`
+- the project now needs a stable branch convention for interrupted-session recovery
+
+Safe outcome:
+Future interrupted work can resume on a known `VSCODEXHHMM` branch with updated continuity artifacts.
 
 ### BL-001 Restore executable validation environment
 

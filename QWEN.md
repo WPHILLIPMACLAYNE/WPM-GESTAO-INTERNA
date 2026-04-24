@@ -2,22 +2,23 @@
 
 ## Visão Geral do Projeto
 
-**WPM Gestão Interna** é um SPA (Single Page Application) de arquivo único para gestão interna da recepção de academias da rede Smart Fit. O sistema centraliza operações mensais de atendimento, vendas complementares (addons), gestão de pendências, pesquisa de satisfação (NPS), escala de funcionários e registro de eventos.
+**WPM Gestão Interna** é um SPA browser-only e local-first para gestão interna da recepção de academias da rede Smart Fit. O sistema centraliza operações mensais de atendimento, vendas complementares (addons), gestão de pendências, pesquisa de satisfação (NPS), escala de funcionários e registro de eventos.
 
 - **Autor:** Wallace Phillip Maclayne
 - **Versão atual:** v34
 - **Licença:** Todos os direitos reservados
-- **Arquitetura:** Single-file SPA com `<script>` tags sequenciais — sem build step, sem ES modules, sem servidor
+- **Arquitetura:** `index.html` como app shell + scripts clássicos sequenciais, sem build step e sem ES modules
 
 ### Princípios de Design
 
 | Princípio | Implementação |
 |---|---|
-| Zero dependência de servidor | Funciona 100% offline no navegador |
-| Arquivo único | Sem build step — basta abrir no navegador |
+| Backend opcional | O core roda localmente; Supabase/Sentry entram apenas quando configurados |
+| App shell estático | Sem build step — basta servir `index.html` |
 | Persistência local | IndexedDB (primário) + localStorage (espelho/fallback) |
 | Sync cross-tab | BroadcastChannel API |
 | Multi-período | Cada mês é um período independente com dados isolados |
+| PWA progressiva | Service worker, manifest e modo offline quando servido via `http(s)` |
 | Responsivo | Desktop (1440px), tablet (768-1024px) e mobile (360-760px) |
 
 ---
@@ -27,8 +28,11 @@
 | Camada | Tecnologia |
 |---|---|
 | Frontend | HTML5 + CSS3 + JavaScript ES6+ |
+| Visualização | Chart.js (CDN) |
 | Persistência | IndexedDB + localStorage |
 | Sync cross-tab | BroadcastChannel API |
+| Backend opcional | Supabase |
+| Observabilidade opcional | Sentry |
 | Testes unitários | Vitest + Happy-DOM |
 | Testes E2E | Playwright (Chromium) |
 | CSS | Dark mode com CSS custom properties |
@@ -39,22 +43,28 @@
 ## Estrutura de Arquivos
 
 ```
-APLICATIVOFINALIZADO/
-├── index.html                  # Aplicação principal (~935 linhas HTML)
-├── styles.css                  # CSS completo (~5214 linhas)
+WPM-GESTAO-INTERNA/
+├── index.html                  # App shell principal + ordem de carga do runtime
+├── styles.css                  # CSS da aplicação
+├── manifest.json               # Manifesto PWA
+├── sw.js                       # Service worker
 ├── package.json                # Dependências de desenvolvimento
 ├── vitest.config.js            # Configuração do Vitest
 ├── playwright.config.js        # Configuração do Playwright
 │
-├── src/                        # JavaScript modular (31 arquivos)
+├── src/                        # JavaScript modular (35 arquivos)
 │   ├── core/
+│   │   ├── env-bootstrap.js    # Defaults de ambiente + carga local opcional de env.js
 │   │   ├── config.js           # Constantes, estado global, DOM helper
+│   │   ├── observability.js    # Bootstrap opcional do Sentry
+│   │   ├── supabase.js         # Cliente Supabase opcional
 │   │   ├── period-builder.js   # Builders de período e templates
 │   │   ├── schema.js           # Migração, sanitização, validação
 │   │   ├── seed.js             # Seed determinístico de massa inicial
 │   │   ├── storage.js          # IndexedDB, localStorage, broadcast
 │   │   ├── backup.js           # Persistência de alto nível, import/export e snapshots
-│   │   └── lifecycle.js        # Ciclo mensal, troca/fechamento/reset de períodos
+│   │   ├── lifecycle.js        # Ciclo mensal, troca/fechamento/reset de períodos
+│   │   └── pwa.js              # Registro do service worker e status online/offline
 │   ├── domain/
 │   │   └── selectors.js        # Selectors memoizados com cache
 │   ├── features/
@@ -78,8 +88,10 @@ APLICATIVOFINALIZADO/
 │   │   ├── events-pending.js   # Handlers de pendências + DnD do Kanban
 │   │   ├── events-addons.js    # Handlers do grid de addons
 │   │   ├── events-scale.js     # Handlers da escala
-│   │   └── events-nps.js       # Handlers de NPS e autosave de observações
+│   │   ├── events-nps.js       # Handlers de NPS e autosave de observações
+│   │   └── back-to-top.js      # Botão flutuante de retorno ao topo
 │   ├── main.js                 # Bootstrap final: initializeApp, APP_INTERNALS, DOMContentLoaded
+│   ├── types.js                # Typedefs JSDoc para checagem estática
 │   └── utils/
 │       └── helpers.js          # Funções puras (format, date, esc, etc.)
 │
@@ -111,37 +123,43 @@ APLICATIVOFINALIZADO/
 A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 
 ```
-1. dompurify (CDN)
-2. src/utils/helpers.js
-3. src/core/config.js       ← state, storage, currentPeriodKey, editing IDs, DOM helper
-4. src/core/period-builder.js
-5. src/core/seed.js
-6. src/core/schema.js
-7. src/core/storage.js
-8. src/domain/selectors.js
-9. src/features/forms.js
-10. src/features/nps.js
-11. src/features/csv.js
-12. src/features/diagnostics.js
-13. src/ui/render-core.js
-14. src/ui/render-dashboard.js
-15. src/ui/render-students.js
-16. src/ui/render-pending.js
-17. src/ui/render-nps.js
-18. src/ui/render-scale.js
-19. src/ui/render-events.js
-20. src/ui/render-settings.js
-21. src/ui/render-addons.js
-22. src/features/crud.js     ← handlers CRUD (resolve collections via getter)
-23. src/ui/events-core.js    ← delegação principal, modais, tooltips, a11y
-24. src/ui/events-students.js
-25. src/ui/events-pending.js
-26. src/ui/events-addons.js
-27. src/ui/events-scale.js
-28. src/ui/events-nps.js
-29. src/core/backup.js       ← persistência de alto nível, import/export e snapshots
-30. src/core/lifecycle.js    ← ciclo mensal, navegação entre meses, sync do período ativo
-31. src/main.js              ← bootstrap final: initializeApp, APP_INTERNALS, DOMContentLoaded
+1. DOMPurify (CDN)
+2. Chart.js (CDN)
+3. src/core/env-bootstrap.js
+4. src/utils/helpers.js
+5. src/core/config.js
+6. src/core/observability.js
+7. src/core/supabase.js
+8. src/core/period-builder.js
+9. src/core/seed.js
+10. src/core/schema.js
+11. src/core/storage.js
+12. src/domain/selectors.js
+13. src/features/forms.js
+14. src/features/nps.js
+15. src/features/csv.js
+16. src/features/diagnostics.js
+17. src/ui/render-core.js
+18. src/ui/render-dashboard.js
+19. src/ui/render-students.js
+20. src/ui/render-pending.js
+21. src/ui/render-nps.js
+22. src/ui/render-scale.js
+23. src/ui/render-events.js
+24. src/ui/render-settings.js
+25. src/ui/render-addons.js
+26. src/features/crud.js
+27. src/ui/events-core.js
+28. src/ui/events-students.js
+29. src/ui/events-pending.js
+30. src/ui/events-addons.js
+31. src/ui/events-scale.js
+32. src/ui/events-nps.js
+33. src/core/backup.js
+34. src/core/lifecycle.js
+35. src/main.js
+36. src/ui/back-to-top.js    ← carregado no rodapé, após o HTML
+37. src/core/pwa.js          ← carregado no rodapé, após o HTML
 ```
 
 ### Camada de Eventos UI
@@ -150,6 +168,7 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 - `bindUIEvents()` continua sendo a porta única da delegação global, mas agora monta registradores por domínio via `bindStudentEvents()`, `bindPendingEvents()`, `bindAddonEvents()`, `bindScaleEvents()` e `bindNpsEvents()`.
 - `src/ui/events-pending.js` mantém `bindPendingDnD()` e `updatePendingStatus()`, preservando o comportamento do Kanban.
 - O autosave de observações de NPS saiu de `src/main.js` e passou para `src/ui/events-nps.js`, sem alterar o debounce de `800ms`.
+- `src/ui/back-to-top.js` é um comportamento isolado de UI tardia, dependente apenas do DOM pronto.
 
 ### Lifecycle & Backup
 
@@ -157,6 +176,13 @@ A ordem de carregamento dos `<script>` tags em `index.html` é crítica:
 - `src/core/backup.js` concentra persistência de alto nível e restauração: `loadStore()`, `saveStore()`, `saveData()`, snapshots commitados, `exportBackup()`, `importBackup()`, `saveLocalSnapshot()` e `restoreLocalSnapshot()`.
 - `src/main.js` deixou de carregar regras de lifecycle e backup. O arquivo agora só expõe `APP_INTERNALS`, executa `initializeApp()` e instala o listener de `DOMContentLoaded`.
 - A política de bootstrap de períodos agora é controlada por `storage.preferences.initializeMonthsWithTestData`: ligada por padrão em `localhost/dev` e desligada por padrão em `file://` e produção.
+
+### Runtime, Integrações e Observabilidade
+
+- `src/core/env-bootstrap.js` define `window.__APP_ENV__` com defaults seguros e injeta `env.js` apenas em runtimes locais.
+- `src/core/observability.js` inicializa Sentry de forma opcional, sem bloquear o bootstrap quando não há DSN.
+- `src/core/supabase.js` encapsula o backend opcional; o app continua funcional sem credenciais.
+- `src/core/pwa.js` registra `sw.js`, trata atualização do service worker e sinaliza estados online/offline.
 
 ### Arquitetura em Camadas
 
@@ -328,11 +354,11 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 
 ---
 
-## Estado Atual dos Testes
+## Última Validação Executada
 
-- **Vitest:** 112/112 ✅
-- **Playwright:** 19/19 ✅
-- **Total:** 131/131 ✅
+- `npm test -- --reporter=dot` → `140/140`
+- `node --check sw.js src/core/pwa.js` → `OK`
+- `npx playwright test tests/e2e/service-worker.spec.js --project=chromium` → `3/3`
 
 ---
 
@@ -358,63 +384,21 @@ window.__APP_INTERNALS__.diagnostics.runSystemDiagnostics(true);
 
 ---
 
-## Pós-auditoria
+## Status Estrutural Atual
 
-### Data
+### Base do Runtime
 
-- Auditoria concluída em `2026-04-06`
+- A superfície pública de `window.__APP_INTERNALS__` continua sendo o ponto de diagnóstico principal do app.
+- `src/ui/render.js` e `src/ui/events.js` não fazem mais parte do runtime; referências a esses arquivos são históricas e devem ser tratadas como legado documental.
+- `src/types.js` existe apenas para typedefs JSDoc e não entra na cadeia de `<script>` do navegador.
 
-### Resultado Final dos Testes
+### Acoplamentos que Ainda Importam
 
-- **Vitest:** `116/116` ✅
-- **Playwright:** `42/42` ✅
-- **Total consolidado:** `158/158` ✅
+- A aplicação continua sensível à ordem de `<script>` em `index.html`.
+- Os hubs com maior acoplamento permanecem em `render-dashboard.js`, `render-settings.js`, `events-core.js`, `backup.js` e `lifecycle.js`.
+- `storage.js` e `schema.js` ainda concentram responsabilidades transversais e exigem cuidado em refactors.
 
-### Resultado da Comparação Monólito × Modular
+### Último Marco Antes da Etapa 5
 
-- A superfície pública do `APP_INTERNALS` foi preservada: **nenhuma função pública do monólito ficou ausente** na versão modular.
-- Diferenças de declaração encontradas fora da superfície pública:
-  - presentes no monólito, mas não com a mesma declaração top-level na versão modular: `doSave`, `saveEventItem`, `savePending`, `saveStudent`
-  - adicionadas na versão modular: `createCrudHandler`, `doResizeMonth`, `sanitizeHtml`
-- Duplicações relevantes entre módulos:
-  - `csvEscape`, `buildCsvContent`
-  - `formatBytes`, `formatPersistenceTimestamp`
-  - `getRiskBand`, `getNpsGoalProgress`, `getNpsHistoryBandClass`
-  - `normalizeSearchText`, `normalizeEventType`, `eventStatusClass`
-  - `shortText`, `toneLabel`, `suggestScaleTone`
-
-### Correções Confirmadas
-
-- Correção prévia confirmada:
-  - `studentStatusPill`, `npsPill` e `pendingPill` permanecem em `src/ui/render.js`, eliminando o bug de ordem de carga que quebrava Alunos Novos e Pendências.
-- Correção adicional feita na pós-auditoria:
-  - `src/ui/render.js`: `aplicarPatchLinhas()` foi ajustado para preservar `<tr>` reais no navegador e estabilizar CRUD + E2E.
-
-### Status Final de Cada Módulo
-
-- `src/utils/helpers.js` — `✅ OK`
-- `src/core/config.js` — `✅ OK`
-- `src/core/backup.js` — `✅ persistência de alto nível, import/export e snapshots`
-- `src/core/lifecycle.js` — `✅ ciclo mensal e navegação de período`
-- `src/core/schema.js` — `⚠ depende de globais tardios`
-- `src/core/storage.js` — `⚠ mistura persistência, schema e UI state`
-- `src/domain/selectors.js` — `✅ OK`
-- `src/features/forms.js` — `✅ OK`
-- `src/features/crud.js` — `✅ OK`
-- `src/features/csv.js` — `⚠ mantém utilidades duplicadas`
-- `src/features/diagnostics.js` — `✅ OK`
-- `src/features/nps.js` — `✅ OK`
-- `src/ui/render-*.js` — `⚠ render ainda depende de globais e ordem de carga`
-- `src/ui/events-*.js` — `✅ separados por domínio; core ainda depende de globais do app`
-- `src/main.js` — `✅ bootstrap mínimo; continua dependente da ordem de <script>`
-
-### Observações Finais da Auditoria
-
-- O CSS foi preservado funcionalmente: mesmas `39` variáveis e `14` media queries do monólito.
-- Os mecanismos de performance foram preservados:
-  - `aplicarHtmlSeMudou()`
-  - `requestRender()`
-  - `lerSelectorMemorizado()` com limite de `120`
-  - `queueStorageOperation()`
-- O seed determinístico passou a ser usado no bootstrap de períodos novos quando o toggle `Inicializar meses com dados de teste` está ativo.
-- A modularização melhorou manutenção e testabilidade, mas o projeto continua dependente da ordem de `<script>` e de globais implícitos.
+- O último ajuste funcional fechado antes desta atualização documental foi o commit `bd0216c` (`fix(pwa): versionar cache do service worker por revisao`).
+- Esse ajuste mudou a estratégia de versionamento de cache do service worker, persistiu metadata do cache ativo e adicionou cobertura unitária/E2E específica para PWA.

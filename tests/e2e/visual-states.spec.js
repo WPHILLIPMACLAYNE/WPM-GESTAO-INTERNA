@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { installFixedBrowserClock } from '../helpers/fixed-browser-clock.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +23,10 @@ const SNAPSHOT_OPTS = {
 };
 
 test.skip(!!process.env.CI, 'Visual snapshot tests run only outside CI to avoid environment-based rendering drift.');
+
+test.beforeEach(async ({ page }) => {
+  await installFixedBrowserClock(page);
+});
 
 // ---------------------------------------------------------------------------
 // Helpers

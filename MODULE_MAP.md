@@ -4,47 +4,55 @@
 
 - O app continua browser-only, carregado por `<script>` tags clássicos em `index.html`.
 - Não há `import`/`export` reais no runtime; dependências são por globais e ordem de carga.
-- O mapa abaixo descreve a estrutura atual pós-split de renderização e eventos.
+- O mapa abaixo descreve a estrutura atual pós-split de renderização/eventos e extração dos scripts inline.
 
 ## Ordem de carga atual
 
-1. `src/utils/helpers.js`
-2. `src/core/config.js`
-3. `src/core/period-builder.js`
-4. `src/core/seed.js`
-5. `src/core/schema.js`
-6. `src/core/storage.js`
-7. `src/domain/selectors.js`
-8. `src/features/forms.js`
-9. `src/features/nps.js`
-10. `src/features/csv.js`
-11. `src/features/diagnostics.js`
-12. `src/ui/render-core.js`
-13. `src/ui/render-dashboard.js`
-14. `src/ui/render-students.js`
-15. `src/ui/render-pending.js`
-16. `src/ui/render-nps.js`
-17. `src/ui/render-scale.js`
-18. `src/ui/render-events.js`
-19. `src/ui/render-settings.js`
-20. `src/ui/render-addons.js`
-21. `src/features/crud.js`
-22. `src/ui/events-core.js`
-23. `src/ui/events-students.js`
-24. `src/ui/events-pending.js`
-25. `src/ui/events-addons.js`
-26. `src/ui/events-scale.js`
-27. `src/ui/events-nps.js`
-28. `src/core/backup.js`
-29. `src/core/lifecycle.js`
-30. `src/main.js`
+1. `src/core/env-bootstrap.js`
+2. `src/utils/helpers.js`
+3. `src/core/config.js`
+4. `src/core/observability.js`
+5. `src/core/supabase.js`
+6. `src/core/period-builder.js`
+7. `src/core/seed.js`
+8. `src/core/schema.js`
+9. `src/core/storage.js`
+10. `src/domain/selectors.js`
+11. `src/features/forms.js`
+12. `src/features/nps.js`
+13. `src/features/csv.js`
+14. `src/features/diagnostics.js`
+15. `src/ui/render-core.js`
+16. `src/ui/render-dashboard.js`
+17. `src/ui/render-students.js`
+18. `src/ui/render-pending.js`
+19. `src/ui/render-nps.js`
+20. `src/ui/render-scale.js`
+21. `src/ui/render-events.js`
+22. `src/ui/render-settings.js`
+23. `src/ui/render-addons.js`
+24. `src/features/crud.js`
+25. `src/ui/events-core.js`
+26. `src/ui/events-students.js`
+27. `src/ui/events-pending.js`
+28. `src/ui/events-addons.js`
+29. `src/ui/events-scale.js`
+30. `src/ui/events-nps.js`
+31. `src/core/backup.js`
+32. `src/core/lifecycle.js`
+33. `src/main.js`
+34. `src/ui/back-to-top.js`
+35. `src/core/pwa.js`
 
 ## Mapa resumido
 
 | Arquivo | Camada | Responsabilidade principal | Depende de |
 |---|---|---|---|
+| `src/core/env-bootstrap.js` | config | defaults de `window.__APP_ENV__` e carregamento local opcional de `env.js` | nenhum módulo local |
 | `src/utils/helpers.js` | transversal | escape, sanitização, datas, CSV, NPS e helpers de período | APIs padrão |
 | `src/core/config.js` | config | constantes, chaves, defaults, helper `DOM` e estado global | nenhum módulo local |
+| `src/core/observability.js` | core | bootstrap condicional do Sentry | config/env |
+| `src/core/supabase.js` | core | cliente Supabase opcional e status de backend | config/env |
 | `src/core/period-builder.js` | core | preferências, UI state, equipe, addons e builders/reset de período | config, storage, helpers, lifecycle |
 | `src/core/seed.js` | core | seed determinístico por período | config, helpers, period-builder |
 | `src/core/schema.js` | core | normalização, migração e sanitização do store | config, period-builder, lifecycle, helpers |
@@ -73,6 +81,8 @@
 | `src/ui/events-scale.js` | ui/events | binds de escala | render-scale, csv |
 | `src/ui/events-nps.js` | ui/events | binds de NPS e autosave | render-nps, features/nps |
 | `src/main.js` | bootstrap | expõe `APP_INTERNALS` e inicializa o app | todos os módulos anteriores |
+| `src/ui/back-to-top.js` | ui/events | botão flutuante de retorno ao topo | DOM pronto |
+| `src/core/pwa.js` | core | registro de service worker, update e estado online/offline | DOM pronto, service worker |
 | `src/types.js` | documentação | typedefs JSDoc para checagem estática | não é carregado em runtime |
 
 ## Observações

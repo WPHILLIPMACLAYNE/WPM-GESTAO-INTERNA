@@ -25,6 +25,117 @@
     let _confirmOk = null;
     let _confirmCancel = null;
 
+    /** @returns {Promise<void>} */
+    async function handleSupabaseSignInAction() {
+      if (typeof signInSupabasePassword !== 'function') {
+        showToast('Integração Supabase indisponível neste runtime.', 'warning');
+        return;
+      }
+      const email = DOM.value('supabaseEmailInput').trim();
+      const password = DOM.value('supabasePasswordInput');
+      const result = await signInSupabasePassword(email, password, { reload: false });
+      if (!result.ok) {
+        showToast(result.error || 'Falha ao autenticar no backend.', 'warning', 4500);
+        return;
+      }
+      DOM.setValue('supabasePasswordInput', '');
+      showToast('Sessão Supabase iniciada. A base local foi preservada; use "Recarregar do backend" apenas quando quiser trocar para a base remota.', 'success', 5000);
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
+    async function handleSupabaseSignOutAction() {
+      if (typeof signOutSupabase !== 'function') {
+        showToast('Integração Supabase indisponível neste runtime.', 'warning');
+        return;
+      }
+      const result = await signOutSupabase();
+      if (!result.ok) {
+        showToast(result.error || 'Falha ao encerrar a sessão Supabase.', 'warning', 4500);
+        return;
+      }
+      showToast('Sessão Supabase encerrada. O app segue em modo local.', 'success');
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
+    async function handleSupabaseReloadAction() {
+      if (typeof reloadAppFromSupabaseSession !== 'function') {
+        showToast('Integração Supabase indisponível neste runtime.', 'warning');
+        return;
+      }
+      const loaded = await reloadAppFromSupabaseSession({ showToast: true });
+      if (!loaded) return;
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
+    async function handleSupabaseSyncNowAction() {
+      if (typeof syncCurrentStoreToSupabase !== 'function') {
+        showToast('Integração Supabase indisponível neste runtime.', 'warning');
+        return;
+      }
+      const result = await syncCurrentStoreToSupabase({ showToast: true });
+      if (!result?.ok && result?.skipped) {
+        showToast('A sincronização remota não está disponível para a sessão atual.', 'info');
+        return;
+      }
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
+    async function handleMigrationDryRunAction() {
+      if (typeof runMigrationDryRun !== 'function') {
+        showToast('Dry-run de migração indisponível neste runtime.', 'warning');
+        return;
+      }
+      await runMigrationDryRun(false);
+      renderAll();
+    }
+
+    /** @returns {Promise<void>} */
+    async function handleMigrationAssistAction() {
+      if (typeof runAssistedMigrationToSupabase !== 'function') {
+        showToast('Migração assistida indisponível neste runtime.', 'warning');
+        return;
+      }
+      const result = await runAssistedMigrationToSupabase();
+      if (!result?.ok) {
+        if (result?.skipped) {
+          if (result.reason === 'backend-unavailable') {
+            showToast('Faça login com perfil gravável no backend antes de migrar.', 'info', 4500);
+            return;
+          }
+          if (result.reason === 'remote-mismatch') {
+            const mismatchCount = Number(result.report?.comparison?.mismatches?.length || 0);
+            showToast(`O backend já diverge da base local (${mismatchCount} divergência(s)). Revise o dry-run antes de migrar.`, 'warning', 5000);
+            return;
+          }
+          if (result.reason === 'remote-compare-failed' || result.reason === 'remote-compare-missing') {
+            showToast('A comparação com a unidade remota não ficou confiável. Reexecute o dry-run autenticado antes de migrar.', 'warning', 5000);
+            return;
+          }
+          if (result.reason === 'backend-auth-required' || result.reason === 'backend-readonly') {
+            showToast('A sessão atual não pode escrever no backend. Ajuste o acesso antes de migrar.', 'info', 4500);
+            return;
+          }
+          showToast('A migração assistida ainda não está liberada para o estado atual do dry-run.', 'info', 4500);
+          return;
+        }
+        showToast('Falha ao executar a migração assistida para o backend.', 'warning', 5000);
+        return;
+      }
+      const mismatchCount = Number(result.report?.comparison?.mismatches?.length || 0);
+      const tone = mismatchCount > 0 ? 'warning' : 'success';
+      showToast(`Migração assistida concluída. ${mismatchCount} divergência(s) após a validação comparativa.`, tone, 5000);
+      renderAll();
+      syncPeriodControls();
+    }
+
     /** @param {string} id @returns {void} */
     function openModal(id) {
       const modal = document.getElementById(id);
@@ -32,7 +143,7 @@
       estadoAcessibilidade.focoRetornoModal[id] = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('body-scroll-locked');
       const destino = modal.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])') || modal.querySelector('.modal-content');
       destino?.focus({ preventScroll: true });
     }
@@ -45,7 +156,7 @@
       modal.setAttribute('aria-hidden', 'true');
       const modalAberto = document.querySelector('.modal.show');
       if (!modalAberto) {
-        document.body.style.overflow = '';
+        document.body.classList.remove('body-scroll-locked');
         const retorno = estadoAcessibilidade.focoRetornoModal[id];
         if (retorno && retorno.isConnected) retorno.focus({ preventScroll: true });
       } else {
@@ -147,6 +258,27 @@
               return true;
             case 'run-persistence-self-test':
               runPersistenceSelfTest();
+              return true;
+            case 'supabase-sign-in':
+              handleSupabaseSignInAction();
+              return true;
+            case 'supabase-sign-out':
+              handleSupabaseSignOutAction();
+              return true;
+            case 'supabase-reload':
+              handleSupabaseReloadAction();
+              return true;
+            case 'supabase-sync-now':
+              handleSupabaseSyncNowAction();
+              return true;
+            case 'run-migration-dry-run':
+              handleMigrationDryRunAction();
+              return true;
+            case 'run-assisted-migration':
+              handleMigrationAssistAction();
+              return true;
+            case 'clear-migration-dry-run':
+              if (typeof clearMigrationDryRunReport === 'function') void clearMigrationDryRunReport();
               return true;
             case 'run-flow-smoke-tests':
               runFlowSmokeTests(actionEl.dataset.silent === 'true');
@@ -572,8 +704,10 @@
       let y = clientY + offset;
       if (x > maxX) x = Math.max(12, clientX - tooltip.offsetWidth - offset);
       if (y > maxY) y = Math.max(12, clientY - tooltip.offsetHeight - offset);
-      tooltip.style.left = `${Math.max(12, Math.min(maxX, x))}px`;
-      tooltip.style.top = `${Math.max(12, Math.min(maxY, y))}px`;
+      setRuntimeStyle(tooltip, {
+        left: `${Math.max(12, Math.min(maxX, x))}px`,
+        top: `${Math.max(12, Math.min(maxY, y))}px`
+      });
     }
 
     /** @returns {void} */

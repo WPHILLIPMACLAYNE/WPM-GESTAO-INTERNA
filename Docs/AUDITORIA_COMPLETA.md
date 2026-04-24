@@ -1,5 +1,8 @@
 # AUDITORIA_COMPLETA — WPM Gestão Interna
 
+> **Aviso:** esta auditoria é um snapshot histórico de `2026-04-10`.
+> Para a baseline estrutural atual, use `MODULE_MAP.md`, `QWEN.md` e `MIGRATION_STATUS.md`.
+
 Data: 2026-04-10
 Base local auditada: commit `865586c` (`docs: adiciona auditoria completa pos-regressao`)
 Base remota observada: `origin/main` em `f6f08ea` (`feat: adiciona graficos interativos no dashboard com Chart.js`)

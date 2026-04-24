@@ -34,7 +34,7 @@
           ],
           ALLOWED_ATTR: [
             'href', 'title', 'target', 'rel', 'src', 'alt', 'class', 'id',
-            'style', 'data-*', 'aria-*', 'role', 'tabindex', 'type', 'value',
+            'data-*', 'aria-*', 'role', 'tabindex', 'type', 'value',
             'placeholder', 'required', 'disabled', 'readonly', 'checked',
             'selected', 'for', 'name', 'min', 'max', 'step', 'pattern',
             'maxlength', 'minlength', 'autocomplete', 'autofocus', 'form',
@@ -50,6 +50,121 @@
       }
       console.warn('DOMPurify indisponível — usando fallback esc()');
       return esc(html);
+    }
+
+    /**
+     * Resolve a stylesheet dedicada a regras de runtime, carregada via arquivo
+     * local para permanecer compatível com `style-src 'self'`.
+     * @returns {CSSStyleSheet|null}
+     */
+    const runtimeStyleRules = new Map();
+    let runtimeStyleCounter = 0;
+
+    function getRuntimeStyleSheet() {
+      if (typeof document === 'undefined') return null;
+      return Array.from(document.styleSheets || []).find(sheet => {
+        const owner = sheet?.ownerNode;
+        return Boolean(owner?.dataset?.runtimeStylesheet !== undefined);
+      }) || null;
+    }
+
+    /**
+     * @param {Element} el
+     * @returns {CSSStyleRule|null}
+     */
+    function ensureRuntimeStyleRule(el) {
+      if (!(el instanceof Element)) return null;
+      const id = el.dataset.runtimeStyleId || `runtime-style-${++runtimeStyleCounter}`;
+      el.dataset.runtimeStyleId = id;
+
+      const cachedRule = runtimeStyleRules.get(id);
+      if (cachedRule?.parentStyleSheet) return cachedRule;
+
+      const sheet = getRuntimeStyleSheet();
+      if (!sheet || typeof sheet.insertRule !== 'function') return null;
+
+      const selector = `[data-runtime-style-id="${id}"]`;
+      /** @type {CSSRuleList|undefined} */
+      let rules;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        return null;
+      }
+
+      if (typeof rules === 'undefined') return null;
+
+      const existingIndex = Array.from(rules).findIndex(rule => rule?.selectorText === selector);
+      if (existingIndex >= 0) {
+        const existingRule = rules[existingIndex];
+        runtimeStyleRules.set(id, existingRule);
+        return existingRule;
+      }
+
+      const index = rules.length;
+      sheet.insertRule(`${selector}{}`, index);
+      const rule = sheet.cssRules[index];
+      runtimeStyleRules.set(id, rule);
+      return rule;
+    }
+
+    /**
+     * @param {Element|null|undefined} el
+     * @param {Record<string, string>} declarations
+     * @returns {void}
+     */
+    function setRuntimeStyle(el, declarations) {
+      if (!(el instanceof Element) || !declarations || typeof declarations !== 'object') return;
+      const rule = ensureRuntimeStyleRule(el);
+      if (!rule?.style) return;
+
+      const style = rule.style;
+      while (style.length) style.removeProperty(style[0]);
+
+      Object.entries(declarations).forEach(([property, value]) => {
+        if (value == null || value === '') return;
+        style.setProperty(property, String(value));
+      });
+    }
+
+    /**
+     * Aplica estilos dinâmicos via JS para compatibilidade com CSP sem
+     * depender de atributos inline no markup renderizado.
+     * @param {ParentNode|Element|Document} [root=document]
+     * @returns {void}
+     */
+    function applyRuntimeStyleData(root = document) {
+      if (!root) return;
+
+      const visit = (selector, callback) => {
+        if (typeof callback !== 'function') return;
+        if (typeof root.matches === 'function' && root.matches(selector)) callback(root);
+        if (typeof root.querySelectorAll !== 'function') return;
+        root.querySelectorAll(selector).forEach(callback);
+      };
+
+      visit('[data-style-width-pct], [data-style-height-px], [data-style-left-pct]', el => {
+        /** @type {Record<string, string>} */
+        const declarations = {};
+
+        if ('styleWidthPct' in el.dataset) {
+          declarations.width = `${clamp(Number(el.dataset.styleWidthPct || 0), 0, 100)}%`;
+        }
+
+        if ('styleHeightPx' in el.dataset) {
+          const height = Number(el.dataset.styleHeightPx || 0);
+          declarations.height = `${Math.max(0, Number.isFinite(height) ? height : 0)}px`;
+        }
+
+        if ('styleLeftPct' in el.dataset) {
+          const pct = clamp(Number(el.dataset.styleLeftPct || 0), 0, 100);
+          const offset = Number(el.dataset.styleLeftOffsetPx || 0);
+          const safeOffset = Math.max(0, Number.isFinite(offset) ? offset : 0);
+          declarations.left = safeOffset ? `calc(${pct}% - ${safeOffset}px)` : `${pct}%`;
+        }
+
+        setRuntimeStyle(el, declarations);
+      });
     }
 
     /** @param {*} value - Value to deep-sanitize (removes null bytes, trims strings). @returns {*} Sanitized copy. */
@@ -172,6 +287,18 @@
       return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
     }
 
+    /**
+     * @param {string} key - Candidate period key (YYYY-MM).
+     * @param {string} [referenceKey=currentPeriodKey] - Reference period key (YYYY-MM).
+     * @returns {boolean} True when `key` is a valid period before `referenceKey`.
+     */
+    function isPastPeriodKey(key, referenceKey = currentPeriodKey) {
+      const candidate = String(key || '');
+      const reference = String(referenceKey || '');
+      if (!isValidPeriodKey(candidate) || !isValidPeriodKey(reference)) return false;
+      return candidate.localeCompare(reference) < 0;
+    }
+
     /** @param {string} key - Period key (YYYY-MM). @returns {string} Next month's period key. */
     function getNextPeriodKey(key) {
       const [yearStr, monthStr] = String(key).split('-');
@@ -257,6 +384,38 @@
       const safeScore = clamp(Number(score || 0), 0, 100);
       const safeGoal = clamp(Number(goal || 0), 0, 100);
       return safeGoal ? Math.min(100, (safeScore / safeGoal) * 100) : 0;
+    }
+
+    /** @param {NpsMention[]} mentions @returns {NpsMention[]} */
+    function sortNpsMentionsByRanking(mentions = []) {
+      return [...mentions].sort((a, b) => {
+        if (Number(b.count || 0) !== Number(a.count || 0)) return Number(b.count || 0) - Number(a.count || 0);
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      });
+    }
+
+    /** @param {NpsMention[]} mentions @returns {Object<string, number>} */
+    function buildNpsRankSnapshot(mentions = []) {
+      return Object.fromEntries(
+        sortNpsMentionsByRanking(mentions).map((item, index) => [item.id, index + 1])
+      );
+    }
+
+    /** @param {NpsMention[]} mentions @param {*} snapshot @returns {Object<string, number>} */
+    function normalizeNpsRankSnapshot(mentions = [], snapshot = {}) {
+      const safeSnapshot = snapshot && typeof snapshot === 'object' && !Array.isArray(snapshot) ? snapshot : {};
+      const mentionIds = new Set(mentions.map(item => item.id).filter(Boolean));
+      const normalized = {};
+      Object.entries(safeSnapshot).forEach(([key, value]) => {
+        const position = Number(value);
+        if (mentionIds.has(key) && Number.isFinite(position) && position > 0) {
+          normalized[key] = position;
+        }
+      });
+      if (Object.keys(safeSnapshot).length && !Object.keys(normalized).length && mentions.length) {
+        return buildNpsRankSnapshot(mentions);
+      }
+      return normalized;
     }
 
     /** @param {number} score - NPS score (0-100). @returns {RiskBand} Risk band with label and tone class. */

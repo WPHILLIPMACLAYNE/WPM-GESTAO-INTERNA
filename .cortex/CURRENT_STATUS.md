@@ -1,101 +1,99 @@
 # CURRENT_STATUS
 
-Snapshot date: 2026-04-14
+Snapshot date: 2026-04-22
+Last updated: 2026-04-22 16:38:51 -03
 
-## Repository state at bootstrap
+## Live status
 
-- Branch: `agent/cortex-bootstrap-initial-audit`
-- HEAD: `a21f6e45effbf58ec16c6824b2d36e766e485d95`
-- Recent tag on HEAD: `v1.0-stable`
-- Pre-bootstrap worktree state: clean
+- Branch: `VSCODEX1807`
+- HEAD: `5eb1324`
+- Baseline in production: `origin/main`
+- App version: `v34`
+- Store version: `4`
+- Runtime model: browser-only SPA with classic `<script>` files in fixed order
+- Active recovery branch: `VSCODEX1807`
+- Recovery branch created at: `2026-04-18 18:07:46 -03`
+- Previous continuity base commit: `623b50a`
+- Remote tracking branch: `origin/VSCODEX1807`
 
-Recent visible progression from `git log --oneline -5`:
+## Current working reading
 
-1. `a21f6e4` `test: atualiza snapshots mobile do dashboard pós-fix Bug 2 e Bug 3`
-2. `e88daab` `fix: corrige cards mobile e gráfico cortado no Dashboard`
-3. `a6e167b` `docs: diagnóstico mobile Bug 2 e Bug 3`
-4. `87d85c7` `fix: correções pós-auditoria — SW, testes, bug lógico e resíduos`
-5. `992ca8f` `docs: auditoria completa pós-estabilização`
+The project is operationally mature, baseline-validated, and now locally hardened on the most urgent PWA/cache risks, while still architecturally fragile.
 
-## Current baseline reading
+Confirmed live facts:
 
-The codebase appears functionally mature and structurally fragile.
+- `index.html` script order remains a hard runtime contract
+- `window.__APP_INTERNALS__` is exposed and part of the continuity surface
+- `package.json` already points `test:e2e` and `test:visual` to `Scripts/...`
+- `todayISO()` already uses local-date formatting
+- the local baseline now validates with `npm test`, Playwright structure checks, responsive smoke, and dedicated service-worker coverage
+- Playwright visual suites required a fixed browser clock to stop date-driven snapshot drift
+- `Docs/GUIA_CODE_REVIEW_PROJETO.md` now defines severity, evidence, and validation expectations for this repo
+- `sw.js` cache identity is now tied to `APP_VERSION` plus a hash of the active precache manifest
+- service worker registration, manifest scope, and precache paths are now safe for root or subpath deploys
+- the app shell now uses network-first fetches with cached offline fallback
+- Etapa 3 logic hardening is now completed locally in `eaa4559`
+- `rankSnapshot` now normalizes to `{ mentionId: position }` in generated and legacy-normalized NPS data
+- duplicate-event confirmation now runs before persistence and compares normalized titles plus date/time
+- CRUD rollback now restores `state`, `storage.periods`, selector cache, and affected render targets when persistence fails
+- direct event delete/duplicate paths now restore their previous event collection on persistence failure
+- Etapa 4 security hardening started in `5eb1324`
+- `script-src` no longer depends on `'unsafe-inline'`
+- DOMPurify and Chart.js CDN tags now use SRI plus `crossorigin="anonymous"`
+- former inline app-shell scripts now live in `src/core/env-bootstrap.js`, `src/ui/back-to-top.js`, and `src/core/pwa.js`
+- Playwright HTTP tests now use an isolated `127.0.0.1:4173` server and never reuse an unrelated process
 
-Evidence-backed positives:
+## Current safe next step
 
-- runtime split is already in place across `src/core`, `src/domain`, `src/features`, `src/ui`, `src/utils`
-- mobile dashboard fixes documented in `Docs/DIAGNOSTICO_MOBILE.md` are reflected in current code and recent commits
-- previously documented infra issues in scripts/config are already corrected in current files
-- `APP_INTERNALS` exposure, backup flows, diagnostics, lifecycle, and service worker are all present in the codebase
-- test assets and snapshots are present for unit, integration, E2E, and visual coverage
+After the validated baseline, service-worker hardening, Etapa 3 logic hardening, and the first Etapa 4 CSP hardening slice:
 
-Evidence-backed constraints:
+1. stay on `VSCODEX1807` for recovery-safe work
+2. commit this continuity checkpoint
+3. push `VSCODEX1807` so local and remote converge again
+4. continue Etapa 4 with style/CSP headers and XSS tests before backend expansion
 
-- runtime still depends on classic script ordering
-- globals remain the main module interface
-- docs are partially out of sync with the codebase
-- executable validation is blocked in this workspace because dev dependencies are not installed
+Latest validation result:
 
-## Validation attempted during bootstrap
+1. `npm audit --audit-level=moderate` OK with `0 vulnerabilities`
+2. `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
+3. `npm test -- --run --reporter=dot` OK with `130 passed`
+4. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
+5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `25 passed`
+6. `npm run test:e2e` OK with no issues across all viewports
 
-Attempted commands:
+## CORTEX operating rule
 
-- `npm test`
-- `npx playwright test --reporter=list`
+`.cortex/` is now a living continuity layer, not a one-time bootstrap snapshot.
 
-Observed results:
+After every completed task:
 
-- `npm test` failed with `sh: 1: vitest: not found`
-- `npx playwright test --reporter=list` failed with `Cannot find package '@playwright/test'`
+1. update `CURRENT_STATUS.md`
+2. update `AGENT_HANDOFF.md`
+3. update `RETOMADA_MASTER.md`
+4. append an entry to `TASK_LEDGER.md`
+5. update any reference artifact that changed materially
 
-Meaning:
+Protocol details live in `UPDATE_PROTOCOL.md`.
 
-- the repository contains test definitions and configs
-- this workspace does not currently contain the installed dev toolchain needed to execute them
-- no new functional conclusion should be drawn from the failed commands beyond missing dependencies
+## Authoritative priority
 
-## Documentation state
-
-Current docs are valuable but not uniform. The repo now contains:
-
-- historical migration narrative
-- audit snapshots at different moments
-- debt and bug registers
-- architecture maps
-- stage-by-stage split notes
-
-Current source-of-truth priority for structure:
+For present-state decisions, trust these in order:
 
 1. live code in `index.html`, `src/`, `sw.js`, configs
-2. `MODULE_MAP.md`
-3. recent git history
-4. debt/audit docs
-5. older general docs such as `QWEN.md` and `Docs/DOCUMENTACAO.md`
-
-## Stable baseline to preserve
-
-Preserve these before any structural or functional work:
-
-- `APP_VERSION = v34`
-- `STORE_VERSION = 4`
-- current 30-script runtime order from `index.html`
-- local-first persistence model
-- exposed `window.__APP_INTERNALS__`
-- current mobile dashboard fixes
-- corrected local test script paths and Playwright server config
+2. `Docs/RETOMADA_SEGURA.md`
+3. `CURRENT_STATUS.md`
+4. `RETOMADA_MASTER.md`
+5. `TASK_LEDGER.md`
+6. `MODULE_MAP.md`
+7. other audit/reference docs as dated evidence
 
 ## Main unresolved pressures
 
 - script-order coupling
 - shared mutable globals
-- storage/schema/lifecycle centrality
-- doc drift between older audits and current code
-- service worker/versioning still not tied to app version or commit hash
-- security posture still includes CSP `unsafe-inline` and CDN dependencies
-- seed `rankSnapshot` shape still appears inconsistent with `src/types.js`
-
-## Confidence level
-
-Moderate to high for structural state.
-
-Lower for runtime pass/fail in this exact workspace because automated execution is currently blocked by missing dependencies.
+- storage, backup, and lifecycle centrality
+- documentation drift across historical docs
+- deploy/rollback validation in a reused browser is still pending outside local tests
+- `style-src 'unsafe-inline'` still remains because of inline style attributes/templates
+- production CSP/clickjacking headers still need deploy-platform implementation
+- XSS regression tests per entity still need to be added

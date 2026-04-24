@@ -177,6 +177,7 @@
         name: item.name || item.nome || '',
         count: Math.max(0, Number(item.count || item.citacoes || 0))
       })).filter(item => item.name);
+      data.nps.rankSnapshot = normalizeNpsRankSnapshot(data.nps.mentions, data.nps.rankSnapshot);
 
       hydrateLegacyAddonsFromStudents(data);
 
@@ -217,16 +218,42 @@
     }
 
     /**
+     * @returns {boolean}
+     */
+    function isBackendReadOnlyMode() {
+      if (typeof getSupabaseBackendState !== 'function') return false;
+      const backendState = getSupabaseBackendState();
+      return backendState?.source === 'supabase'
+        && backendState?.sessionStatus === 'authenticated'
+        && backendState?.writable === false;
+    }
+
+    /**
+     * @returns {string}
+     */
+    function getBackendReadonlyMessage() {
+      if (typeof getSupabaseBackendState !== 'function') {
+        return 'Sua sessão atual está em modo somente leitura.';
+      }
+      const backendState = getSupabaseBackendState();
+      const roleLabel = backendState?.activeUnit?.role || 'leitura';
+      return `Sua sessão Supabase está em modo somente leitura (${roleLabel}).`;
+    }
+
+    /**
      * Checks if the current period is writable; shows a toast if locked.
      * @param {Object} [options]
      * @returns {boolean}
      */
     function canMutateCurrentPeriod(options = {}) {
-      if (!isCurrentPeriodLocked()) return true;
+      if (!isCurrentPeriodLocked() && !isBackendReadOnlyMode()) return true;
       const rerenderTargets = normalizarAlvosRender(options?.rerender || []);
       if (rerenderTargets.length) requestRender(rerenderTargets);
       if (!options?.silent) {
-        showToast(options?.message || getCurrentPeriodLockMessage(), 'warning');
+        showToast(
+          options?.message || (isBackendReadOnlyMode() ? getBackendReadonlyMessage() : getCurrentPeriodLockMessage()),
+          'warning'
+        );
       }
       return false;
     }
@@ -245,8 +272,12 @@
      * @returns {void}
      */
     function syncCurrentPeriodLockUI() {
-      const locked = isCurrentPeriodLocked();
-      const hint = locked ? `${getPeriodLabel()} fechado. Somente leitura.` : '';
+      const locked = isCurrentPeriodLocked() || isBackendReadOnlyMode();
+      const hint = isBackendReadOnlyMode()
+        ? getBackendReadonlyMessage()
+        : locked
+          ? `${getPeriodLabel()} fechado. Somente leitura.`
+          : '';
 
       const syncDisableState = control => {
         if (!control) return;

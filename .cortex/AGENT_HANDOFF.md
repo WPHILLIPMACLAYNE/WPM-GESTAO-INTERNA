@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 10:38:42 -03
+Last updated: 2026-05-03 10:55:37 -03
 
 ## Current handoff
 
@@ -36,6 +36,8 @@ Current state:
 - `vercel.json` now generates `env.js` via `npm run build:env`
 - commit `d1abdc4` is pushed to `origin/main`
 - Vercel now serves `/env.js` with HTTP `200`, but the deploy still lacks Supabase public env values, so `hasEnv=false`
+- Vercel production env is now configured and redeployed; published app reports `hasEnv=true`
+- remote Supabase `public.units` is still empty, and dev local credentials do not exist remotely
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
@@ -86,11 +88,11 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Configure the deploy for the already-pushed runtime hotfix:
+Bootstrap the remote backend before dry-run:
 
-1. configure only public/browser-safe env vars in Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
-2. redeploy the app
-3. confirm `/env.js` returns `200` and `hasEnv=true`
+1. define/approve unit name, unit slug, admin e-mail and display name
+2. create/confirm the remote Auth admin user
+3. run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
 4. authenticate in the real unit
 5. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
 6. do not click `Migrar para o backend` before human preview review

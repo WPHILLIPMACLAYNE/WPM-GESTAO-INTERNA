@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 10:38:42 -03
+Last updated: 2026-05-03 10:55:37 -03
 
 ## Purpose
 
@@ -87,14 +87,17 @@ This phrase is a continuity test marker and should be used only when the new ses
 - validated the published URLs as reachable but blocked for remote functional homologation because runtime Supabase env was missing
 - pushed remote-runtime hotfix `d1abdc4` to load optional `env.js` in deployed HTTP/HTTPS runtimes and generate it on Vercel
 - verified Vercel serves `/env.js` with HTTP `200`, but Supabase public env values are still absent
+- configured Vercel production public Supabase env vars and redeployed production
+- verified published runtime has `hasEnv=true` and smoke passes against `https://wpm-gestao-interna.vercel.app/`
+- confirmed remote Supabase still has no units, so real dry-run awaits initial unit/admin bootstrap
 
 ## Exact next step
 
 Close the current checkpoint cleanly, then continue deploy homologation:
 
-1. configure public/browser-safe Supabase env vars in Vercel
-2. wait for/retrigger redeploy from latest `main`
-3. confirm `/env.js` plus `hasEnv=true`
+1. define/approve real remote bootstrap data
+2. create/confirm remote Auth admin user
+3. run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
 4. authenticate in the real unit and run only the migration dry-run
 
 The latest validation already recorded for this session is:
@@ -102,3 +105,4 @@ The latest validation already recorded for this session is:
 1. `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
 2. `git diff --check` OK
 3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
+4. `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`

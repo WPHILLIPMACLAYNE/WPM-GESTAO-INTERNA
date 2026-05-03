@@ -130,3 +130,41 @@ Proxima etapa segura:
 4. Autenticar na unidade real.
 5. Executar apenas `Executar dry-run` em `Configuracoes` -> `Migracao assistida`.
 6. Revisar o preview humano antes de qualquer clique em `Migrar para o backend`.
+
+## Deploy remoto com Supabase habilitado
+
+Ainda em 2026-05-03, a Vercel CLI foi autenticada, o checkout foi linkado ao projeto `wpm-gestao-interna` e as variaveis publicas de producao foram configuradas:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_UNIT_SLUG`
+
+Redeploy de producao:
+
+- Deployment: `dpl_AfbGoSzFa6eSsvst5BByFznNmGgJ`
+- URL de producao gerada: `https://wpm-gestao-interna-nlp7ge3l6-wphillipmaclaynes-projects.vercel.app`
+- Alias atualizado: `https://wpm-gestao-interna.vercel.app`
+- Build: `Scripts/generate-env.mjs` gerou `env.js` com `3/9` chaves preenchidas.
+
+Validacao pos-redeploy:
+
+- `https://wpm-gestao-interna.vercel.app/env.js`: HTTP `200`.
+- Runtime publicado: `hasEnv=true`, `hasSdk=true`, `enabled=true`.
+- Host Supabase: `eautmpqkxibolmcfiacd.supabase.co`.
+- `SUPABASE_UNIT_SLUG`: `wpm-unidade-local`.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy`: 1 teste Playwright passou.
+
+Bloqueio atual antes do dry-run real:
+
+- Consulta administrativa confirmou `0` unidades em `public.units` no Supabase remoto.
+- Login de desenvolvimento local (`dev.admin@wpm.local`) contra o remoto retornou `invalid_credentials`.
+- Portanto, o app publicado ja esta tecnicamente pronto para autenticar, mas o backend remoto ainda precisa do bootstrap inicial de unidade/admin real antes do dry-run funcional.
+
+Proxima etapa segura:
+
+1. Definir dados reais do bootstrap remoto: nome da unidade, slug final, e-mail do admin e nome de exibicao.
+2. Criar/confirmar usuario admin no Supabase Auth remoto.
+3. Executar `public.bootstrap_unit_admin(...)` uma unica vez com `service_role`/SQL administrativo.
+4. Autenticar no app publicado.
+5. Executar somente o dry-run de migracao assistida.
+6. Nao executar migracao antes da revisao humana do preview.

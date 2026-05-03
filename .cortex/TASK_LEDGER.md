@@ -331,6 +331,35 @@ This file records one durable checkpoint per completed task.
   - redeploy and confirm `/env.js` plus `hasEnv=true`
 - Deploy observation:
   - Vercel `/env.js` returned HTTP `200` after the hotfix, but Supabase public env values were still absent
+
+### Task 012
+
+- Date/time: 2026-05-03 10:55:37 -03
+- Branch: `main`
+- HEAD: `b3225a8`
+- Task: configure Vercel production Supabase runtime env, redeploy production, and validate remote runtime readiness
+- Files touched:
+  - `.gitignore`
+  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - Vercel env list shows `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_UNIT_SLUG` on production
+  - production deploy `dpl_AfbGoSzFa6eSsvst5BByFznNmGgJ` completed and aliased to `https://wpm-gestao-interna.vercel.app`
+  - published `/env.js` returned HTTP `200`
+  - published runtime reported `hasEnv=true`, `hasSdk=true`, `enabled=true`
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
+  - remote `public.units` returned `0` rows
+  - remote login with local dev credentials returned `invalid_credentials`
+- Pending:
+  - define/approve real remote bootstrap data
+  - create/confirm the remote Auth admin user
+  - run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
+- Next step:
+  - after remote bootstrap, authenticate in the published app and run only `Executar dry-run`
 - Next step:
   - authenticate in the real unit after redeploy
   - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`

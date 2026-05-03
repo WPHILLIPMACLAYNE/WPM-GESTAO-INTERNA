@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 10:38:42 -03
+Última atualização: 2026-05-03 10:55:37 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,14 +128,17 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 10:38:42 -03
+Data/hora: 2026-05-03 10:55:37 -03
 
 - Branch atual: `main`
 - Último commit conhecido: `d1abdc4`
 - Estado do worktree ao fim desta etapa:
   - hotfix de runtime remoto commitado e enviado para `origin/main`
   - Vercel já responde `/env.js` com HTTP `200`
-  - `/env.js` publicado ainda não contém `SUPABASE_URL`, `SUPABASE_ANON_KEY` nem `SUPABASE_UNIT_SLUG`
+  - Vercel production recebeu `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`
+  - redeploy de produção gerou `env.js` com `3/9` chaves preenchidas
+  - app publicado agora mostra `hasEnv=true`, `hasSdk=true` e `enabled=true`
+  - Supabase remoto ainda tem `0` unidades e o login dev local retorna `invalid_credentials`
   - docs de continuidade atualizados para homologação remota funcional
   - nenhuma migração real executada
 - Contexto recuperado e consolidado:
@@ -148,6 +151,7 @@ Data/hora: 2026-05-03 10:38:42 -03
   - `vercel.json` passa a executar `npm run build:env`
   - README, deploy docs, homologação e `.cortex/` foram alinhados
 - Arquivos tocados nesta etapa:
+  - `.gitignore`
   - `src/core/env-bootstrap.js`
   - `src/reconstruction/env-bootstrap.js`
   - `vercel.json`
@@ -164,11 +168,14 @@ Data/hora: 2026-05-03 10:38:42 -03
   - `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK com `44 passed`
   - `git diff --check` OK
   - `npm run smoke:deploy` OK com `1 passed` contra runtime HTTP local
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK com `1 passed`
+  - consulta administrativa remota: `public.units` com `0` linhas
 - Pendências imediatas:
-  - configurar no Vercel somente variáveis públicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
-  - redeployar e confirmar `/env.js` publicado com `hasEnv=true` sem expor segredo
+  - definir/aprovar dados reais para bootstrap remoto: nome da unidade, slug, e-mail admin e nome de exibição
+  - criar/confirmar admin no Supabase Auth remoto
+  - executar `public.bootstrap_unit_admin(...)` uma única vez via SQL administrativo/service_role
 - Próximo passo exato mais seguro:
-  - após redeploy, confirmar `hasEnv=true`, autenticar na unidade real e executar apenas `Executar dry-run` em `Configurações -> Migração assistida`
+  - após bootstrap remoto, autenticar na unidade real e executar apenas `Executar dry-run` em `Configurações -> Migração assistida`
   - não clicar em `Migrar para o backend` antes de revisão humana do preview
 
 ## Checkpoint histórico anterior

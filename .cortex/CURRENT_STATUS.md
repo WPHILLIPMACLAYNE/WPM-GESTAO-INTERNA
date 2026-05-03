@@ -1,7 +1,7 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 10:38:42 -03
+Last updated: 2026-05-03 10:55:37 -03
 
 ## Live status
 
@@ -30,6 +30,10 @@ Current 2026-05-03 reading:
 - `vercel.json` now runs `npm run build:env` so Vercel can materialize `env.js` from public/browser-safe env vars
 - runtime hotfix commit `d1abdc4` was pushed to `origin/main`
 - after continuity commit `847904a`, Vercel served `/env.js` with HTTP `200`, but the file still contained no Supabase public env values
+- Vercel production env is now configured with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_UNIT_SLUG`
+- production redeploy `dpl_AfbGoSzFa6eSsvst5BByFznNmGgJ` is ready and aliased to `https://wpm-gestao-interna.vercel.app`
+- published runtime now reports `hasEnv=true`, `hasSdk=true`, and Supabase enabled
+- remote Supabase currently has `0` units, so the next blocker is initial remote unit/admin bootstrap
 - focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
@@ -59,16 +63,18 @@ Confirmed live facts:
 
 After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
 
-1. configure only public/browser-safe deploy env vars in Vercel
-2. wait for/retrigger redeploy from the latest `main`
-3. confirm `/env.js` still returns `200` and `hasEnv=true` without logging secrets
-4. authenticate in the real unit and run only the assisted-migration dry-run
+1. define/approve real remote bootstrap data: unit name, unit slug, admin email, display name
+2. create/confirm the remote Supabase Auth admin user
+3. run `public.bootstrap_unit_admin(...)` exactly once via administrative SQL/service_role
+4. authenticate in the published app and run only the assisted-migration dry-run
 
 Latest validation result:
 
 1. `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
 2. `git diff --check` OK
 3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
+4. `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
+5. remote `public.units` check returned `0` units
 
 ## CORTEX operating rule
 
@@ -103,7 +109,7 @@ For present-state decisions, trust these in order:
 - storage, backup, and lifecycle centrality
 - documentation drift across historical docs
 - deploy/rollback validation in a reused browser is still pending outside local tests
-- remote deploy env still must be configured before real-unit dry-run
+- remote unit/admin bootstrap is required before real-unit dry-run
 - `style-src 'unsafe-inline'` still remains because of inline style attributes/templates
 - production CSP/clickjacking headers still need deploy-platform implementation
 - XSS regression tests per entity still need to be added

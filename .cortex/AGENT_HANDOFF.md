@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 11:12:44 -03
+Last updated: 2026-05-03 11:15:38 -03
 
 ## Current handoff
 
@@ -41,7 +41,8 @@ Current state:
 - remote admin is `smartwonkey@gmail.com` with display name `WPM` and role `admin`
 - Supabase Auth recovery now redirects to `https://wpm-gestao-interna.vercel.app`
 - app has authenticated password update UI in the Supabase panel
-- newest password recovery/setup email was requested for `smartwonkey@gmail.com`
+- production deploy `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` includes the password update UI
+- newest password recovery/setup email was requested for `smartwonkey@gmail.com` after that deploy
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task

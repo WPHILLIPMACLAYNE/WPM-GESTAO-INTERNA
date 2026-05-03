@@ -1,7 +1,7 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 11:12:44 -03
+Last updated: 2026-05-03 11:15:38 -03
 
 ## Live status
 
@@ -40,6 +40,8 @@ Current 2026-05-03 reading:
 - Supabase Auth site URL now points to `https://wpm-gestao-interna.vercel.app`
 - recovery links now redirect to the Vercel app instead of localhost
 - authenticated Supabase panel now exposes password update fields and action
+- production deploy `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` published the password update panel
+- recovery email was resent after the password panel deploy
 - focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
@@ -85,6 +87,8 @@ Latest validation result:
 7. remote `public.periods` includes open `2026-05`
 8. recovery link generation validates `redirectHost = wpm-gestao-interna.vercel.app`
 9. focused password/auth tests passed with `43 passed`
+10. published runtime validates `hasUpdatePassword=true`
+11. public smoke after password panel deploy passed with `1 passed`
 
 ## CORTEX operating rule
 

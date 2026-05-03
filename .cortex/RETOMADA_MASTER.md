@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 11:12:44 -03
+Last updated: 2026-05-03 11:15:38 -03
 
 ## Purpose
 
@@ -92,7 +92,8 @@ This phrase is a continuity test marker and should be used only when the new ses
 - completed remote Supabase unit/admin bootstrap for `Smartfit Pampulha` / `mgcpam2`
 - fixed Supabase Auth recovery redirect to Vercel
 - added password update UI for authenticated recovery sessions
-- requested a new password recovery/setup email for admin `smartwonkey@gmail.com`
+- deployed password update UI to production in `dpl_F97AVZAbANPAhFDXH4v6Rna462X4`
+- requested a new password recovery/setup email for admin `smartwonkey@gmail.com` after deploy
 
 ## Exact next step
 

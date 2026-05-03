@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 11:12:44 -03
+Última atualização: 2026-05-03 11:15:38 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,7 +128,7 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 11:12:44 -03
+Data/hora: 2026-05-03 11:15:38 -03
 
 - Branch atual: `main`
 - Último commit conhecido: `d1abdc4`
@@ -143,7 +143,8 @@ Data/hora: 2026-05-03 11:12:44 -03
   - admin remoto `smartwonkey@gmail.com` foi criado/confirmado com nome de exibição `WPM`
   - Auth remoto agora aponta recovery para `https://wpm-gestao-interna.vercel.app`
   - app ganhou painel autenticado para atualizar senha
-  - solicitação de recuperação/definição de senha mais recente foi enviada para o e-mail admin
+  - deploy de produção `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` publicou o painel de senha
+  - solicitação de recuperação/definição de senha mais recente foi reenviada após o deploy do painel
   - docs de continuidade atualizados para homologação remota funcional
   - nenhuma migração real executada
 - Contexto recuperado e consolidado:
@@ -186,6 +187,9 @@ Data/hora: 2026-05-03 11:12:44 -03
   - link de recovery validado com `redirectHost = wpm-gestao-interna.vercel.app`
   - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js` OK
   - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js` OK com `43 passed`
+  - runtime publicado validado com `hasUpdatePassword=true`
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK com `1 passed` após o deploy do painel
+  - recovery reenviado após deploy: HTTP `200`
 - Pendências imediatas:
   - definir a senha do admin pelo e-mail de recuperação mais recente recebido em `smartwonkey@gmail.com`
   - autenticar no app publicado usando o navegador que contém a base local real

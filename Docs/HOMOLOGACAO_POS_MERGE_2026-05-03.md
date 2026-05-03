@@ -224,6 +224,10 @@ Validacao:
 - Link de recovery gerado pela API aponta para `redirectHost = wpm-gestao-interna.vercel.app`.
 - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js`: OK.
 - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js`: 43 testes passaram.
+- Deploy de producao com painel de senha: `dpl_F97AVZAbANPAhFDXH4v6Rna462X4`.
+- Runtime publicado validado: `unitSlug=mgcpam2`, `enabled=true`, `hasEnv=true`, `hasSdk=true`, `hasUpdatePassword=true`.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy`: 1 teste Playwright passou.
+- Recovery reenviado apos o deploy do painel de senha: HTTP `200`.
 
 Proxima etapa segura:
 

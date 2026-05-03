@@ -417,8 +417,11 @@ This file records one durable checkpoint per completed task.
   - recovery email request returned HTTP 200
   - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js` OK
   - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js` OK with `43 passed`
+  - production deploy `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` completed
+  - published runtime reports `hasUpdatePassword=true`
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
+  - recovery email was resent after deploy and returned HTTP `200`
 - Pending:
-  - deploy updated app to production
   - user opens newest recovery email and defines password in the app
   - run only `Executar dry-run`
 - Next step:

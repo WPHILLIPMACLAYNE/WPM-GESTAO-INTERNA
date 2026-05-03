@@ -212,6 +212,37 @@
       openModal('confirmModal');
     }
 
+    /** @param {HTMLElement} root @returns {void} */
+    function resetSettingsHorizontalScroll(root) {
+      root.scrollLeft = 0;
+      root.querySelectorAll('.settings-shell, .settings-main-column, .settings-side-column, .settings-panel-nav').forEach(element => {
+        element.scrollLeft = 0;
+      });
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+      const currentTop = window.scrollY || document.documentElement.scrollTop || 0;
+      window.scrollTo({ top: currentTop, left: 0, behavior: 'auto' });
+    }
+
+    /** @param {string} [panel] @returns {void} */
+    function setSettingsPanel(panel = 'all') {
+      const root = document.getElementById('settings');
+      if (!root) return;
+      const validPanels = new Set(['all', 'team', 'data', 'backend', 'diagnostics', 'audit']);
+      const nextPanel = validPanels.has(panel) ? panel : 'all';
+      root.dataset.settingsPanel = nextPanel;
+      root.querySelectorAll('[data-settings-panel].settings-card').forEach(card => {
+        const visible = nextPanel === 'all' || card.dataset.settingsPanel === nextPanel;
+        card.hidden = !visible;
+      });
+      root.querySelectorAll('.settings-panel-tab').forEach(button => {
+        const active = button.dataset.settingsPanel === nextPanel;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      resetSettingsHorizontalScroll(root);
+    }
+
     /** @param {boolean} accepted @returns {void} */
     function _resolveConfirm(accepted) {
       closeModal('confirmModal');
@@ -232,6 +263,9 @@
             case 'close-current-month':
               closeCurrentMonth();
               return true;
+            case 'reopen-selected-month':
+              reopenSelectedMonth();
+              return true;
             case 'download-data':
               downloadData();
               return true;
@@ -240,6 +274,9 @@
               return true;
             case 'save-settings':
               saveSettings();
+              return true;
+            case 'set-settings-panel':
+              setSettingsPanel(actionEl.dataset.settingsPanel);
               return true;
             case 'reset-demo-data':
               resetDemoData();

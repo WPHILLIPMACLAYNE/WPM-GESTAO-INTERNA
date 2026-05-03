@@ -1,0 +1,671 @@
+openapi: 3.0.3
+info:
+  title: WPM Gestao Interna - Supabase RPCs
+  version: 1.0.0
+  description: |
+    Contrato OpenAPI reverso para as RPCs PostgREST expostas pelo Supabase.
+    As rotas seguem o padrao /rest/v1/rpc/{function_name}; a autorizacao final
+    ocorre dentro das funcoes SQL por RLS, require_unit_role e contexto service_role.
+servers:
+  - url: "{supabaseUrl}"
+    description: Projeto Supabase configurado em runtime.
+    variables:
+      supabaseUrl:
+        default: https://example.supabase.co
+security:
+  - bearerAuth: []
+    apiKeyAuth: []
+tags:
+  - name: Sync
+    description: Checkpoint e importacao guardada do store local-first.
+  - name: Periodos
+    description: Fechamento, reset e importacao de periodos mensais.
+  - name: Atendimentos
+    description: Vinculo transacional entre atendimento e venda de addon.
+  - name: Bootstrap
+    description: Provisionamento administrativo inicial.
+paths:
+  /rest/v1/rpc/get_unit_sync_checkpoint:
+    post:
+      tags:
+        - Sync
+      summary: Calcula checkpoint remoto da unidade.
+      description: |
+        Requer usuario autenticado com membership ativo na unidade em qualquer role
+        operacional: admin, gestor, recepcao, professor ou leitura.
+      operationId: getUnitSyncCheckpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_unit_id
+              properties:
+                p_unit_id:
+                  $ref: "#/components/schemas/Uuid"
+            examples:
+              default:
+                value:
+                  p_unit_id: "00000000-0000-0000-0000-000000000001"
+      responses:
+        "200":
+          description: Checkpoint calculado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Checkpoint"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/import_backup_transaction_guarded:
+    post:
+      tags:
+        - Sync
+        - Periodos
+      summary: Importa backup somente se o checkpoint remoto esperado bater.
+      description: |
+        Caminho principal de escrita remota do app local-first. A funcao exige
+        admin ou gestor, serializa por unidade com advisory lock e levanta
+        WPM_SYNC_CONFLICT quando o backend possui dados sem baseline local ou
+        quando o checkpoint esperado diverge.
+      operationId: importBackupTransactionGuarded
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_unit_id
+                - p_payload
+              properties:
+                p_unit_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_payload:
+                  $ref: "#/components/schemas/BackupPayload"
+                p_expected_checkpoint:
+                  nullable: true
+                  allOf:
+                    - $ref: "#/components/schemas/Checkpoint"
+                p_preview_accepted:
+                  type: boolean
+                  default: false
+                  description: Deve ser true quando o cliente ja exibiu e confirmou preview granular antes de importacao destrutiva.
+            examples:
+              appBackup:
+                value:
+                  p_unit_id: "00000000-0000-0000-0000-000000000001"
+                  p_payload:
+                    meta:
+                      kind: app-backup
+                      exportedAt: "2026-05-02T18:29:51Z"
+                    periods:
+                      "2026-05":
+                        settings:
+                          monthDays: 31
+                        students: []
+                        pending: []
+                        recados: []
+                        nps:
+                          score: 0
+                          monthlyGoal: 75
+                          semesterGoal: 80
+                          mentions: []
+                        scale: []
+                        events: []
+                        addons: {}
+                    archives: {}
+                  p_expected_checkpoint:
+                    revision: ""
+                    maxUpdatedAt: ""
+                    periodCount: 0
+                    auditCount: 0
+                  p_preview_accepted: true
+      responses:
+        "200":
+          description: Importacao concluida e checkpoints retornados.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportGuardedResult"
+        "400":
+          description: Payload invalido ou conflito de sincronizacao.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostgrestError"
+              examples:
+                conflict:
+                  value:
+                    code: P0001
+                    message: "WPM_SYNC_CONFLICT: checkpoint remoto divergente; recarregue do backend antes de sincronizar."
+                    details: null
+                    hint: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/import_backup_transaction:
+    post:
+      tags:
+        - Periodos
+      summary: Importa arquivo de mes ou backup completo sem checkpoint guardado.
+      description: |
+        RPC transacional interna/publica para admin e gestor. Aceita meta.kind
+        month-archive, app-backup ou full-backup. Em backup completo, periodos
+        remotos ausentes do payload sao removidos.
+      operationId: importBackupTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_unit_id
+                - p_payload
+              properties:
+                p_unit_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_payload:
+                  $ref: "#/components/schemas/BackupPayload"
+      responses:
+        "200":
+          description: Resultado da importacao.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+        "400":
+          $ref: "#/components/responses/PostgrestError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/close_period_transaction:
+    post:
+      tags:
+        - Periodos
+      summary: Fecha periodo mensal e prepara o proximo periodo.
+      description: |
+        Requer admin ou gestor. Recusa periodo inexistente ou ja fechado.
+        Registra auditoria close-month e cria ou reseta o proximo periodo aberto
+        com template limpo do periodo fechado.
+      operationId: closePeriodTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_period_id
+              properties:
+                p_period_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_archive_payload:
+                  type: object
+                  additionalProperties: true
+                  default: {}
+                p_next_period_key:
+                  type: string
+                  nullable: true
+                  pattern: "^\\d{4}-\\d{2}$"
+                p_next_period_label:
+                  type: string
+                  nullable: true
+                p_reset_next_period:
+                  type: boolean
+                  default: true
+            examples:
+              closeMonth:
+                value:
+                  p_period_id: "00000000-0000-0000-0000-000000000010"
+                  p_archive_payload:
+                    exportedAt: "2026-05-02T18:29:51Z"
+                  p_next_period_key: "2026-06"
+                  p_next_period_label: "Junho/2026"
+                  p_reset_next_period: true
+      responses:
+        "200":
+          description: Periodo fechado e proximo periodo preparado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClosePeriodResult"
+        "400":
+          $ref: "#/components/responses/PostgrestError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/reset_period_transaction:
+    post:
+      tags:
+        - Periodos
+      summary: Reseta dados operacionais de um periodo aberto.
+      description: |
+        Requer admin ou gestor. Recusa periodo fechado. Limpa dados operacionais
+        e recria metricas NPS preservando metas existentes quando disponiveis.
+      operationId: resetPeriodTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_period_id
+              properties:
+                p_period_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_backup_payload:
+                  type: object
+                  additionalProperties: true
+                  default: {}
+      responses:
+        "200":
+          description: Periodo resetado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPeriodResult"
+        "400":
+          $ref: "#/components/responses/PostgrestError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/link_student_attendance_addon_transaction:
+    post:
+      tags:
+        - Atendimentos
+      summary: Sincroniza venda derivada de addon para um atendimento.
+      description: |
+        Requer admin, gestor ou recepcao. Se o atendimento possui addon, cria ou
+        atualiza uma venda source=student_attendance. Se nao possui addon, remove
+        venda derivada anterior.
+      operationId: linkStudentAttendanceAddonTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_student_attendance_id
+              properties:
+                p_student_attendance_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_sale_date:
+                  type: string
+                  format: date
+                  nullable: true
+                p_quantity:
+                  type: integer
+                  minimum: 0
+                  default: 1
+            examples:
+              linkAddon:
+                value:
+                  p_student_attendance_id: "00000000-0000-0000-0000-000000000020"
+                  p_sale_date: "2026-05-02"
+                  p_quantity: 1
+      responses:
+        "200":
+          description: Venda derivada criada, atualizada ou removida.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkAddonResult"
+        "400":
+          $ref: "#/components/responses/PostgrestError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /rest/v1/rpc/bootstrap_unit_admin:
+    post:
+      tags:
+        - Bootstrap
+      summary: Provisiona unidade, admin e periodo inicial.
+      description: |
+        RPC restrita a service_role ou SQL administrativo. Recusa bootstrap se a
+        unidade ja possui outro admin ativo. Nao deve ser chamada pelo cliente
+        browser com anon key.
+      operationId: bootstrapUnitAdmin
+      security:
+        - serviceRoleAuth: []
+          apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - p_user_id
+                - p_unit_name
+                - p_unit_slug
+                - p_display_name
+              properties:
+                p_user_id:
+                  $ref: "#/components/schemas/Uuid"
+                p_unit_name:
+                  type: string
+                  minLength: 1
+                p_unit_slug:
+                  type: string
+                  minLength: 1
+                p_display_name:
+                  type: string
+                  minLength: 1
+                p_period_key:
+                  type: string
+                  pattern: "^\\d{4}-\\d{2}$"
+                  default: "2026-05"
+                p_timezone:
+                  type: string
+                  default: America/Sao_Paulo
+                p_month_days:
+                  type: integer
+                  nullable: true
+                  minimum: 28
+                  maximum: 31
+            examples:
+              initialAdmin:
+                value:
+                  p_user_id: "00000000-0000-0000-0000-000000000030"
+                  p_unit_name: "WPM Unidade Local"
+                  p_unit_slug: "wpm-unidade-local"
+                  p_display_name: "Admin Local"
+                  p_period_key: "2026-05"
+                  p_timezone: "America/Sao_Paulo"
+                  p_month_days: 31
+      responses:
+        "200":
+          description: Bootstrap concluido.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BootstrapResult"
+        "400":
+          $ref: "#/components/responses/PostgrestError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT de sessao Supabase Auth.
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Chave anon ou service_role conforme contexto.
+    serviceRoleAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token service_role para bootstrap administrativo.
+  responses:
+    Unauthorized:
+      description: Sessao ausente ou token invalido.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PostgrestError"
+    Forbidden:
+      description: Role insuficiente para a unidade ou funcao.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PostgrestError"
+    PostgrestError:
+      description: Erro retornado por PostgREST ou excecao PL/pgSQL.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PostgrestError"
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+    Checkpoint:
+      type: object
+      required:
+        - revision
+        - maxUpdatedAt
+        - periodCount
+        - auditCount
+      properties:
+        revision:
+          type: string
+          description: Revisao composta por maxUpdatedAt, periodCount, rowCount e auditCount.
+        maxUpdatedAt:
+          type: string
+          description: Maior timestamp remoto observado ou string vazia.
+        periodCount:
+          type: integer
+          minimum: 0
+        auditCount:
+          type: integer
+          minimum: 0
+    BackupPayload:
+      type: object
+      required:
+        - meta
+      properties:
+        meta:
+          type: object
+          required:
+            - kind
+          properties:
+            kind:
+              type: string
+              enum:
+                - month-archive
+                - app-backup
+                - full-backup
+            exportedAt:
+              type: string
+              format: date-time
+        periodKey:
+          type: string
+          pattern: "^\\d{4}-\\d{2}$"
+          description: Obrigatorio quando meta.kind=month-archive.
+        periodLabel:
+          type: string
+        data:
+          $ref: "#/components/schemas/PeriodData"
+        periods:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/PeriodData"
+          description: Obrigatorio para app-backup e full-backup.
+        archives:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+    PeriodData:
+      type: object
+      properties:
+        settings:
+          type: object
+          additionalProperties: true
+          properties:
+            monthDays:
+              type: integer
+              minimum: 28
+              maximum: 31
+            team:
+              type: array
+              items:
+                type: string
+            receptionists:
+              type: array
+              items:
+                type: string
+            professors:
+              type: array
+              items:
+                type: string
+            addonTypes:
+              type: array
+              items:
+                type: string
+        students:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        pending:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        recados:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        nps:
+          type: object
+          additionalProperties: true
+        scale:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        addons:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                type: integer
+                minimum: 0
+    ImportResult:
+      type: object
+      required:
+        - kind
+        - processedPeriods
+        - deletedPeriods
+      properties:
+        kind:
+          type: string
+        processedPeriods:
+          type: integer
+          minimum: 0
+        deletedPeriods:
+          type: integer
+          minimum: 0
+    ImportGuardedResult:
+      allOf:
+        - $ref: "#/components/schemas/ImportResult"
+        - type: object
+          required:
+            - previousCheckpoint
+            - nextCheckpoint
+          properties:
+            previousCheckpoint:
+              $ref: "#/components/schemas/Checkpoint"
+            nextCheckpoint:
+              $ref: "#/components/schemas/Checkpoint"
+    ClosePeriodResult:
+      type: object
+      required:
+        - closedPeriodId
+        - closedPeriodKey
+        - nextPeriodId
+        - nextPeriodKey
+        - nextPeriodReset
+      properties:
+        closedPeriodId:
+          $ref: "#/components/schemas/Uuid"
+        closedPeriodKey:
+          type: string
+          pattern: "^\\d{4}-\\d{2}$"
+        nextPeriodId:
+          $ref: "#/components/schemas/Uuid"
+        nextPeriodKey:
+          type: string
+          pattern: "^\\d{4}-\\d{2}$"
+        nextPeriodReset:
+          type: boolean
+    ResetPeriodResult:
+      type: object
+      required:
+        - periodId
+        - periodKey
+        - status
+      properties:
+        periodId:
+          $ref: "#/components/schemas/Uuid"
+        periodKey:
+          type: string
+          pattern: "^\\d{4}-\\d{2}$"
+        status:
+          type: string
+          enum:
+            - reset
+    LinkAddonResult:
+      type: object
+      required:
+        - studentAttendanceId
+        - saleAction
+      properties:
+        studentAttendanceId:
+          $ref: "#/components/schemas/Uuid"
+        saleId:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/Uuid"
+        saleAction:
+          type: string
+          enum:
+            - upserted
+            - deleted
+    BootstrapResult:
+      type: object
+      required:
+        - boot_unit_id
+        - boot_unit_member_id
+        - boot_period_id
+      properties:
+        boot_unit_id:
+          $ref: "#/components/schemas/Uuid"
+        boot_unit_member_id:
+          $ref: "#/components/schemas/Uuid"
+        boot_period_id:
+          $ref: "#/components/schemas/Uuid"
+    PostgrestError:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+        details:
+          type: string
+          nullable: true
+        hint:
+          type: string
+          nullable: true

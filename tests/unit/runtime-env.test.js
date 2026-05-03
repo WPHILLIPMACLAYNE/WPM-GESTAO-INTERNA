@@ -234,6 +234,35 @@ describe('Backend (Supabase) — fallback offline', () => {
     expect(app.window.queueSupabaseStoreSync).not.toHaveBeenCalled();
   });
 
+  it('adapter real expõe contrato RPC compartilhado para chamadas Supabase criticas', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend } = app.window.__APP_INTERNALS__;
+
+    expect(backend.getSupabaseRpcOperation('importBackupTransactionGuarded')).toMatchObject({
+      operationId: 'importBackupTransactionGuarded',
+      functionName: 'import_backup_transaction_guarded',
+      required: ['p_unit_id', 'p_payload']
+    });
+    expect(backend.getSupabaseRpcOperation('get_unit_sync_checkpoint')).toMatchObject({
+      operationId: 'getUnitSyncCheckpoint',
+      functionName: 'get_unit_sync_checkpoint'
+    });
+    expect(backend.validateSupabaseRpcParams('importBackupTransactionGuarded', {
+      p_unit_id: 'unit-1',
+      p_payload: { meta: { kind: 'app-backup' }, periods: {}, archives: {} },
+      p_preview_accepted: true
+    })).toMatchObject({ ok: true });
+    expect(backend.validateSupabaseRpcParams('importBackupTransactionGuarded', {
+      p_unit_id: 'unit-1',
+      p_payload: { meta: { kind: 'app-backup' }, periods: {}, archives: {} },
+      p_preview_accepted: 'sim'
+    })).toMatchObject({
+      ok: false,
+      failures: [expect.objectContaining({ path: 'p_preview_accepted' })]
+    });
+  });
+
   it('saveStoreToSupabase usa RPC guardada por checkpoint quando o backend ainda esta vazio', async () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;
@@ -276,7 +305,16 @@ describe('Backend (Supabase) — fallback offline', () => {
     expect(guardedCall).toBeTruthy();
     expect(guardedCall[1]).toEqual(expect.objectContaining({
       p_unit_id: 'unit-1',
-      p_expected_checkpoint: emptyCheckpoint
+      p_expected_checkpoint: emptyCheckpoint,
+      p_preview_accepted: true
+    }));
+    expect(guardedCall[1].p_payload.meta).toEqual(expect.objectContaining({
+      kind: 'app-backup',
+      sourceAppId: 'wpm-gestao-interna',
+      integrity: expect.objectContaining({
+        algorithm: 'canonical-fnv1a32-v1',
+        hash: expect.stringMatching(/^[0-9a-f]{8}$/)
+      })
     }));
     expect(backend.getSupabaseBackendState().lastRemoteCheckpoint).toEqual(syncedCheckpoint);
   });

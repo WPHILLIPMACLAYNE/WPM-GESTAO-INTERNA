@@ -34,6 +34,21 @@
       professor: 4,
       leitura: 5
     };
+    const SUPABASE_RPC_OPERATIONS = Object.freeze({
+      getUnitSyncCheckpoint: Object.freeze({
+        operationId: 'getUnitSyncCheckpoint',
+        functionName: 'get_unit_sync_checkpoint',
+        required: Object.freeze(['p_unit_id']),
+        optional: Object.freeze([])
+      }),
+      importBackupTransactionGuarded: Object.freeze({
+        operationId: 'importBackupTransactionGuarded',
+        functionName: 'import_backup_transaction_guarded',
+        required: Object.freeze(['p_unit_id', 'p_payload']),
+        optional: Object.freeze(['p_expected_checkpoint', 'p_preview_accepted'])
+      })
+    });
+    const SUPABASE_RPC_OPERATION_LIST = Object.freeze(Object.values(SUPABASE_RPC_OPERATIONS));
 
     const supabaseBackendState = {
       enabled: false,
@@ -136,13 +151,92 @@
     }
 
     /**
+     * @param {unknown} value
+     * @returns {boolean}
+     */
+    function isSupabasePlainObject(value) {
+      return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+    }
+
+    /**
+     * @param {string} identifier
+     * @returns {Object|null}
+     */
+    function getSupabaseRpcOperation(identifier) {
+      const key = String(identifier || '');
+      return SUPABASE_RPC_OPERATIONS[key]
+        || SUPABASE_RPC_OPERATION_LIST.find(operation => operation.functionName === key)
+        || null;
+    }
+
+    /**
+     * @param {Array<Object>} failures
+     * @param {string} path
+     * @param {string} message
+     * @returns {void}
+     */
+    function addSupabaseRpcFailure(failures, path, message) {
+      failures.push({ path, message });
+    }
+
+    /**
+     * @param {string} identifier
+     * @param {Object} [params]
+     * @returns {{ok: boolean, failures: Array<{path: string, message: string}>}}
+     */
+    function validateSupabaseRpcParams(identifier, params = {}) {
+      const operation = getSupabaseRpcOperation(identifier);
+      if (!operation) {
+        return { ok: false, failures: [{ path: 'operationId', message: 'unknown operation' }] };
+      }
+      const failures = [];
+      if (!isSupabasePlainObject(params)) {
+        return { ok: false, failures: [{ path: 'params', message: 'must be an object' }] };
+      }
+      operation.required.forEach(key => {
+        if (params[key] === undefined || params[key] === null) {
+          addSupabaseRpcFailure(failures, key, 'is required');
+        }
+      });
+      if (params.p_payload !== undefined && !isSupabasePlainObject(params.p_payload)) {
+        addSupabaseRpcFailure(failures, 'p_payload', 'must be an object');
+      }
+      if (params.p_expected_checkpoint !== undefined
+        && params.p_expected_checkpoint !== null
+        && !isSupabasePlainObject(params.p_expected_checkpoint)) {
+        addSupabaseRpcFailure(failures, 'p_expected_checkpoint', 'must be an object');
+      }
+      if (params.p_preview_accepted !== undefined && typeof params.p_preview_accepted !== 'boolean') {
+        addSupabaseRpcFailure(failures, 'p_preview_accepted', 'must be a boolean');
+      }
+      return { ok: failures.length === 0, failures };
+    }
+
+    /**
+     * @param {any} client
+     * @param {string} operationId
+     * @param {Object} params
+     * @returns {Promise<{data: any, error: any}>}
+     */
+    async function callSupabaseRpc(client, operationId, params = {}) {
+      if (!client?.rpc) throw new Error('Supabase RPC client indisponível.');
+      const operation = getSupabaseRpcOperation(operationId);
+      if (!operation) throw new Error(`Operação RPC Supabase desconhecida: ${operationId}`);
+      const validation = validateSupabaseRpcParams(operation.operationId, params);
+      if (!validation.ok) {
+        throw new Error(`Parâmetros inválidos para ${operation.operationId}: ${validation.failures.map(item => item.path).join(', ')}`);
+      }
+      return client.rpc(operation.functionName, params);
+    }
+
+    /**
      * @param {any} client
      * @param {string} unitId
      * @returns {Promise<Object|null>}
      */
     async function readSupabaseSyncCheckpoint(client, unitId) {
       if (!client?.rpc || !unitId) return null;
-      const { data, error } = await client.rpc('get_unit_sync_checkpoint', {
+      const { data, error } = await callSupabaseRpc(client, 'getUnitSyncCheckpoint', {
         p_unit_id: unitId
       });
       if (error) throw error;
@@ -439,11 +533,12 @@
      */
     function buildSupabaseBackupPayload(storeLike) {
       const prepared = prepareStoreCandidate(cloneSerializable(storeLike)) || getDefaultStore();
-      return {
+      const payload = {
         meta: {
           kind: 'app-backup',
           appVersion: APP_VERSION,
           exportedAt: new Date().toISOString(),
+          sourceAppId: 'wpm-gestao-interna',
           source: 'supabase-sync'
         },
         version: prepared.version || STORE_VERSION,
@@ -452,6 +547,7 @@
         periods: cloneSerializable(prepared.periods),
         archives: cloneSerializable(prepared.archives)
       };
+      return typeof attachPayloadIntegrity === 'function' ? attachPayloadIntegrity(payload) : payload;
     }
 
     /**
@@ -905,10 +1001,11 @@
         const expectedCheckpoint = __supabaseLastRemoteCheckpoint
           ? cloneSerializable(__supabaseLastRemoteCheckpoint)
           : normalizeSupabaseCheckpoint(currentCheckpoint);
-        const { data, error } = await client.rpc('import_backup_transaction_guarded', {
+        const { data, error } = await callSupabaseRpc(client, 'importBackupTransactionGuarded', {
           p_unit_id: backendState.activeUnit.unitId,
           p_payload: payload,
-          p_expected_checkpoint: expectedCheckpoint
+          p_expected_checkpoint: expectedCheckpoint,
+          p_preview_accepted: true
         });
         if (error) throw error;
         const nextCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);

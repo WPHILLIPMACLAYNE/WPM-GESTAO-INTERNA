@@ -1,0 +1,192 @@
+{
+  "generated_at": "2026-05-02T17:05:27Z",
+  "project_root": "/mnt/storage/WPMGESTAOVSCODEX/WPM-GESTAO-INTERNA",
+  "languages": [
+    {
+      "name": "JavaScript",
+      "extensions": [".js", ".mjs"],
+      "file_count": 67
+    },
+    {
+      "name": "Markdown",
+      "extensions": [".md"],
+      "file_count": 70
+    },
+    {
+      "name": "SQL",
+      "extensions": [".sql"],
+      "file_count": 6
+    },
+    {
+      "name": "HTML",
+      "extensions": [".html"],
+      "file_count": 3
+    },
+    {
+      "name": "CSS",
+      "extensions": [".css"],
+      "file_count": 1
+    },
+    {
+      "name": "JSON",
+      "extensions": [".json"],
+      "file_count": 7
+    },
+    {
+      "name": "TOML",
+      "extensions": [".toml"],
+      "file_count": 1
+    },
+    {
+      "name": "YAML",
+      "extensions": [".yml", ".yaml"],
+      "file_count": 2
+    }
+  ],
+  "primary_language": "JavaScript",
+  "frameworks": [
+    {
+      "name": "Vanilla JavaScript SPA",
+      "version": "ES2022",
+      "source": "README.md/index.html"
+    },
+    {
+      "name": "PWA Service Worker",
+      "version": "custom",
+      "source": "sw.js/manifest.json/src/core/pwa.js"
+    },
+    {
+      "name": "Supabase",
+      "version": "2.104.0",
+      "source": "index.html/supabase/config.toml"
+    },
+    {
+      "name": "Chart.js",
+      "version": "4.4.7",
+      "source": "index.html"
+    },
+    {
+      "name": "DOMPurify",
+      "version": "3.2.6",
+      "source": "index.html"
+    },
+    {
+      "name": "Vitest",
+      "version": "3.2.4",
+      "source": "package-lock.json"
+    },
+    {
+      "name": "Playwright",
+      "version": "1.59.1",
+      "source": "package-lock.json"
+    }
+  ],
+  "package_manager": "npm",
+  "entry_points": [
+    {
+      "path": "index.html",
+      "type": "app_shell"
+    },
+    {
+      "path": "src/core/env-bootstrap.js",
+      "type": "runtime_env_bootstrap"
+    },
+    {
+      "path": "src/main.js",
+      "type": "app_bootstrap"
+    },
+    {
+      "path": "src/core/pwa.js",
+      "type": "pwa_registration"
+    },
+    {
+      "path": "sw.js",
+      "type": "service_worker"
+    },
+    {
+      "path": "supabase/config.toml",
+      "type": "backend_local_config"
+    }
+  ],
+  "config_files": [
+    "package.json",
+    "package-lock.json",
+    "jsconfig.json",
+    "vitest.config.js",
+    "playwright.config.js",
+    "vercel.json",
+    "manifest.json",
+    "env.example.js",
+    "supabase/config.toml"
+  ],
+  "ci_cd": [
+    ".github/workflows/ci.yml",
+    "vercel.json"
+  ],
+  "docker": {},
+  "database_hints": [
+    {
+      "path": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+      "type": "migration"
+    },
+    {
+      "path": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+      "type": "migration"
+    },
+    {
+      "path": "supabase/migrations/20260422203000_bootstrap_initial_admin.sql",
+      "type": "migration"
+    },
+    {
+      "path": "supabase/migrations/20260422224500_fix_addon_sales_unique_index.sql",
+      "type": "migration"
+    },
+    {
+      "path": "supabase/migrations/20260423090000_sync_checkpoint_guard.sql",
+      "type": "migration"
+    },
+    {
+      "path": "supabase/seed.sql",
+      "type": "seed"
+    },
+    {
+      "path": "src/core/storage.js",
+      "type": "browser_persistence"
+    },
+    {
+      "path": "src/core/schema.js",
+      "type": "store_schema"
+    },
+    {
+      "path": "src/core/backup.js",
+      "type": "backup_import_export"
+    }
+  ],
+  "test_framework": "Vitest + Playwright",
+  "test_file_count": 18,
+  "modules": [
+    "core",
+    "domain",
+    "features",
+    "ui",
+    "utils",
+    "supabase",
+    "legacy",
+    "tests"
+  ],
+  "total_files": 346,
+  "runtime_characteristics": [
+    "browser-only SPA",
+    "classic script load order",
+    "IndexedDB primary persistence",
+    "localStorage mirror and fallback",
+    "optional Supabase remote sync",
+    "PWA service worker",
+    "CSP without unsafe-inline"
+  ],
+  "generated_files": [
+    "_reversa_sdd/inventory.md",
+    "_reversa_sdd/dependencies.md",
+    ".reversa/context/surface.json"
+  ]
+}

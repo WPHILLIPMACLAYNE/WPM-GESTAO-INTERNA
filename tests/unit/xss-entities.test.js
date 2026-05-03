@@ -173,4 +173,22 @@ describe('XSS por entidade', () => {
     expectEscapedMarkup(addonsGrid, 'settings', 'XSS-SETTINGS');
     expectEscapedMarkup(addonsGrid, 'settings-addon', 'XSS-SETTINGS-ADDON');
   });
+
+  it('sanitiza centralmente linhas de tabela mesmo se um renderizador esquecer esc()', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { rendering } = app.window.__APP_INTERNALS__;
+    const tbody = app.window.document.createElement('tbody');
+    app.window.document.body.appendChild(tbody);
+
+    rendering.aplicarPatchLinhas(
+      tbody,
+      [{ id: 'row-1', name: '<img src=x data-xss="central-row">XSS-CENTRAL' }],
+      item => item.id,
+      item => `<tr><td>${item.name}</td></tr>`
+    );
+
+    expect(tbody.querySelector('[data-xss="central-row"]')).toBeNull();
+    expect(tbody.textContent).toContain('XSS-CENTRAL');
+  });
 });

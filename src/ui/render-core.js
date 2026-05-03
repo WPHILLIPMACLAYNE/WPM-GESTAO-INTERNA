@@ -207,16 +207,30 @@
       return String(hash >>> 0);
     }
 
+    /** @param {string} html @returns {string} */
+    function sanitizeTableRowsHtml(html) {
+      const raw = String(html || '').trim();
+      if (!raw) return '';
+      const template = document.createElement('template');
+      const sanitized = sanitizeHtml(`<table><tbody>${raw}</tbody></table>`)
+        .replace(/<\/?(?:img|svg|circle|path|g)\b[^>]*>/gi, '');
+      template.innerHTML = sanitized;
+      const tbody = template.content.querySelector('tbody');
+      return tbody ? tbody.innerHTML : sanitizeHtml(raw);
+    }
+
     /** @param {string} html @param {string} chave @param {string} assinatura @returns {Element} */
     function criarNoRenderizado(html, chave, assinatura) {
       const template = document.createElement('template');
-      const markup = sanitizeHtml(html.trim());
-      if (/^<tr[\s>]/i.test(markup)) {
+      const raw = String(html || '').trim();
+      const isTableRow = /^<tr[\s>]/i.test(raw);
+      const markup = isTableRow ? sanitizeTableRowsHtml(raw) : sanitizeHtml(raw);
+      if (isTableRow) {
         template.innerHTML = `<table><tbody>${markup}</tbody></table>`;
       } else {
         template.innerHTML = markup;
       }
-      const no = /^<tr[\s>]/i.test(markup)
+      const no = isTableRow
         ? template.content.querySelector('tr')
         : template.content.firstElementChild;
       if (!no) throw new Error('Renderização sem nó raiz.');
@@ -275,7 +289,7 @@
       if (!el) return;
       const assinatura = criarAssinaturaHtml(html);
       if (el.dataset.assinaturaRender === assinatura) return;
-      el.innerHTML = sanitizeHtml(html);
+      el.innerHTML = el.tagName === 'TBODY' ? sanitizeTableRowsHtml(html) : sanitizeHtml(html);
       applyRuntimeStyleData(el);
       el.dataset.assinaturaRender = assinatura;
     }
@@ -316,11 +330,9 @@
     function aplicarPatchLinhas(container, itens, obterChave, renderizarLinha) {
       if (!container) return;
       const foco = capturarEstadoFoco(container);
-      const html = itens.map(item => renderizarLinha(item)).join('');
+      const html = sanitizeTableRowsHtml(itens.map(item => renderizarLinha(item)).join(''));
       const assinatura = criarAssinaturaHtml(html);
       if (container.dataset.assinaturaRender !== assinatura) {
-        // Linhas de tabela já chegam com conteúdo escapado por esc() e markup
-        // controlado pelo próprio app; usar innerHTML cru aqui preserva <tr>/<td>.
         container.innerHTML = html;
         applyRuntimeStyleData(container);
         container.dataset.assinaturaRender = assinatura;

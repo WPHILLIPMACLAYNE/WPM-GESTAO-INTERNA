@@ -260,4 +260,55 @@ describe('Seletores reais do app modularizado', () => {
     );
     expect(ranking.ranking.every(item => item.tendencia.classe === 'trend-stable')).toBe(true);
   });
+
+  it('reabre mês fechado com autorização, motivo e auditoria persistida', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+
+    await app.setStore({
+      version: app.window.__APP_INTERNALS__.config.STORE_VERSION,
+      activePeriod: '2026-05',
+      preferences: { initializeMonthsWithTestData: false },
+      periods: {
+        '2026-05': app.window.generatePeriodSeed('2026-05')
+      },
+      archives: {
+        '2026-05': {
+          closedAt: '2026-06-01T12:00:00.000Z',
+          closedAtLabel: '01/06/2026, 09:00:00',
+          label: 'Maio/2026'
+        }
+      }
+    });
+
+    app.window.__APP_INTERNALS__.rendering.renderHero();
+    expect(app.window.document.getElementById('closeMonthBtn').disabled).toBe(true);
+    expect(app.window.document.getElementById('reopenMonthBtn').disabled).toBe(false);
+
+    const result = await app.window.__APP_INTERNALS__.actions.reopenPeriod('2026-05', {
+      authorized: true,
+      reason: 'Fechado por engano',
+      reopenedBy: 'gestor',
+      reopenedAt: '2026-06-02T10:00:00.000Z'
+    });
+
+    const nextStore = app.window.__APP_INTERNALS__.persistence
+      .readStoredJson(app.window.__APP_INTERNALS__.config.STORAGE_KEY);
+
+    expect(result).toMatchObject({ ok: true, periodKey: '2026-05' });
+    expect(nextStore.archives['2026-05']).toBeUndefined();
+    expect(app.window.document.getElementById('closeMonthBtn').disabled).toBe(false);
+    expect(app.window.document.getElementById('reopenMonthBtn').disabled).toBe(true);
+    expect(nextStore.reopenAudit).toHaveLength(1);
+    expect(nextStore.reopenAudit[0]).toMatchObject({
+      periodKey: '2026-05',
+      reason: 'Fechado por engano',
+      reopenedBy: 'gestor',
+      reopenedAt: '2026-06-02T10:00:00.000Z',
+      previousArchive: {
+        closedAt: '2026-06-01T12:00:00.000Z',
+        label: 'Maio/2026'
+      }
+    });
+  });
 });

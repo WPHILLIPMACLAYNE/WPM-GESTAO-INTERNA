@@ -2,6 +2,92 @@
     // BACKUP & PERSISTÊNCIA DE ALTO NÍVEL
     // ══════════════════════════════════════════
 
+    const BACKUP_SOURCE_APP_ID = 'wpm-gestao-interna';
+    const BACKUP_INTEGRITY_ALGORITHM = 'canonical-fnv1a32-v1';
+
+    /** @param {unknown} value @returns {boolean} */
+    function isPlainObject(value) {
+      return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+    }
+
+    /** @param {unknown} value @returns {unknown} */
+    function canonicalize(value) {
+      if (Array.isArray(value)) return value.map(canonicalize);
+      if (isPlainObject(value)) {
+        return Object.fromEntries(
+          Object.keys(value)
+            .sort()
+            .map(key => [key, canonicalize(value[key])])
+        );
+      }
+      return value;
+    }
+
+    /** @param {unknown} value @returns {string} */
+    function canonicalJson(value) {
+      return JSON.stringify(canonicalize(value));
+    }
+
+    /** @param {string} text @returns {string} */
+    function fnv1a32(text) {
+      let hash = 0x811c9dc5;
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 0x01000193);
+      }
+      return (hash >>> 0).toString(16).padStart(8, '0');
+    }
+
+    /** @param {Object} payload @returns {Object} */
+    function stripIntegrityEnvelope(payload) {
+      const cloned = cloneSerializable(payload);
+      if (isPlainObject(cloned?.meta)) delete cloned.meta.integrity;
+      return cloned;
+    }
+
+    /** @param {Object} payload @returns {string} */
+    function calculatePayloadIntegrityHash(payload) {
+      return fnv1a32(canonicalJson(stripIntegrityEnvelope(payload)));
+    }
+
+    /** @param {Object} payload @returns {Object} */
+    function attachPayloadIntegrity(payload) {
+      const next = cloneSerializable(payload);
+      next.meta ||= {};
+      next.meta.sourceAppId ||= BACKUP_SOURCE_APP_ID;
+      next.meta.integrity = {
+        algorithm: BACKUP_INTEGRITY_ALGORITHM,
+        hash: calculatePayloadIntegrityHash(next)
+      };
+      return next;
+    }
+
+    /** @param {Object} payload @param {Object} [options] @returns {{ok: boolean, reason: string, hash?: string, message?: string}} */
+    function verifyPayloadIntegrity(payload, options = {}) {
+      const requireTrustedSource = options.requireTrustedSource !== false;
+      const requireIntegrity = options.requireIntegrity !== false;
+      const sourceAppId = String(payload?.meta?.sourceAppId || '');
+      const integrity = payload?.meta?.integrity || null;
+
+      if (requireTrustedSource && sourceAppId !== BACKUP_SOURCE_APP_ID) {
+        return { ok: false, reason: 'untrusted-source', message: 'Backup de origem não confiável.' };
+      }
+      if (!integrity) {
+        return requireIntegrity
+          ? { ok: false, reason: 'missing-integrity', message: 'Backup completo sem integridade verificável.' }
+          : { ok: true, reason: 'not-required' };
+      }
+      if (integrity.algorithm !== BACKUP_INTEGRITY_ALGORITHM) {
+        return { ok: false, reason: 'unsupported-algorithm', message: 'Algoritmo de integridade não suportado.' };
+      }
+
+      const expectedHash = calculatePayloadIntegrityHash(payload);
+      if (integrity.hash !== expectedHash) {
+        return { ok: false, reason: 'hash-mismatch', message: 'Hash de integridade do backup não confere.' };
+      }
+      return { ok: true, reason: 'verified', hash: expectedHash };
+    }
+
     /**
      * Validates, migrates and sanitizes a store-like object.
      * @param {Object} storeLike
@@ -245,21 +331,24 @@
     /**
      * Builds an exportable backup payload from a store snapshot.
      * @param {AppStore} storeSnapshot
+     * @param {Object} [options]
      * @returns {Object}
      */
-    function buildBackupPayloadFromStore(storeSnapshot) {
-      return {
+    function buildBackupPayloadFromStore(storeSnapshot, options = {}) {
+      return attachPayloadIntegrity({
         meta: {
           kind: 'app-backup',
           appVersion: APP_VERSION,
-          exportedAt: new Date().toISOString()
+          sourceAppId: BACKUP_SOURCE_APP_ID,
+          exportedAt: options.exportedAt || new Date().toISOString()
         },
         version: storeSnapshot.version,
         activePeriod: storeSnapshot.activePeriod,
         preferences: cloneSerializable(storeSnapshot.preferences),
         periods: cloneSerializable(storeSnapshot.periods),
-        archives: cloneSerializable(storeSnapshot.archives)
-      };
+        archives: cloneSerializable(storeSnapshot.archives),
+        reopenAudit: cloneSerializable(storeSnapshot.reopenAudit || [])
+      });
     }
 
     /**
@@ -267,22 +356,24 @@
      * @param {AppStore} storeSnapshot
      * @param {string} periodKey
      * @param {string} periodLabel
+     * @param {Object} [options]
      * @returns {Object}
      */
-    function buildMonthArchivePayload(storeSnapshot, periodKey, periodLabel) {
+    function buildMonthArchivePayload(storeSnapshot, periodKey, periodLabel, options = {}) {
       const period = cloneSerializable(storeSnapshot?.periods?.[periodKey] || state);
       normalizeData(period);
-      return {
+      return attachPayloadIntegrity({
         meta: {
           kind: 'month-archive',
           appVersion: APP_VERSION,
-          exportedAt: new Date().toISOString()
+          sourceAppId: BACKUP_SOURCE_APP_ID,
+          exportedAt: options.exportedAt || new Date().toISOString()
         },
         version: storeSnapshot?.version || STORE_VERSION,
         periodKey,
         periodLabel,
         data: period
-      };
+      });
     }
 
     /**
@@ -470,17 +561,19 @@
         return {
           kind: 'month-archive',
           periodKey: meta.periodKey,
-          periodLabel: meta.periodLabel
+          periodLabel: meta.periodLabel,
+          hasIntegrity: Boolean(payload?.meta?.integrity)
         };
       }
       if (payload.periods && typeof payload.periods === 'object' && !Array.isArray(payload.periods)) {
         return {
           kind: 'full-backup',
-          periodCount: Object.keys(payload.periods).filter(isValidPeriodKey).length
+          periodCount: Object.keys(payload.periods).filter(isValidPeriodKey).length,
+          hasIntegrity: Boolean(payload?.meta?.integrity)
         };
       }
       if (isLegacyPeriodPayload(payload)) {
-        return { kind: 'legacy-period' };
+        return { kind: 'legacy-period', hasIntegrity: Boolean(payload?.meta?.integrity) };
       }
       return { kind: 'unknown' };
     }
@@ -488,13 +581,14 @@
     /**
      * Coerces any recognized import format into a valid AppStore.
      * @param {Object} source
+     * @param {AppStore} [baseStore]
      * @returns {AppStore|null}
      */
-    function coerceImportedStore(source) {
+    function coerceImportedStore(source, baseStore = storage) {
       const payload = extractImportedPayload(source);
       if (!payload) return null;
       if (isMonthArchivePayload(payload)) {
-        return buildStoreFromMonthArchivePayload(payload, storage);
+        return buildStoreFromMonthArchivePayload(payload, baseStore);
       }
       if (payload.periods && typeof payload.periods === 'object' && !Array.isArray(payload.periods)) {
         return prepareStoreCandidate(payload);
@@ -512,6 +606,115 @@
     }
 
     /**
+     * Summarizes per-period impact of an import candidate.
+     * @param {string} periodKey
+     * @param {PeriodData|null} beforePeriod
+     * @param {PeriodData|null} afterPeriod
+     * @returns {Object}
+     */
+    function summarizePeriodDiff(periodKey, beforePeriod, afterPeriod) {
+      const before = beforePeriod ? getPeriodMetrics(beforePeriod) : null;
+      const after = afterPeriod ? getPeriodMetrics(afterPeriod) : null;
+      let action = 'unchanged';
+      if (!beforePeriod && afterPeriod) action = 'added';
+      else if (beforePeriod && !afterPeriod) action = 'removed';
+      else if (canonicalJson(before) !== canonicalJson(after) || canonicalJson(beforePeriod) !== canonicalJson(afterPeriod)) action = 'replaced';
+      return {
+        periodKey,
+        label: getPeriodLabel(periodKey),
+        action,
+        before,
+        after
+      };
+    }
+
+    /**
+     * Builds a granular preview for an import candidate before applying it.
+     * @param {Object} source
+     * @param {AppStore} [baseStore]
+     * @returns {Object}
+     */
+    function buildImportPreview(source, baseStore = storage) {
+      const descriptor = getImportedPayloadDescriptor(source);
+      const beforeStore = prepareStoreCandidate(baseStore) || getDefaultStore();
+      const targetStore = coerceImportedStore(source, beforeStore);
+      if (!targetStore) {
+        return {
+          ok: false,
+          descriptor,
+          reason: 'invalid-store',
+          periodChanges: [],
+          destructiveChanges: [],
+          summaryBefore: getBackupSummary(beforeStore),
+          summaryAfter: null,
+          targetStore: null,
+          requiresGranularPreview: false
+        };
+      }
+
+      const periodKeys = [...new Set([
+        ...Object.keys(beforeStore.periods || {}),
+        ...Object.keys(targetStore.periods || {})
+      ])].filter(isValidPeriodKey).sort();
+      const periodChanges = periodKeys.map(key => summarizePeriodDiff(
+        key,
+        beforeStore.periods?.[key] || null,
+        targetStore.periods?.[key] || null
+      ));
+      const destructiveChanges = periodChanges.filter(change => change.action === 'removed' || change.action === 'replaced');
+      return {
+        ok: true,
+        descriptor,
+        targetStore,
+        summaryBefore: getBackupSummary(beforeStore),
+        summaryAfter: getBackupSummary(targetStore),
+        periodChanges,
+        destructiveChanges,
+        requiresGranularPreview: descriptor.kind === 'full-backup' && destructiveChanges.length > 0
+      };
+    }
+
+    /**
+     * Validates import guardrails before destructive application.
+     * @param {Object} source
+     * @param {Object} preview
+     * @param {Object} [options]
+     * @returns {{ok: boolean, reason?: string, message?: string}}
+     */
+    function validateImportGuards(source, preview, options = {}) {
+      if (!preview?.ok) return { ok: false, reason: preview?.reason || 'invalid-preview', message: 'Preview de importação inválido.' };
+      const descriptor = preview.descriptor || getImportedPayloadDescriptor(source);
+      const payload = extractImportedPayload(source);
+      const destructiveFullBackup = descriptor.kind === 'full-backup' && preview.requiresGranularPreview;
+
+      if (destructiveFullBackup && options.previewAccepted !== true) {
+        return {
+          ok: false,
+          reason: 'preview-required',
+          message: 'Importação completa exige preview granular confirmado antes de substituir/remover períodos.'
+        };
+      }
+      if (descriptor.kind === 'full-backup') {
+        const integrity = verifyPayloadIntegrity(payload, {
+          requireIntegrity: options.requireIntegrity !== false,
+          requireTrustedSource: options.requireTrustedSource !== false
+        });
+        if (!integrity.ok) return integrity;
+      }
+      return { ok: true };
+    }
+
+    /** @param {Object} preview @returns {string} */
+    function formatImportPreviewMessage(preview) {
+      if (!preview?.requiresGranularPreview) return '';
+      const previewLines = preview.destructiveChanges
+        .slice(0, 8)
+        .map(change => `${change.label}: ${change.action === 'removed' ? 'será removido' : 'será substituído'}`)
+        .join('\n');
+      return `\n\nImpacto detectado:\n${previewLines}${preview.destructiveChanges.length > 8 ? '\n...' : ''}`;
+    }
+
+    /**
      * Builds a full backup payload, persisting current state by default.
      * @param {Object} [options]
      * @returns {Promise<Object>}
@@ -523,7 +726,7 @@
         broadcast: options?.broadcast === true,
         skipRemoteSync: options?.skipRemoteSync === true
       });
-      return buildBackupPayloadFromStore(storeSnapshot);
+      return buildBackupPayloadFromStore(storeSnapshot, options);
     }
 
     /**
@@ -533,7 +736,11 @@
      * @returns {Promise<BackupSummary>}
      */
     async function applyImportedStore(parsed, options = {}) {
-      const normalized = coerceImportedStore(parsed);
+      const baseStore = options.baseStore || storage;
+      const preview = options.preview || buildImportPreview(parsed, baseStore);
+      const guard = validateImportGuards(parsed, preview, options);
+      if (!guard.ok) throw new Error(guard.message || `Import guard failed: ${guard.reason}`);
+      const normalized = preview.targetStore || coerceImportedStore(parsed, baseStore);
       if (!normalized) throw new Error('Estrutura inválida ou incompatível com o schema atual.');
       const saved = await saveStore(normalized, {
         silent: true,
@@ -582,9 +789,15 @@
       if (!assertWritableCurrentPeriod()) return;
       const snapshot = readStoredJsonWithFallback(LOCAL_SNAPSHOT_KEY, LEGACY_LOCAL_SNAPSHOT_KEYS, null);
       if (!snapshot) { showToast('Nenhum snapshot local foi salvo ainda.', 'info'); return; }
-      showConfirm('Deseja restaurar o último snapshot local? Isso substituirá o estado atual.', async () => {
+      const payload = snapshot.payload || snapshot;
+      const preview = buildImportPreview(payload, storage);
+      showConfirm(`Deseja restaurar o último snapshot local? Isso substituirá o estado atual.${formatImportPreviewMessage(preview)}`, async () => {
         try {
-          const summary = await applyImportedStore(snapshot.payload || snapshot, { eventType: 'restore' });
+          const summary = await applyImportedStore(payload, {
+            eventType: 'restore',
+            preview,
+            previewAccepted: true
+          });
           showToast(`Snapshot restaurado: ${summary.periods} períodos carregados.`);
         } catch {
           showToast('Snapshot local inválido ou corrompido.', 'danger');
@@ -646,15 +859,19 @@
         try {
           const parsed = JSON.parse(reader.result);
           const descriptor = getImportedPayloadDescriptor(parsed);
-          const importedStore = coerceImportedStore(parsed);
-          if (!importedStore) throw new Error('Dados não reconhecidos');
+          const preview = buildImportPreview(parsed, storage);
+          if (!preview.ok) throw new Error('Dados não reconhecidos');
           const confirmMessage = descriptor.kind === 'month-archive'
             ? `Confirmar importação do fechamento de ${descriptor.periodLabel}? Somente ${descriptor.periodLabel} será restaurado/atualizado e marcado como fechado. Um backup será gerado antes.`
-            : 'Confirmar importação e substituir todos os dados atuais? Um backup será gerado antes.';
+            : `Confirmar importação e substituir todos os dados atuais? Um backup será gerado antes.${formatImportPreviewMessage(preview)}`;
           showConfirm(confirmMessage, async () => {
             try {
               await exportBackup();
-              const summary = await applyImportedStore(parsed, { eventType: 'import' });
+              const summary = await applyImportedStore(parsed, {
+                eventType: 'import',
+                preview,
+                previewAccepted: true
+              });
               const successMessage = descriptor.kind === 'month-archive'
                 ? `Fechamento de ${descriptor.periodLabel} importado com sucesso. Demais períodos foram preservados.`
                 : `Backup importado: ${summary.periods} períodos • ${summary.students} alunos • ${summary.pending} pendências • ${summary.events} eventos.`;

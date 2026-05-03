@@ -179,6 +179,67 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 2);
     });
 
+    test('abas operacionais devem preservar linhas reais de tabela', async ({ page }) => {
+      await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__APP_INTERNALS__ && window.setActiveTab);
+
+      for (const tab of ['students', 'pending', 'scale', 'events']) {
+        await page.locator(`#tab-${tab}`).click();
+        await page.waitForFunction(activeTab => document.querySelector('.view.active')?.id === activeTab, tab);
+
+        const tableShape = await page.evaluate(activeTab => {
+          const table = document.querySelector(`#${activeTab} table`);
+          const tbody = table?.querySelector('tbody');
+          const firstRow = tbody?.querySelector(':scope > tr');
+          const firstCell = firstRow?.querySelector(':scope > td');
+          return {
+            tab: activeTab,
+            table: Boolean(table),
+            rowCount: tbody?.querySelectorAll(':scope > tr').length || 0,
+            firstRowDisplay: firstRow ? getComputedStyle(firstRow).display : null,
+            firstCellDisplay: firstCell ? getComputedStyle(firstCell).display : null,
+            directLooseElements: Array.from(tbody?.children || [])
+              .filter(child => child.tagName !== 'TR')
+              .map(child => child.tagName)
+          };
+        }, tab);
+
+        expect(tableShape.table).toBe(true);
+        expect(tableShape.rowCount).toBeGreaterThan(0);
+        expect(tableShape.directLooseElements).toEqual([]);
+        if (viewport.width > 760) {
+          expect(tableShape.firstRowDisplay).toBe('table-row');
+          expect(tableShape.firstCellDisplay).toBe('table-cell');
+        }
+      }
+    });
+
+    test('quadro de pendências não deve ser cortado pelo painel', async ({ page }) => {
+      await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__APP_INTERNALS__ && window.setActiveTab);
+      await page.locator('#tab-pending').click();
+      await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'pending');
+
+      const kanbanFit = await page.evaluate(() => {
+        const kanban = document.querySelector('#pendingKanban');
+        const panel = kanban?.closest('.section');
+        if (!kanban || !panel) return null;
+        const kanbanRect = kanban.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        return {
+          kanbanRight: kanbanRect.right,
+          panelRight: panelRect.right,
+          kanbanWidth: kanbanRect.width,
+          panelWidth: panelRect.width,
+          overflow: kanban.scrollWidth - kanban.clientWidth
+        };
+      });
+
+      expect(kanbanFit).toBeTruthy();
+      expect(kanbanFit.kanbanRight).toBeLessThanOrEqual(kanbanFit.panelRight + 1);
+      expect(kanbanFit.overflow).toBeLessThanOrEqual(2);
+    });
+
     if (viewport.width <= 760) {
       test('inputs devem ter font-size >= 16px (sem zoom no mobile)', async ({ page }) => {
         await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
@@ -279,8 +340,9 @@ test.describe('Funcionalidade', () => {
 
   test('deve ter abas com role tablist e tab', async ({ page }) => {
     await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('[role="tablist"]')).toBeVisible();
-    const tabs = page.locator('[role="tab"]');
+    const mainTabs = page.getByRole('tablist', { name: 'Módulos do sistema' });
+    await expect(mainTabs).toBeVisible();
+    const tabs = mainTabs.getByRole('tab');
     await expect(tabs).toHaveCount(8);
   });
 

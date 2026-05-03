@@ -1,6 +1,6 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10 · Última atualização: 2026-04-22
+Data: 2026-04-10 · Última atualização: 2026-05-02
 Baseline estável em produção: `origin/main` @ `bc6307f` (GitHub Pages v34)
 Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 
@@ -55,6 +55,16 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > `import_backup_transaction_guarded(...)`. Se outro dispositivo alterar o backend desde a última
 > leitura/sync conhecida, o app entra em estado de conflito e exige `Recarregar do backend` antes
 > de tentar novo envio, evitando sobrescrita silenciosa.
+
+> **Atualização 2026-05-02** — Fechamento pos-Reversa iniciado.
+> Os blocos locais 1 a 6 foram integrados ao app real: reabertura de mes fechado,
+> preview/integridade de backup, import guard Supabase, SRI no Supabase CDN,
+> catalogo RPC critico e sanitizacao central de tabelas. A migration
+> `20260502183000_import_guard_preview_integrity.sql` foi validada e aplicada no
+> Supabase local. Em 2026-05-02, o remoto `eautmpqkxibolmcfiacd` recebeu as
+> 7 migrations com preservacao das tabelas legadas em `legacy_periods`,
+> `legacy_archives` e `legacy_profiles`.
+> Roteiro: [`FECHAMENTO_POS_REVERSA_2026-05-02.md`](./FECHAMENTO_POS_REVERSA_2026-05-02.md).
 
 ## Etapa 0 — Proteger baseline
 

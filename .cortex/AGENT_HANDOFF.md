@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 10:37:11 -03
+Last updated: 2026-05-03 10:38:42 -03
 
 ## Current handoff
 
@@ -35,6 +35,7 @@ Current state:
 - `src/core/env-bootstrap.js` now loads optional `env.js` in published HTTP/HTTPS runtimes
 - `vercel.json` now generates `env.js` via `npm run build:env`
 - commit `d1abdc4` is pushed to `origin/main`
+- Vercel now serves `/env.js` with HTTP `200`, but the deploy still lacks Supabase public env values, so `hasEnv=false`
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
@@ -89,7 +90,7 @@ Configure the deploy for the already-pushed runtime hotfix:
 
 1. configure only public/browser-safe env vars in Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
 2. redeploy the app
-3. confirm `/env.js` exists and `hasEnv=true`
+3. confirm `/env.js` returns `200` and `hasEnv=true`
 4. authenticate in the real unit
 5. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
 6. do not click `Migrar para o backend` before human preview review

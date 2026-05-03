@@ -305,7 +305,7 @@ This file records one durable checkpoint per completed task.
 
 ### Task 011
 
-- Date/time: 2026-05-03 10:37:11 -03
+- Date/time: 2026-05-03 10:38:42 -03
 - Branch: `main`
 - HEAD: `d1abdc4`
 - Task: prepare remote-runtime deploy hotfix so published app can load browser-safe Supabase env and continue functional remote homologation
@@ -329,6 +329,8 @@ This file records one durable checkpoint per completed task.
 - Pending:
   - configure public/browser-safe deploy env vars in Vercel
   - redeploy and confirm `/env.js` plus `hasEnv=true`
+- Deploy observation:
+  - Vercel `/env.js` returned HTTP `200` after the hotfix, but Supabase public env values were still absent
 - Next step:
   - authenticate in the real unit after redeploy
   - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`

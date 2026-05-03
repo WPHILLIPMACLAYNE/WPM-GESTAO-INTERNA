@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 10:37:11 -03
+Última atualização: 2026-05-03 10:38:42 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,12 +128,14 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 10:37:11 -03
+Data/hora: 2026-05-03 10:38:42 -03
 
 - Branch atual: `main`
 - Último commit conhecido: `d1abdc4`
 - Estado do worktree ao fim desta etapa:
   - hotfix de runtime remoto commitado e enviado para `origin/main`
+  - Vercel já responde `/env.js` com HTTP `200`
+  - `/env.js` publicado ainda não contém `SUPABASE_URL`, `SUPABASE_ANON_KEY` nem `SUPABASE_UNIT_SLUG`
   - docs de continuidade atualizados para homologação remota funcional
   - nenhuma migração real executada
 - Contexto recuperado e consolidado:
@@ -164,7 +166,7 @@ Data/hora: 2026-05-03 10:37:11 -03
   - `npm run smoke:deploy` OK com `1 passed` contra runtime HTTP local
 - Pendências imediatas:
   - configurar no Vercel somente variáveis públicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
-  - redeployar e confirmar `/env.js` publicado sem expor segredo
+  - redeployar e confirmar `/env.js` publicado com `hasEnv=true` sem expor segredo
 - Próximo passo exato mais seguro:
   - após redeploy, confirmar `hasEnv=true`, autenticar na unidade real e executar apenas `Executar dry-run` em `Configurações -> Migração assistida`
   - não clicar em `Migrar para o backend` antes de revisão humana do preview

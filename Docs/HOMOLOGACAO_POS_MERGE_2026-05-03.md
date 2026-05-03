@@ -120,12 +120,13 @@ Evidencia da correcao:
 
 - `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js`: 44 testes passaram.
 - `npm run smoke:deploy`: 1 teste Playwright passou contra o app local servido por HTTP, com `env.js` carregado antes dos modulos.
+- Apos push para `main`, o Vercel passou a responder `/env.js` com HTTP `200`, mas ainda sem valores publicos Supabase; o status do app publicado permaneceu `hasEnv=false`.
 
 Proxima etapa segura:
 
 1. Configurar no deploy remoto somente variaveis publicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG` e metadados de release quando aplicavel.
 2. Redeployar o artefato.
-3. Confirmar que `env.js` publicado existe e que o app mostra `hasEnv=true` sem expor segredo em log.
+3. Confirmar que `env.js` publicado existe, contem as variaveis publicas esperadas e que o app mostra `hasEnv=true` sem expor segredo em log.
 4. Autenticar na unidade real.
 5. Executar apenas `Executar dry-run` em `Configuracoes` -> `Migracao assistida`.
 6. Revisar o preview humano antes de qualquer clique em `Migrar para o backend`.

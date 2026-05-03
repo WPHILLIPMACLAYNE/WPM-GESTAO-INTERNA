@@ -1,7 +1,7 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 10:37:11 -03
+Last updated: 2026-05-03 10:38:42 -03
 
 ## Live status
 
@@ -29,6 +29,7 @@ Current 2026-05-03 reading:
 - `src/core/env-bootstrap.js` now loads optional `env.js` in local and deployed HTTP/HTTPS runtimes
 - `vercel.json` now runs `npm run build:env` so Vercel can materialize `env.js` from public/browser-safe env vars
 - runtime hotfix commit `d1abdc4` was pushed to `origin/main`
+- after continuity commit `847904a`, Vercel served `/env.js` with HTTP `200`, but the file still contained no Supabase public env values
 - focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
@@ -59,8 +60,8 @@ Confirmed live facts:
 After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
 
 1. configure only public/browser-safe deploy env vars in Vercel
-2. wait for/retrigger redeploy from `d1abdc4`
-3. confirm `/env.js` exists without logging secrets
+2. wait for/retrigger redeploy from the latest `main`
+3. confirm `/env.js` still returns `200` and `hasEnv=true` without logging secrets
 4. authenticate in the real unit and run only the assisted-migration dry-run
 
 Latest validation result:

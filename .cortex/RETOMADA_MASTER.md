@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 10:37:11 -03
+Last updated: 2026-05-03 10:38:42 -03
 
 ## Purpose
 
@@ -86,13 +86,14 @@ This phrase is a continuity test marker and should be used only when the new ses
 - published the active recovery branch to GitHub with upstream tracking enabled
 - validated the published URLs as reachable but blocked for remote functional homologation because runtime Supabase env was missing
 - pushed remote-runtime hotfix `d1abdc4` to load optional `env.js` in deployed HTTP/HTTPS runtimes and generate it on Vercel
+- verified Vercel serves `/env.js` with HTTP `200`, but Supabase public env values are still absent
 
 ## Exact next step
 
 Close the current checkpoint cleanly, then continue deploy homologation:
 
 1. configure public/browser-safe Supabase env vars in Vercel
-2. wait for/retrigger redeploy from `d1abdc4`
+2. wait for/retrigger redeploy from latest `main`
 3. confirm `/env.js` plus `hasEnv=true`
 4. authenticate in the real unit and run only the migration dry-run
 

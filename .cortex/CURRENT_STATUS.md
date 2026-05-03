@@ -1,7 +1,7 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 15:19:24 -03
+Last updated: 2026-05-03 15:24:54 -03
 
 ## Live status
 
@@ -11,6 +11,7 @@ Last updated: 2026-05-03 15:19:24 -03
 - Local and remote state: aligned at `d8da0d5a7fd42be30e6bbedbe045fb3cc9a71cad`
 - Homologated technical baseline: `191383e` (remote Supabase homologation)
 - Latest published documentation checkpoint before this pause update: `d8da0d5` (`docs: atualiza estágio pós-homologação remota`)
+- README checkpoint after pause: refreshed to describe the current modular app, Supabase/Vercel production state, and Etapa 11 as the next gate
 - Baseline in production: Vercel alias `https://wpm-gestao-interna.vercel.app`
 - Latest production deploy validated in this block: `dpl_3Qnt3pQX1kkE5889RvoxVLMELRMD`
 - App version: `v34`
@@ -69,6 +70,8 @@ Do **not** start a new feature yet.
 Next stage: **Etapa 11 - Piloto operacional controlado em producao**.
 
 Session paused on 2026-05-03 at 15:19:24 -03 by operator request. On the next Codex session, resume here and do not run any new visual/frontend work before the pilot.
+
+README was updated after the pause checkpoint so GitHub now reflects the current project state. This did not start Etapa 11.
 
 Recommended order:
 

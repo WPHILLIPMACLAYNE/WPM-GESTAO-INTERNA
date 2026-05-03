@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 15:19:24 -03
+Last updated: 2026-05-03 15:24:54 -03
 
 ## Current handoff
 
@@ -22,6 +22,7 @@ Current state:
 - remote role: `admin`
 - current stage: **remote Supabase migration homologated; next is controlled production pilot**
 - pause marker: operator paused work on 2026-05-03 at 15:19:24 -03; next session should resume at Etapa 11 only
+- README marker: GitHub README was refreshed after the pause to match the current modular/Supabase/Vercel state; no pilot action was started
 
 ## Completed in the latest work block
 

@@ -1,495 +1,368 @@
 # WPM Gestão Interna
 
-Sistema de gestão interna para recepção — controle de atendimentos, pendências, NPS, escala e eventos em um único painel, 100% no navegador.
+Aplicação web operacional para recepção de academias, com dashboard, atendimentos, pendências, NPS, escala, eventos, backup, PWA offline e sincronização guardada com Supabase.
 
-![Stack](https://img.shields.io/badge/stack-Vanilla%20JS%20%2B%20CSS-f7df1e?style=flat-square)
+![Stack](https://img.shields.io/badge/stack-HTML%20%2B%20CSS%20%2B%20JS-f7df1e?style=flat-square)
 ![PWA](https://img.shields.io/badge/PWA-enabled-5a0fc8?style=flat-square)
-![License](https://img.shields.io/badge/license-ISC-blue?style=flat-square)
+![Backend](https://img.shields.io/badge/backend-Supabase-3ecf8e?style=flat-square)
+![Deploy](https://img.shields.io/badge/deploy-Vercel-black?style=flat-square)
 ![Lang](https://img.shields.io/badge/lang-pt--BR-009c3b?style=flat-square)
 
----
+## Estado Atual
 
-## Sumário
+O projeto deixou de ser o antigo HTML monolítico e hoje é uma aplicação web modular, browser-first, com app shell em `index.html`, módulos em `src/`, Service Worker próprio, testes automatizados e backend Supabase remoto homologado.
 
-- [Visão geral](#visão-geral)
-- [Principais recursos](#principais-recursos)
-- [Stack](#stack)
-- [Arquitetura](#arquitetura)
-- [Como rodar localmente](#como-rodar-localmente)
-- [Testes](#testes)
-- [Fluxo Seguro de Evolução](#fluxo-seguro-de-evolução)
-- [Estrutura de diretórios](#estrutura-de-diretórios)
-- [Design system](#design-system)
-- [PWA e offline](#pwa-e-offline)
-- [Documentação complementar](#documentação-complementar)
-- [Roadmap](#roadmap)
-- [Contribuindo](#contribuindo)
-- [Licença](#licença)
+Produção principal:
 
----
+- App publicado: `https://wpm-gestao-interna.vercel.app`
+- Backend remoto: Supabase project `eautmpqkxibolmcfiacd`
+- Unidade homologada: `Smartfit Pampulha`
+- Slug operacional: `mgcpam2`
+- Versão do app/store: `v34` / store version `4`
+- Baseline técnico homologado: `191383e`
+- Checkpoint documental mais recente antes desta atualização: `b4b50fd`
 
-## Visão geral
+Em 2026-05-03, a homologação remota foi concluída com Vercel + Supabase:
 
-O **WPM Gestão Interna** é um SPA (Single Page Application) concebido para o dia a dia da recepção: concentra em um só lugar os principais fluxos operacionais — alunos novos, pendências abertas, citações de NPS, escala de professores/recepção e eventos/ações do mês — com dashboards consolidados, filtros por período e persistência local (IndexedDB) com exportação/importação de backup.
+- `env.js` publicado pelo Vercel com variáveis públicas browser-safe.
+- Supabase Auth, recovery de senha, login e perfil admin validados no app publicado.
+- SDK Supabase vendorizado em `src/vendor/supabase-js-2.104.0.umd.js` e precacheado pelo Service Worker.
+- Dry-run remoto aprovado com `12 periodo(s) locais`, backend vazio e `0 divergencia(s)`.
+- Migração inicial executada uma única vez.
+- Reload remoto retornou `Base remota carregada com sucesso`.
+- Navegação manual validou janeiro a dezembro.
 
-O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **fonte única de verdade** para a equipe de atendimento, com foco em:
+Próxima etapa bloqueante antes de novas features:
 
-- **Velocidade**: UI densa mas legível, pensada para uso diário.
-- **Confiabilidade**: dados persistidos localmente, sem dependência de rede.
-- **Autonomia**: backup/import em um clique, sem servidor obrigatório.
-- **Estética premium**: design system consolidado em tema escuro com acento dourado.
+**Etapa 11 - Piloto operacional controlado em produção.**
 
-## Status atual
+O objetivo é criar um atendimento controlado em `Maio/2026`, salvar localmente, sincronizar uma única vez, recarregar do Supabase e confirmar que o registro voltou do backend. Só depois disso entram novo ciclo visual, features ou expansão operacional.
 
-`main` permanece como baseline estável publicada. Em 2026-05-03, o projeto fechou a homologação remota funcional em Vercel + Supabase e entrou no estágio de **piloto operacional controlado em produção**.
+## O Que o Sistema Faz
 
-A baseline recente foi validada em CI com:
+O WPM Gestão Interna centraliza a operação diária da recepção:
 
-- **Testes Unitários + Coverage**: Vitest com provider `@vitest/coverage-v8`.
-- **Testes E2E**: Playwright em Chromium.
-- **Validação de estrutura**: presença de entrypoints, CSP, DOMPurify e módulos críticos.
-- **Teste de responsividade**: script multi-viewport em desktop, tablet e mobile.
-- **Deploy preview**: Vercel ativo para branches de release.
+- Dashboard com KPIs, NPS, pendências, escala, eventos, recados e visão por atendente.
+- Cadastro de alunos/atendimentos com feedback, addon, observações e filtros.
+- Pendências em tabela e Kanban, com drag-and-drop e histórico de resposta.
+- NPS com ranking, metas, histórico, observações e tendências.
+- Escala semanal de professores e recepção, com turnos e substituições.
+- Eventos e ações mensais com calendário, status, filtros e responsáveis.
+- Configurações de equipe, professores, addons, período ativo, backup e diagnóstico.
+- Backup/import JSON com preview, hash de integridade e proteções contra importação destrutiva.
+- Sync local-first com checkpoint remoto para evitar sobrescrita silenciosa entre dispositivos.
 
-Auditoria executiva registrada em [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md).
+## Arquitetura
 
-Fechamento pos-Reversa iniciado em 2026-05-02:
+O projeto não é mais um arquivo único com CSS e JavaScript embutidos. A aplicação continua sem bundler, mas agora é modularizada em camadas explícitas carregadas por `<script>` clássicos em ordem controlada.
 
-- integracao local concluida nos blocos 1 a 6;
-- migration `20260502183000_import_guard_preview_integrity.sql` aplicada e validada no Supabase local;
-- schema remoto aplicado no projeto `eautmpqkxibolmcfiacd` com 7 migrations, preservando tabelas legadas em `legacy_periods`, `legacy_archives` e `legacy_profiles`;
-- roteiro operacional em [`Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md`](./Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md).
+```
+index.html
+├── env-bootstrap + config + observability
+├── core/
+│   ├── supabase.js
+│   ├── storage.js
+│   ├── schema.js
+│   ├── backup.js
+│   ├── lifecycle.js
+│   └── pwa.js
+├── domain/
+│   └── selectors.js
+├── features/
+│   ├── crud.js
+│   ├── forms.js
+│   ├── nps.js
+│   ├── csv.js
+│   └── diagnostics.js
+├── ui/
+│   ├── render-*.js
+│   ├── events-*.js
+│   └── back-to-top.js
+└── utils/
+    └── helpers.js
+```
 
-Homologação remota concluída em 2026-05-03:
+Princípios atuais:
 
-- produção ativa em `https://wpm-gestao-interna.vercel.app`;
-- Supabase remoto `eautmpqkxibolmcfiacd` configurado para a unidade `Smartfit Pampulha` (`mgcpam2`);
-- admin `smartwonkey@gmail.com` autenticado como `WPM` com perfil `admin`;
-- recovery/senha/login validados no app publicado;
-- SDK Supabase vendorizado em `src/vendor/supabase-js-2.104.0.umd.js` e precacheado pelo service worker;
-- dry-run remoto: `12 periodo(s) locais`, backend remoto vazio e `0 divergencia(s)`;
-- migração inicial executada uma única vez;
-- reload do backend confirmou `Base remota carregada com sucesso`;
-- 12 meses navegados manualmente de janeiro a dezembro;
-- fonte atual de homologação: [`Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md).
+- `core/` concentra persistência, schema, backup, Supabase, lifecycle e PWA.
+- `domain/` contém selectors puros para indicadores, rankings e filtros.
+- `features/` guarda ações de negócio reutilizáveis.
+- `ui/render-*` renderiza cada área funcional.
+- `ui/events-*` conecta DOM events aos fluxos de negócio.
+- `src/types.js` documenta contratos JSDoc e não é carregado em runtime.
+- `MODULE_MAP.md` é a referência para ordem de carga e responsabilidades.
 
----
-
-## Principais recursos
-
-### Dashboard
-- KPIs do mês: NPS, pendências abertas, próxima escala, próximo evento.
-- Gráfico de feedback positivo por atendente.
-- Ranking de addons vendidos por pessoa.
-- Painel de recados independente por período.
-- Comparativo do atendente vs. média do time.
-
-### Alunos novos do mês
-- Cadastro rápido com atendente, feedback, addon e observações.
-- Edição inline de última visita e hora.
-- Filtros por atendente, status de feedback e busca textual.
-- Vínculo automático de addon ao contador do atendente.
-
-### Pendências
-- Tabela e **Kanban** (Abertas / Respondidas / Concluídas).
-- Drag-and-drop entre colunas com atalhos de teclado.
-- Resposta e histórico por pendência.
-- Strip de status no topo com contadores em tempo real.
-
-### NPS
-- Ranking de citações por funcionário com tendência mês a mês.
-- Histórico de líderes dos meses anteriores.
-- Ajuste rápido de contagem (+/-) ou edição numérica direta.
-
-### Escala
-- Grade semanal de professores + recepção.
-- Board visual por dia com turnos múltiplos.
-- Duplicação do mês anterior em um clique.
-- Troca de turno com registro de quem substitui.
-
-### Eventos e ações
-- Agenda do mês com tipo, responsável e status.
-- Calendário visual + tabela detalhada.
-- Duplicação de eventos recorrentes.
-- Chips de status e filtros combináveis.
-
-### Configurações
-- Cadastro de recepcionistas, professores, tipos de addon.
-- Import/export de backup completo (JSON).
-- Alternância de período ativo (mês/ano) com bloqueio de escrita em períodos fechados.
-
----
+Limite consciente: o runtime ainda depende de globais e ordem de `<script>`, então mudanças em `index.html`, `sw.js`, `storage`, `backup`, `lifecycle`, `render-dashboard` e `events-core` exigem validação focada.
 
 ## Stack
 
 | Camada | Tecnologia |
 |---|---|
-| UI | HTML5 + CSS custom (design tokens, `:has()`, `:focus-visible`, scroll-snap) |
-| Lógica | JavaScript ES2022 modular (sem bundler — imports via `<script>` + IIFE/global) |
-| Persistência | IndexedDB (via módulo próprio `src/core/storage.js`) |
-| Gráficos | [Chart.js](https://www.chartjs.org/) via CDN |
-| Sanitização | [DOMPurify](https://github.com/cure53/DOMPurify) via CDN |
-| PWA | Service Worker próprio (`sw.js`) com `manifest.json` |
-| Testes unitários | [Vitest](https://vitest.dev/) |
-| Testes E2E/visuais | [Playwright](https://playwright.dev/) + scripts próprios em `Scripts/` |
-| Backend | [Supabase](https://supabase.com/) com auth/session, leitura remota e sync híbrida inicial em `src/core/supabase.js` |
+| Interface | HTML5, CSS custom, JavaScript ES2022 |
+| Design | WPM Design System Polish Layer v1 em `styles.css` |
+| Runtime | App shell estático, sem bundler, módulos por `<script>` clássico |
+| Persistência local | IndexedDB + espelho localStorage + broadcast cross-tab |
+| Backend | Supabase Auth, PostgreSQL, RPCs transacionais e RLS |
+| Sync | Local-first guardado por checkpoint remoto de unidade |
+| PWA | `sw.js`, `manifest.json`, cache versionado e suporte offline |
+| Segurança | CSP via Vercel headers, SRI, DOMPurify, testes XSS |
+| Testes | Vitest, Playwright, visual snapshots e smoke pós-deploy |
+| Deploy | Vercel com `npm run build:env` gerando `env.js` público |
 
----
+## Backend Supabase
 
-## Arquitetura
+O backend canônico está em `supabase/migrations/` e cobre:
 
-O projeto é um **SPA de arquivo único (`index.html`)** com módulos JS organizados por responsabilidade. Não há bundler — os módulos são carregados em ordem e conversam via escopo global controlado.
+- unidades, usuários e vínculos de unidade;
+- períodos mensais e configurações por período;
+- atendimentos, pendências, NPS, addons, escala e eventos;
+- tabelas legadas preservadas;
+- RPCs de bootstrap, importação guardada, checkpoint de sync e reload;
+- hash de integridade `canonical-sha256-v1` para payloads de importação.
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│                        index.html                             │
-│  (topbar · hero · tabs · 8 views · 5 modais · footer)         │
-└────────────────────────────────────────────────────────────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         ▼                   ▼                   ▼
-   ┌──────────┐         ┌──────────┐        ┌──────────┐
-   │  core/   │         │ domain/  │        │features/ │
-   │          │         │          │        │          │
-   │ storage  │         │selectors │        │  crud    │
-   │ backup   │         │          │        │  forms   │
-   │ schema   │         │          │        │  nps     │
-   │ seed     │         │          │        │  csv     │
-   │lifecycle │         │          │        │diagnstc. │
-   │observab. │         │          │        │          │
-   │supabase  │         │          │        │          │
-   └────┬─────┘         └────┬─────┘        └────┬─────┘
-        │                    │                   │
-        └────────────────────┼───────────────────┘
-                             ▼
-                       ┌──────────┐
-                       │   ui/    │
-                       │          │
-                       │ render-* │  ← renderização pura
-                       │ events-* │  ← bindings de DOM events
-                       └──────────┘
-                             │
-                             ▼
-                       ┌──────────┐
-                       │ utils/   │
-                       │ helpers  │
-                       └──────────┘
-```
+Contrato operacional:
 
-**Princípios:**
+- O browser só recebe `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`.
+- `service_role` nunca entra em `env.js` nem no frontend.
+- `Sincronizar agora` envia o store local completo apenas quando o checkpoint remoto ainda bate.
+- Se houver conflito remoto, a ação segura é `Recarregar do backend`, revisar e reaplicar manualmente.
+- `Importar backup` é operação de alto risco e exige preview revisado.
 
-- **`render-*`** produzem HTML declarativamente a partir de `state`.
-- **`events-*`** fazem binding de handlers e delegam para `features/` (lógica de negócio).
-- **`core/storage`** centraliza IndexedDB; ninguém mais toca persistência direto.
-- **`domain/selectors`** são funções puras que derivam indicadores do `state`.
-- **Diffing otimizado**: helpers `aplicarHtmlSeMudou`, `aplicarPatchLinhas`, `aplicarPatchCards` minimizam re-renderização.
+## PWA, Offline e Sync
 
----
+O app continua útil sem rede após a primeira visita:
 
-## Como rodar localmente
+- Service Worker precacheia app shell, CSS, scripts, manifest, ícones e SDK Supabase local.
+- IndexedDB guarda o store principal.
+- localStorage funciona como espelho/compatibilidade.
+- Broadcast cross-tab mantém abas sincronizadas.
+- Toasts indicam estado online/offline e falhas relevantes.
+- Backups JSON permitem transporte e recuperação manual.
 
-### Pré-requisitos
+Quando autenticado no Supabase, o app pode recarregar o backend ou sincronizar o store local, sempre com guarda de checkpoint para reduzir risco de perda silenciosa.
 
-- Node.js ≥ 18
-- npm ≥ 9
+## Como Rodar Localmente
 
-### Passos
+Pré-requisitos:
+
+- Node.js 18+
+- npm 9+
+- Supabase CLI apenas se for testar backend local
+
+Instalação:
 
 ```bash
-# 1. Clonar e entrar no diretório
 git clone https://github.com/WPHILLIPMACLAYNE/WPM-GESTAO-INTERNA.git
 cd WPM-GESTAO-INTERNA
-
-# 2. Instalar dependências (dev apenas)
 npm install
+```
 
-# 3. Servir o app (qualquer servidor estático funciona)
+Servidor estático:
+
+```bash
 python3 -m http.server 3000
 # ou
 npx serve . -p 3000
 ```
 
-Acesse **http://localhost:3000**.
+Acesse `http://localhost:3000`.
 
-> **Por que um servidor?** O Service Worker e os módulos JS exigem origem HTTP (não `file://`). Qualquer servidor estático serve.
+Configuração local opcional:
 
-### Runtime de ambiente (`env.js`)
+```bash
+npm run setup
+```
 
-- O app sempre inicia com defaults seguros de `window.__APP_ENV__` em `src/core/env-bootstrap.js`.
-- O arquivo `env.js` é opcional e carregado em runtime local ou publicado antes de `config.js`.
-- Em deploy remoto, `env.js` deve ser gerado pelo build/hosting quando houver Supabase/Sentry; se o arquivo não existir, o app permanece em modo local-first.
-- Chaves públicas suportadas hoje: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `APP_COMMIT`, `APP_BUILD_TIME` e `APP_RUNTIME_OVERRIDE`.
-- No Vercel, `vercel.json` executa `npm run build:env`; configure somente variáveis públicas/browser-safe no ambiente do projeto.
-- Checklist de deploy, smoke pós-deploy e rollback seguro: [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md).
+Esse comando cria `env.js` a partir de `env.example.js`. Edite somente variáveis públicas browser-safe:
 
-### Backend local (`Supabase`)
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_UNIT_SLUG`
+- `SENTRY_DSN`
+- `SENTRY_ENVIRONMENT`
+- `SENTRY_RELEASE`
+- `APP_COMMIT`
+- `APP_BUILD_TIME`
+- `APP_RUNTIME_OVERRIDE`
 
-O schema canônico e as RPCs de backend vivem em `supabase/migrations/`. Para subir o backend local com seed de desenvolvimento:
+Backend local:
 
 ```bash
 npx supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 npx supabase db reset --local
 ```
 
-O `db reset` aplica as migrations e carrega `supabase/seed.sql`, criando:
+O seed local cria uma unidade de desenvolvimento, um admin local e o período aberto do mês corrente.
 
-- unidade local `WPM Unidade Local`
-- período aberto do mês corrente em `America/Sao_Paulo`
-- usuário admin de desenvolvimento
+## Testes e Validação
 
-Credenciais locais seeded:
-
-- e-mail: `dev.admin@wpm.local`
-- senha: `Admin123!`
-
-Para ligar o frontend ao backend local, preencha o `env.js` com os valores públicos do `npx supabase status`:
-
-```js
-window.__APP_ENV__ = Object.assign({}, window.__APP_ENV__ || {}, {
-  SUPABASE_URL: 'http://127.0.0.1:54321',
-  SUPABASE_ANON_KEY: 'sb_publishable_...',
-  SUPABASE_UNIT_SLUG: 'wpm-unidade-local',
-  APP_COMMIT: 'local-dev',
-  APP_BUILD_TIME: new Date().toISOString()
-});
-```
-
-Bootstrap inicial fora do seed:
-
-- a função `public.bootstrap_unit_admin(...)` cria a primeira `unit`, o vínculo `admin` e o `period_settings` inicial;
-- o uso é restrito a `service_role` ou SQL administrativo;
-- a `service_role` nunca deve ir para `env.js` nem para o browser.
-
-Homologação operacional real da migração assistida:
-
-- o roteiro está em [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md);
-- em 2026-04-22 o fluxo foi validado em navegador real com sessão autenticada, dry-run consistente,
-  snapshot local, pós-migração remoto e fechamento de mês sobre a base remota.
-- em 2026-05-03 o fluxo remoto publicado foi validado em Vercel + Supabase real com admin `smartwonkey@gmail.com`, unidade `Smartfit Pampulha`, dry-run sem divergências, migração inicial e reload remoto bem-sucedido.
-
----
-
-## Testes
+Comandos principais:
 
 ```bash
-# Unitários (Vitest)
 npm test
-
-# E2E responsivo (Playwright headless + múltiplas viewports)
+npm run test:coverage
 npm run test:e2e
-
-# Visual check (screenshots + comparação)
 npm run test:visual
-
-# Tudo
 npm run test:all
 ```
 
-Relatórios ficam em `playwright-report/` e `test-results/`.
-
-> Esses artefatos são locais e estão no `.gitignore`.
-
-### Matriz de CI
-
-O workflow principal (`.github/workflows/ci.yml`) executa:
-
-| Job | Finalidade |
-|---|---|
-| Testes Unitários | `npm run test:coverage`, upload de coverage e Codecov quando token existe |
-| Testes E2E | `npx playwright test --reporter=line` com Chromium |
-| Validação de Estrutura | checa entrypoints, CSP, DOMPurify, reduced motion e modularização |
-| Teste de Responsividade | executa `Scripts/responsive-test.mjs` em múltiplas viewports |
-| Resumo | consolida o status dos jobs no summary do GitHub Actions |
-
-Para smoke pós-deploy real:
+Smoke de deploy publicado:
 
 ```bash
-npm run smoke:deploy
+DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy
 ```
 
----
+Validações importantes por tipo de mudança:
 
-## Qualidade, segurança e auditoria
+| Mudança | Validação recomendada |
+|---|---|
+| Lógica pura | `npm test` |
+| Runtime/app shell | `node --check` nos JS alterados + `npm test` |
+| UI ou fluxo browser | `npm run test:e2e` |
+| Mudança visual sensível | `npm run test:visual` ou specs visuais Playwright |
+| Service Worker/PWA | `tests/e2e/service-worker.spec.js` + smoke |
+| Deploy | `npm run build:env` + `npm run smoke:deploy` |
+| Sync/backup/import | testes unitários de backup/import + fluxo manual controlado |
 
-O projeto recebeu hardening específico para uso em produção browser-first:
+Artefatos locais como `test-results/` e `playwright-report/` não devem ser commitados.
 
-- CSP sem `unsafe-inline` em `script-src` e `style-src`.
-- DOMPurify com SRI para sanitização dos patches HTML.
-- Chart.js com SRI.
-- Supabase JS vendorizado localmente em versão exata para não depender de CDN no fluxo de auth/recovery.
-- Testes de XSS por entidade cobrindo alunos, pendências, eventos, recados, NPS e configurações.
-- Labels de formulários associados a seus campos, incluindo linhas dinâmicas da escala.
-- Service Worker com estratégia de revisão de assets e testes dedicados.
-- Persistência local-first com fila serializada, IndexedDB, espelho localStorage e broadcast cross-tab.
-- Sync Supabase protegido por checkpoint remoto para evitar sobrescrita silenciosa.
-- Importação/sync Supabase guardada por preview aceito e hash de integridade no payload.
+## Segurança e Qualidade
 
-Relatórios e guias principais:
+O projeto já passou por ciclos de hardening importantes:
 
-- [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md)
-- [`Docs/GUIA_CODE_REVIEW_PROJETO.md`](./Docs/GUIA_CODE_REVIEW_PROJETO.md)
-- [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md)
+- CSP sem `unsafe-inline` em scripts e estilos.
+- Headers Vercel para CSP, `X-Frame-Options`, `Referrer-Policy` e `X-Content-Type-Options`.
+- DOMPurify e Chart.js com SRI.
+- Supabase SDK local vendorizado para reduzir dependência de CDN no fluxo de auth/recovery.
+- Testes XSS por entidade.
+- Labels e controles revisados para acessibilidade.
+- Service Worker com cobertura dedicada.
+- Importação Supabase guardada por preview, hash e RPC transacional.
+- CORTEX como camada viva de continuidade, status e retomada.
 
----
+## Design System e UX
 
-## Fluxo Seguro de Evolução
+O WPM Design System Polish Layer v1 está consolidado em `styles.css`:
 
-Para continuar o projeto sem risco de quebrar o deploy atual:
+- tokens de tipografia, espaçamento, raios, sombras, motion e z-index;
+- botões, pills, cards, tabelas, modais, toasts e formulários;
+- estados vazios ricos com próxima ação;
+- `:focus-visible`, `prefers-reduced-motion` e `prefers-contrast`;
+- layout mobile com cards para áreas críticas;
+- botão global back-to-top;
+- checks de responsividade em 390, 480, 760 e 1200px para mudanças visuais.
 
-- use `origin/main` como baseline estável;
-- desenvolva sempre em branch própria;
-- não faça alterações diretas em `main`;
-- valide testes antes de abrir PR.
+Documentos-chave:
 
-Guia prático completo: [`Docs/RETOMADA_SEGURA.md`](./Docs/RETOMADA_SEGURA.md).
+- `Docs/UI_UX_OVERHAUL.md`
+- `Docs/DIAGNOSTICO_MOBILE.md`
+- `.cortex/REGRESSION_MAP.md`
 
----
-
-## Estrutura de diretórios
+## Estrutura de Diretórios
 
 ```
 .
-├── index.html                 # SPA monolítica (entrada principal)
-├── styles.css                 # CSS completo + WPM Polish Layer v1
-├── sw.js                      # Service Worker (PWA)
-├── manifest.json              # Web App Manifest
+├── index.html
+├── styles.css
+├── sw.js
+├── manifest.json
+├── env.example.js
+├── vercel.json
 ├── src/
-│   ├── main.js                # Bootstrap + lifecycle
-│   ├── types.js               # JSDoc typedefs
-│   ├── core/                  # Persistência, backup, schema, observabilidade
-│   ├── domain/                # Selectors puros
-│   ├── features/              # Regras de negócio (crud, forms, nps, csv)
+│   ├── core/
+│   ├── domain/
+│   ├── features/
+│   ├── reconstruction/
 │   ├── ui/
-│   │   ├── render-*.js        # Funções de renderização por view
-│   │   └── events-*.js        # Bindings de DOM events
-│   └── utils/helpers.js       # Esc, date, format, debounce, etc.
-├── Scripts/                   # Ferramentas dev (setup-env, testes)
-├── tests/                     # Unitários (Vitest) e E2E (Playwright)
-├── icons/                     # Ícones PWA
-├── adapters/                  # Adapters de integração (Supabase, etc.)
-├── Docs/                      # Documentação técnica e roadmap
-└── Legacy/                    # Arquivos antigos preservados
+│   ├── utils/
+│   ├── vendor/
+│   ├── main.js
+│   └── types.js
+├── supabase/
+│   ├── migrations/
+│   ├── reconstruction/
+│   ├── config.toml
+│   └── seed.sql
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   ├── e2e/
+│   └── helpers/
+├── Scripts/
+├── Docs/
+├── _reversa_sdd/
+├── .cortex/
+├── icons/
+└── Legacy/
 ```
 
----
+## Documentação Principal
 
-## Design system
-
-Consolidado no **WPM Design System Polish Layer v1** (camada aditiva em `styles.css`).
-
-### Tokens globais
-
-- **Tipografia**: `--font-2xs` a `--font-3xl`.
-- **Espaçamento**: escala consistente.
-- **Raios**: `--radius-sm`/`md`/`lg`/`xl`.
-- **Sombras**: `--shadow-xs` a `--shadow-xl` + `--shadow-focus`.
-- **Motion**: `--motion-fast`/`base`/`slow`, `--ease-out`, `--ease-spring`.
-- **Z-index**: `--z-sticky`, `--z-topbar: 40`, `--z-modal: 90`, `--z-toast: 100`.
-- **Cores**: tema escuro com acento `#FFC20F` (dourado).
-
-### Componentes
-
-Botões (`.btn`, `.btn-primary`, `.btn-ghost`, `.btn-danger`, `.btn-xs`, `.btn.is-loading`), cards (`.card`, `.card-kpi`, `.card-nav`), pills (`.pill`, `.pill.ok`, `.pill.bad`, `.pill.warn`, `.pill--dot`), tabelas (`.table` com scroll-shadows + zebra + tabular-nums), modais (sticky head/footer com blur), formulários (inputs com transições, `.field-error`, `.field-group`).
-
-### Estados vazios ricos
-
-```html
-<div class="empty">
-  <strong>Título direto</strong>
-  Corpo explicativo com <em>próxima ação</em> em destaque dourado.
-</div>
-```
-
-Variante compacta: `.empty.empty--compact`.
-
-### Acessibilidade
-
-- `:focus-visible` universal com `--shadow-focus`.
-- `@media (prefers-reduced-motion: reduce)` — desliga todas as animações.
-- `@media (prefers-contrast: more)` — reforça bordas, pills e placeholders.
-- Navegação por teclado no Kanban (ArrowUp/Down, Home/End, Alt+Arrow para mover).
-- `aria-label` em todos os botões de ação de linha.
-
-### Utilitários globais
-
-- **Back-to-top** flutuante (`.back-to-top`) que aparece após 480px de scroll e oculta automaticamente quando modal está aberto.
-- **Toasts** com transições suaves.
-- **Skeleton loading** (`.skeleton`, `.skeleton-row`, `.skeleton-pill`).
-
-Detalhes completos em [`Docs/UI_UX_OVERHAUL.md`](./Docs/UI_UX_OVERHAUL.md).
-
----
-
-## PWA e offline
-
-O app funciona offline após a primeira visita:
-
-- **Service Worker** (`sw.js`) pré-cacheia `index.html`, `styles.css`, módulos `src/**/*.js`, `manifest.json` e ícones.
-- **IndexedDB** guarda todo o `state` — atendimentos, pendências, escalas, NPS, eventos, configurações.
-- **Sync local-first guardada**: quando autenticado no Supabase, o app envia o store local para o backend apenas se o checkpoint remoto da unidade ainda bate com a última leitura/sincronização conhecida.
-- **Backup JSON** por um clique em *Configurações* → ideal para migrar entre navegadores ou arquivar o mês.
-- **Detecção online/offline**: toast notifica quando conexão cai ou volta.
-
-> **Atenção ao cache**: após deploy, o service worker pode manter assets antigos. Plano de mitigação em [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) (Etapa 2).
-
----
-
-## Documentação complementar
-
-| Arquivo | Conteúdo |
+| Documento | Finalidade |
 |---|---|
-| [`Docs/DOCUMENTACAO.md`](./Docs/DOCUMENTACAO.md) | Documentação funcional completa |
-| [`Docs/UI_UX_OVERHAUL.md`](./Docs/UI_UX_OVERHAUL.md) | Design system + polish layer v1 |
-| [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) | Roadmap de evolução (Fase 0 → backend) |
-| [`Docs/BACKEND_CANONICO.md`](./Docs/BACKEND_CANONICO.md) | ERD lógico, papéis e transações canônicas do backend |
-| [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md) | Checklist operacional da migração assistida real |
-| [`Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md) | Homologação remota Vercel + Supabase, recovery, dry-run, migração e reload |
-| [`Docs/BUGS_CONHECIDOS.md`](./Docs/BUGS_CONHECIDOS.md) | Bugs e riscos rastreados |
-| [`Docs/DIAGNOSTICO_MOBILE.md`](./Docs/DIAGNOSTICO_MOBILE.md) | Análise mobile + Bug 2/Bug 3 |
-| [`Docs/MAPA_ENTIDADES.md`](./Docs/MAPA_ENTIDADES.md) | Modelo de dados para backend |
-| [`Docs/FASE_0_CHECKLIST.md`](./Docs/FASE_0_CHECKLIST.md) | Checklist de preparação para Supabase |
-| [`MODULE_MAP.md`](./MODULE_MAP.md) | Mapa modular (render-*, events-*, features) |
-| [`TECH_DEBT.md`](./TECH_DEBT.md) | Débito técnico e prioridades |
-| [`MIGRATION_STATUS.md`](./MIGRATION_STATUS.md) | Status da migração para backend |
+| [Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md](./Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md) | Fonte de verdade da homologação Vercel + Supabase |
+| [Docs/PROXIMOS_PASSOS.md](./Docs/PROXIMOS_PASSOS.md) | Roadmap atual, incluindo Etapas 11 e 12 |
+| [Docs/RETOMADA_SEGURA.md](./Docs/RETOMADA_SEGURA.md) | Protocolo de retomada e proteção do baseline |
+| [.cortex/CURRENT_STATUS.md](./.cortex/CURRENT_STATUS.md) | Estado operacional vivo |
+| [.cortex/AGENT_HANDOFF.md](./.cortex/AGENT_HANDOFF.md) | Handoff para próxima sessão |
+| [.cortex/RETOMADA_MASTER.md](./.cortex/RETOMADA_MASTER.md) | Guia mestre de recuperação |
+| [MODULE_MAP.md](./MODULE_MAP.md) | Ordem de carga e responsabilidade dos módulos |
+| [MIGRATION_STATUS.md](./MIGRATION_STATUS.md) | Histórico e snapshot da migração |
+| [Docs/BACKEND_CANONICO.md](./Docs/BACKEND_CANONICO.md) | Modelo lógico Supabase |
+| [Docs/GUIA_CODE_REVIEW_PROJETO.md](./Docs/GUIA_CODE_REVIEW_PROJETO.md) | Guia de revisão e validação |
+| [Docs/DEPLOY_OBSERVABILIDADE.md](./Docs/DEPLOY_OBSERVABILIDADE.md) | Deploy, smoke, observabilidade e rollback |
+| [Docs/UI_UX_OVERHAUL.md](./Docs/UI_UX_OVERHAUL.md) | Design system e polish layer |
+| [_reversa_sdd/](./_reversa_sdd/) | Especificações reconstruídas pelo Reversa |
 
----
+## Roadmap Atual
 
-## Roadmap
+- [x] Modularização do antigo app monolítico.
+- [x] Separação `core`, `domain`, `features`, `ui`, `utils`.
+- [x] UI/UX Overhaul v1 e correções mobile críticas.
+- [x] PWA/service worker endurecido.
+- [x] CSP, SRI, headers Vercel e testes XSS.
+- [x] Backend canônico Supabase com migrations e RPCs.
+- [x] Sync local-first guardado por checkpoint remoto.
+- [x] Auth/recovery/login em produção.
+- [x] Migração inicial remota homologada.
+- [ ] Etapa 11: piloto operacional controlado com dado real/controlado.
+- [ ] Etapa 12: runbook operacional pós-piloto.
+- [ ] Multi-unidade.
+- [ ] Relatórios exportáveis.
 
-- [x] **Fase 0** — Infraestrutura de runtime, Supabase base e observabilidade
-- [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
-- [x] **Cache-busting do Service Worker** — versionamento por manifesto/revisão de assets e precache do SDK Supabase local
-- [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
-- [x] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, recovery, SDK local, homologação remota e guarda de conflito por checkpoint prontos
-- [ ] **Piloto operacional controlado** — validar um atendimento real/controlado criado em produção, sincronizado e recarregado do Supabase
-- [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
-- [ ] **Relatórios exportáveis** — PDF mensal consolidado
+## Como Continuar o Projeto
 
-Detalhes em [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md).
+Antes de qualquer nova tarefa:
 
----
+```bash
+git status --short --branch
+git log --oneline -n 5
+sed -n '1,180p' .cortex/CURRENT_STATUS.md
+sed -n '1,160p' .cortex/AGENT_HANDOFF.md
+```
 
-## Contribuindo
+Regra de ouro atual:
 
-Este é um projeto interno da WPM, mas o código segue práticas abertas:
+1. Não iniciar feature nova antes da Etapa 11.
+2. Não fazer refinamento visual antes de provar persistência real em produção.
+3. Não usar `Importar backup` em produção sem preview revisado.
+4. Não clicar `Sincronizar agora` repetidamente.
+5. Documentar cada etapa concluída em `.cortex/` e `Docs/RETOMADA_SEGURA.md`.
 
-1. Crie uma branch a partir de `main` (`feat/...`, `fix/...`, `docs/...`).
-2. Rode `npm run test:all` antes de abrir PR.
-3. Siga o padrão de commits: `tipo(escopo): mensagem` em pt-BR.
-4. Para mudanças em `styles.css`, valide em 390 / 480 / 760 / 1200px.
+## Contribuição e Fluxo Git
 
-O repositório usa o framework **CORTEX** (`.cortex/`) para auditoria e governança — ver [`PROTOCOL.md`](./PROTOCOL.md).
+Este é um projeto interno da WPM, mas o repositório segue práticas formais:
 
----
+- trabalhar em branch própria a partir de `origin/main`;
+- usar commits convencionais em pt-BR;
+- rodar validações compatíveis com o escopo da mudança;
+- não commitar `env.js`, secrets, `test-results/` ou `playwright-report/`;
+- manter README, `.cortex/` e docs de status alinhados quando a verdade operacional mudar.
 
 ## Licença
 
-ISC — ver [`package.json`](./package.json).
-
----
+ISC. Consulte `package.json`.
 
 ## Autor
 
-**Wallace Phillip Maclayne** · [@WPHILLIPMACLAYNE](https://github.com/WPHILLIPMACLAYNE)
-
-Engenharia assistida por Claude · Anthropic
+Wallace Phillip Maclayne - [@WPHILLIPMACLAYNE](https://github.com/WPHILLIPMACLAYNE)

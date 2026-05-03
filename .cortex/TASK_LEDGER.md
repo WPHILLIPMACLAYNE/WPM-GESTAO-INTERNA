@@ -499,3 +499,27 @@ This file records one durable checkpoint per completed task.
   - reload from backend
   - confirm the atendimento returns from Supabase
   - document the result before testing pendencia/addon or starting any UI/frontend work
+
+### Task 017
+
+- Date/time: 2026-05-03 15:24:54 -03
+- Branch: `main`
+- HEAD before this task: `b4b50fd`
+- Task: rewrite GitHub README to match the current modular app, Vercel/Supabase production state, and Etapa 11 gate
+- Files touched:
+  - `README.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - README was checked against `package.json`, `MODULE_MAP.md`, `vercel.json`, `env.example.js`, `src/`, `tests/`, `.cortex/CURRENT_STATUS.md`, and `Docs/PROXIMOS_PASSOS.md`
+  - `git diff --check` passed
+  - local README links were verified with a Node script
+  - no runtime, Supabase, Vercel, UI, or pilot action was started
+- Pending:
+  - execute **Etapa 11 - Piloto operacional controlado em producao** in the next session
+- Next step:
+  - keep Etapa 11 as the next project action
+  - do not start visual polish or feature work before the controlled production pilot is documented

@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 15:19:24 -03
+Last updated: 2026-05-03 15:24:54 -03
 
 ## Purpose
 
@@ -30,6 +30,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - Recovery, password setup, login, dry-run, initial migration, backend reload, and January-to-December navigation were manually validated on 2026-05-03.
 - The migrated remote dataset currently contains 12 periods and zero operational records.
 - Work paused by operator on 2026-05-03 at 15:19:24 -03. Resume with Etapa 11 only.
+- README was refreshed after the pause checkpoint to make GitHub match the current project state.
 
 ## Mandatory read order on resume
 

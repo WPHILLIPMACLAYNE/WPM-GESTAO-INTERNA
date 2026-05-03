@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 15:19:24 -03
+Última atualização: 2026-05-03 15:24:54 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção, preservando o baseline remoto Supabase já homologado.
 
 ## Baseline oficial
@@ -138,6 +138,7 @@ Data/hora: 2026-05-03 15:19:24 -03
 - Runtime publicado principal: `https://wpm-gestao-interna.vercel.app`
 - Estágio atual: **homologação remota Supabase concluída; próximo bloco é piloto operacional controlado**
 - Pausa operacional: trabalho pausado a pedido do operador; ao retomar amanhã, não iniciar feature, UI/frontend ou refatoração antes da Etapa 11
+- Atualização posterior à pausa: `README.md` foi reescrito para refletir o estado atual no GitHub sem iniciar a Etapa 11
 - Estado do worktree ao fim desta etapa:
   - Vercel publica `env.js` com `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`
   - app publicado carrega Supabase pelo bundle local `src/vendor/supabase-js-2.104.0.umd.js`
@@ -161,6 +162,7 @@ Data/hora: 2026-05-03 15:19:24 -03
   - homologação final foi registrada em `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
   - docs de continuidade foram atualizados para o estágio correto
   - planejamento de retomada para amanhã foi engatilhado para iniciar pela Etapa 11
+  - README público foi atualizado para remover narrativa antiga de app monolítico e documentar arquitetura modular, Vercel, Supabase e piloto pendente
 - Arquivos tocados no bloco de atualização documental:
   - `README.md`
   - `MIGRATION_STATUS.md`

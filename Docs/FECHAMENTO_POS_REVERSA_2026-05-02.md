@@ -2,6 +2,8 @@
 
 Data: 2026-05-02
 
+Atualizacao 2026-05-03: homologacao pos-merge registrada em [`HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./HOMOLOGACAO_POS_MERGE_2026-05-03.md). O browser autenticou no Supabase local com perfil gravavel, mas a migracao assistida ficou corretamente bloqueada por `remote-mismatch` em `2026-04`.
+
 Objetivo: iniciar a etapa de fechamento e homologacao da integracao pos-Reversa, separando o que ja esta validado localmente do que ainda precisa ser aplicado no Supabase alvo.
 
 ## Estado executivo

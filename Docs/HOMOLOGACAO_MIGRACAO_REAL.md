@@ -4,6 +4,8 @@ Data: 2026-04-22
 
 Atualizacao 2026-05-02: a etapa de fechamento pos-Reversa adicionou uma camada obrigatoria de preview aceito e integridade de payload para importacao/sync Supabase. O roteiro complementar esta em [`FECHAMENTO_POS_REVERSA_2026-05-02.md`](./FECHAMENTO_POS_REVERSA_2026-05-02.md).
 
+Atualizacao 2026-05-03: a homologacao pos-merge local esta registrada em [`HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./HOMOLOGACAO_POS_MERGE_2026-05-03.md). O fluxo browser autenticou, mas o dry-run bloqueou a migracao por divergencias entre local e remoto em `2026-04`.
+
 Objetivo: validar a migracao assistida da base legada real para o backend Supabase sem perda silenciosa de dados.
 
 > Resultado do ciclo de 2026-04-22:

@@ -99,3 +99,33 @@ Evidencia pos-ajuste:
 - Dry-run apos migracao: `remoteState=present`, 12 periodos remotos, 0 divergencias, `matches=true`.
 - Contagens no banco local apos migracao: 12 periodos, 360 alunos, 240 pendencias, 120 eventos, 220 vendas de addon, 1 evento de auditoria.
 - `npx supabase migration list --local`: migration `20260503130312` registrada junto das migrations anteriores.
+
+## Retomada da homologacao remota funcional
+
+Ainda em 2026-05-03, a retomada da etapa remota confirmou:
+
+- `DEPLOY_SMOKE_URL="https://wphillipmaclayne.github.io/WPM-GESTAO-INTERNA/" npm run smoke:deploy`: 1 teste Playwright passou contra o app publicado.
+- A URL do GitHub Pages respondeu `200`.
+- A URL do Vercel (`https://wpm-gestao-interna.vercel.app/`) respondeu `200`.
+- Ambos os artefatos publicados inicializavam em modo local-first, mas sem `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG` no runtime.
+- Consequencia: a autenticacao real e o dry-run remoto funcional ainda nao podiam ser executados nesses deploys publicados.
+
+Correcao preparada no codigo:
+
+- `src/core/env-bootstrap.js` passou a carregar `env.js` opcional tambem em runtime publicado, antes de `config.js`.
+- `vercel.json` passou a executar `npm run build:env`, materializando `env.js` com variaveis publicas/browser-safe no artefato do Vercel.
+- README e `Docs/DEPLOY_OBSERVABILIDADE.md` foram alinhados ao novo contrato.
+
+Evidencia da correcao:
+
+- `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js`: 44 testes passaram.
+- `npm run smoke:deploy`: 1 teste Playwright passou contra o app local servido por HTTP, com `env.js` carregado antes dos modulos.
+
+Proxima etapa segura:
+
+1. Configurar no deploy remoto somente variaveis publicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG` e metadados de release quando aplicavel.
+2. Redeployar o artefato.
+3. Confirmar que `env.js` publicado existe e que o app mostra `hasEnv=true` sem expor segredo em log.
+4. Autenticar na unidade real.
+5. Executar apenas `Executar dry-run` em `Configuracoes` -> `Migracao assistida`.
+6. Revisar o preview humano antes de qualquer clique em `Migrar para o backend`.

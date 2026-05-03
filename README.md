@@ -203,9 +203,10 @@ Acesse **http://localhost:3000**.
 ### Runtime de ambiente (`env.js`)
 
 - O app sempre inicia com defaults seguros de `window.__APP_ENV__` em `src/core/env-bootstrap.js`.
-- O arquivo `env.js` é opcional e carregado somente em runtime local (`localhost`, `127.0.0.1` ou `file://`).
-- Em deploy remoto (como GitHub Pages), `env.js` não é requisitado, evitando ruído de `404` no boot.
+- O arquivo `env.js` é opcional e carregado em runtime local ou publicado antes de `config.js`.
+- Em deploy remoto, `env.js` deve ser gerado pelo build/hosting quando houver Supabase/Sentry; se o arquivo não existir, o app permanece em modo local-first.
 - Chaves públicas suportadas hoje: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `APP_COMMIT`, `APP_BUILD_TIME` e `APP_RUNTIME_OVERRIDE`.
+- No Vercel, `vercel.json` executa `npm run build:env`; configure somente variáveis públicas/browser-safe no ambiente do projeto.
 - Checklist de deploy, smoke pós-deploy e rollback seguro: [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md).
 
 ### Backend local (`Supabase`)

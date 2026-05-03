@@ -17,6 +17,8 @@ APP_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
 node Scripts/generate-env.mjs
 ```
 
+No Vercel, o `vercel.json` executa `npm run build:env` para materializar esse `env.js` no artefato publicado. O projeto de deploy deve receber apenas variáveis públicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `APP_COMMIT`, `APP_BUILD_TIME` e `APP_RUNTIME_OVERRIDE`.
+
 Se `SENTRY_RELEASE` não for informado, o Sentry usa `APP_VERSION@APP_COMMIT`. Em desenvolvimento local sem commit injetado, o app mostra `local`.
 
 ## Smoke pós-deploy

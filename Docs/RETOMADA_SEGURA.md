@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-04-22 16:38:51 -03
+Última atualização: 2026-05-03 10:34:24 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -127,6 +127,50 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 ```
 
 ## Checkpoint atual
+
+Data/hora: 2026-05-03 10:34:24 -03
+
+- Branch atual: `main`
+- Último commit conhecido: `1d34d0b`
+- Estado do worktree ao fim desta etapa:
+  - hotfix de runtime remoto preparado e ainda pendente de commit/push
+  - docs de continuidade atualizados para homologação remota funcional
+  - nenhuma migração real executada
+- Contexto recuperado e consolidado:
+  - a integração pós-Reversa já está em `main`
+  - a homologação Supabase local pós-merge passou contra alvo local descartável
+  - GitHub Pages e Vercel respondem `200`, mas ambos estavam sem `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG` em runtime
+  - sem `env.js` publicado, não há como autenticar na unidade real nem executar o dry-run remoto funcional
+- Tarefa concluída nesta etapa:
+  - `src/core/env-bootstrap.js` passa a carregar `env.js` opcional também em deploy HTTP/HTTPS
+  - `vercel.json` passa a executar `npm run build:env`
+  - README, deploy docs, homologação e `.cortex/` foram alinhados
+- Arquivos tocados nesta etapa:
+  - `src/core/env-bootstrap.js`
+  - `src/reconstruction/env-bootstrap.js`
+  - `vercel.json`
+  - `tests/unit/reconstruction-env-bootstrap.test.js`
+  - `README.md`
+  - `Docs/DEPLOY_OBSERVABILIDADE.md`
+  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validação executada:
+  - `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK com `44 passed`
+  - `git diff --check` OK
+  - `npm run smoke:deploy` OK com `1 passed` contra runtime HTTP local
+- Pendências imediatas:
+  - commitar e fazer push deste hotfix em `main`
+  - configurar no Vercel somente variáveis públicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
+  - redeployar e confirmar `/env.js` publicado sem expor segredo
+- Próximo passo exato mais seguro:
+  - após redeploy, confirmar `hasEnv=true`, autenticar na unidade real e executar apenas `Executar dry-run` em `Configurações -> Migração assistida`
+  - não clicar em `Migrar para o backend` antes de revisão humana do preview
+
+## Checkpoint histórico anterior
 
 Data/hora: 2026-04-22 16:38:51 -03
 

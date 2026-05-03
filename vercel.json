@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build:env",
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",

@@ -302,3 +302,35 @@ This file records one durable checkpoint per completed task.
   - address or explicitly scope remaining `style-src 'unsafe-inline'`
   - add production CSP/clickjacking headers for the selected deploy platform
   - add XSS regression tests for aluno, pendência, evento, recado, NPS and configurações
+
+### Task 011
+
+- Date/time: 2026-05-03 10:34:24 -03
+- Branch: `main`
+- HEAD: `1d34d0b` with remote-runtime hotfix pending commit
+- Task: prepare remote-runtime deploy hotfix so published app can load browser-safe Supabase env and continue functional remote homologation
+- Files touched:
+  - `src/core/env-bootstrap.js`
+  - `src/reconstruction/env-bootstrap.js`
+  - `vercel.json`
+  - `tests/unit/reconstruction-env-bootstrap.test.js`
+  - `README.md`
+  - `Docs/DEPLOY_OBSERVABILIDADE.md`
+  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
+  - `git diff --check` OK
+  - `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
+- Pending:
+  - commit and push the hotfix to `origin/main`
+  - configure public/browser-safe deploy env vars in Vercel
+  - redeploy and confirm `/env.js` plus `hasEnv=true`
+- Next step:
+  - authenticate in the real unit after redeploy
+  - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
+  - do not click `Migrar para o backend` before human preview review

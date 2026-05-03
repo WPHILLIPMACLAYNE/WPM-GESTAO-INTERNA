@@ -46,6 +46,11 @@ export function isLocalRuntime(locationLike = globalThis.location) {
   return protocol === 'file:' || LOCAL_HOSTNAMES.includes(hostname);
 }
 
+export function canLoadRuntimeEnvScript(locationLike = globalThis.location) {
+  if (!locationLike) return false;
+  return ['file:', 'http:', 'https:'].includes(locationLike.protocol || '');
+}
+
 export function shouldUseDocumentWrite(documentLike = globalThis.document) {
   return Boolean(documentLike && documentLike.readyState === 'loading');
 }
@@ -86,10 +91,11 @@ export function bootstrapRuntimeEnv(globalLike = globalThis, options = {}) {
 
   globalLike[envKey] = mergeAppEnv(existingEnv);
 
-  if (!isLocalRuntime(locationLike)) {
+  const localRuntime = isLocalRuntime(locationLike);
+  if (!canLoadRuntimeEnvScript(locationLike)) {
     return {
       env: globalLike[envKey],
-      localRuntime: false,
+      localRuntime,
       envScriptLoaded: false,
       loadMode: null,
     };
@@ -99,7 +105,7 @@ export function bootstrapRuntimeEnv(globalLike = globalThis, options = {}) {
 
   return {
     env: globalLike[envKey],
-    localRuntime: true,
+    localRuntime,
     envScriptLoaded: Boolean(injection),
     loadMode: injection?.mode || null,
   };

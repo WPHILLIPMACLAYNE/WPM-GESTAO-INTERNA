@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-04-22 16:38:51 -03
+Last updated: 2026-05-03 10:34:24 -03
 
 ## Current handoff
 
@@ -8,9 +8,9 @@ This repository already has a functioning CORTEX layer and it must now be mainta
 
 Current state:
 
-- baseline branch in use: `VSCODEX1807`
-- current HEAD reference: `5eb1324`
-- previous continuity base commit: `623b50a`
+- baseline branch in use: `main`
+- current HEAD reference: `1d34d0b` with remote-runtime hotfix pending commit
+- previous continuity base commit: `1d34d0b`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
 - local executable baseline validated successfully in this session
@@ -28,7 +28,13 @@ Current state:
 - DOMPurify/Chart.js keep CDN loading but now require SRI
 - app-shell inline scripts were extracted to `src/core/env-bootstrap.js`, `src/ui/back-to-top.js`, and `src/core/pwa.js`
 - Playwright HTTP validation now uses isolated port `4173`
-- `VSCODEX1807` now exists on GitHub and tracks `origin/VSCODEX1807`
+- post-Reversa integration has already landed on `main`
+- local post-merge homologation passed against disposable Supabase local
+- GitHub Pages and Vercel both answer `200`, but both published artifacts currently lack Supabase runtime env
+- the next blocker is deploy configuration, not app bootstrap logic
+- `src/core/env-bootstrap.js` now loads optional `env.js` in published HTTP/HTTPS runtimes
+- `vercel.json` now generates `env.js` via `npm run build:env`
+- no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
 
@@ -78,8 +84,11 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Commit this continuity checkpoint, push `VSCODEX1807`, then continue Etapa 4:
+Commit and push the remote-runtime hotfix on `main`, then configure the deploy:
 
-1. address remaining `style-src 'unsafe-inline'` or document the exact blockers
-2. add production CSP/clickjacking headers for the selected deploy platform
-3. add XSS regression tests for aluno, pendência, evento, recado, NPS and configurações
+1. configure only public/browser-safe env vars in Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
+2. redeploy the app
+3. confirm `/env.js` exists and `hasEnv=true`
+4. authenticate in the real unit
+5. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
+6. do not click `Migrar para o backend` before human preview review

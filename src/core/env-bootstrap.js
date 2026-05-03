@@ -1,8 +1,8 @@
 /**
  * Runtime environment bootstrap.
  *
- * Keeps safe defaults available before config.js and loads the optional local
- * env.js override only in local runtimes.
+ * Keeps safe defaults available before config.js and loads the optional
+ * browser-safe env.js override in local and deployed runtimes.
  */
 (function bootstrapRuntimeEnv() {
   window.__APP_ENV__ = Object.assign({
@@ -17,9 +17,8 @@
     APP_RUNTIME_OVERRIDE: null
   }, window.__APP_ENV__ || {});
 
-  const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
-  const isLocalRuntime = window.location.protocol === 'file:' || localHosts.has(window.location.hostname);
-  if (!isLocalRuntime) return;
+  const canLoadRuntimeEnv = ['file:', 'http:', 'https:'].includes(window.location.protocol);
+  if (!canLoadRuntimeEnv) return;
 
   if (document.currentScript && document.readyState === 'loading') {
     document.write('<script src="env.js"><\/script>');

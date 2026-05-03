@@ -1,24 +1,34 @@
 # CURRENT_STATUS
 
-Snapshot date: 2026-04-22
-Last updated: 2026-04-22 16:38:51 -03
+Snapshot date: 2026-05-03
+Last updated: 2026-05-03 10:34:24 -03
 
 ## Live status
 
-- Branch: `VSCODEX1807`
-- HEAD: `5eb1324`
+- Branch: `main`
+- HEAD: `1d34d0b` with remote-runtime hotfix staged in the worktree
 - Baseline in production: `origin/main`
 - App version: `v34`
 - Store version: `4`
 - Runtime model: browser-only SPA with classic `<script>` files in fixed order
-- Active recovery branch: `VSCODEX1807`
-- Recovery branch created at: `2026-04-18 18:07:46 -03`
-- Previous continuity base commit: `623b50a`
-- Remote tracking branch: `origin/VSCODEX1807`
+- Active recovery branch: `main` after post-Reversa merge
+- Recovery branch created at: not applicable for this checkpoint
+- Previous continuity base commit: `1d34d0b`
+- Remote tracking branch: `origin/main`
 
 ## Current working reading
 
 The project is operationally mature, baseline-validated, and now locally hardened on the most urgent PWA/cache risks, while still architecturally fragile.
+
+Current 2026-05-03 reading:
+
+- local Supabase homologation passed after reset/reseed of a disposable local target
+- published GitHub Pages and Vercel URLs both answered `200`
+- both published artifacts booted in local-first mode but did not expose Supabase runtime env
+- the functional remote dry-run cannot proceed until the deploy publishes a browser-safe `env.js`
+- `src/core/env-bootstrap.js` now loads optional `env.js` in local and deployed HTTP/HTTPS runtimes
+- `vercel.json` now runs `npm run build:env` so Vercel can materialize `env.js` from public/browser-safe env vars
+- focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
 
@@ -45,21 +55,19 @@ Confirmed live facts:
 
 ## Current safe next step
 
-After the validated baseline, service-worker hardening, Etapa 3 logic hardening, and the first Etapa 4 CSP hardening slice:
+After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
 
-1. stay on `VSCODEX1807` for recovery-safe work
-2. commit this continuity checkpoint
-3. push `VSCODEX1807` so local and remote converge again
-4. continue Etapa 4 with style/CSP headers and XSS tests before backend expansion
+1. commit the remote-runtime hotfix and continuity checkpoint on `main`
+2. push `main` to GitHub
+3. configure only public/browser-safe deploy env vars in Vercel
+4. redeploy and confirm `/env.js` exists without logging secrets
+5. authenticate in the real unit and run only the assisted-migration dry-run
 
 Latest validation result:
 
-1. `npm audit --audit-level=moderate` OK with `0 vulnerabilities`
-2. `node --check src/core/env-bootstrap.js src/core/pwa.js src/ui/back-to-top.js sw.js` OK
-3. `npm test -- --run --reporter=dot` OK with `130 passed`
-4. `npx playwright test tests/e2e/service-worker.spec.js --reporter=line` OK with `2 passed`
-5. `npx playwright test tests/e2e/app.spec.js --reporter=line` OK with `25 passed`
-6. `npm run test:e2e` OK with no issues across all viewports
+1. `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
+2. `git diff --check` OK
+3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
 
 ## CORTEX operating rule
 
@@ -94,6 +102,7 @@ For present-state decisions, trust these in order:
 - storage, backup, and lifecycle centrality
 - documentation drift across historical docs
 - deploy/rollback validation in a reused browser is still pending outside local tests
+- remote deploy env still must be configured before real-unit dry-run
 - `style-src 'unsafe-inline'` still remains because of inline style attributes/templates
 - production CSP/clickjacking headers still need deploy-platform implementation
 - XSS regression tests per entity still need to be added

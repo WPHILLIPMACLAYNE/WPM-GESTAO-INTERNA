@@ -10,6 +10,7 @@
       store.activePeriod = isValidPeriodKey(store.activePeriod) ? String(store.activePeriod) : getInitialPeriodKey();
       store.periods = store.periods && typeof store.periods === 'object' && !Array.isArray(store.periods) ? store.periods : {};
       store.archives = store.archives && typeof store.archives === 'object' && !Array.isArray(store.archives) ? store.archives : {};
+      store.reopenAudit = Array.isArray(store.reopenAudit) ? store.reopenAudit.filter(item => item && typeof item === 'object') : [];
       store.preferences = normalizeStorePreferences(store.preferences);
 
       Object.keys(store.periods).forEach(key => {
@@ -142,11 +143,15 @@
         const preferences = parsed.preferences && typeof parsed.preferences === 'object' && !Array.isArray(parsed.preferences)
           ? cloneSerializable(parsed.preferences)
           : {};
+        const reopenAudit = Array.isArray(parsed.reopenAudit)
+          ? parsed.reopenAudit.filter(item => item && typeof item === 'object').map(item => cloneSerializable(item))
+          : [];
         const store = normalizeStore({
           version: getStoreVersion(parsed),
           activePeriod: parsed.activePeriod,
           periods: rawPeriods,
           archives,
+          reopenAudit,
           preferences
         });
         const currentYear = String(store.activePeriod || getInitialPeriodKey()).split('-')[0];

@@ -20,6 +20,9 @@
       renderMigrationHomologationPanel();
       renderPeriodAudit();
       renderFlowSmokePanel();
+      if (typeof setSettingsPanel === 'function') {
+        setSettingsPanel(document.getElementById('settings')?.dataset.settingsPanel || 'all');
+      }
     }
 
     /** @returns {Promise<void>} */

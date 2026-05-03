@@ -2,6 +2,8 @@
 
 Data: 2026-04-22
 
+Atualizacao 2026-05-02: a etapa de fechamento pos-Reversa adicionou uma camada obrigatoria de preview aceito e integridade de payload para importacao/sync Supabase. O roteiro complementar esta em [`FECHAMENTO_POS_REVERSA_2026-05-02.md`](./FECHAMENTO_POS_REVERSA_2026-05-02.md).
+
 Objetivo: validar a migracao assistida da base legada real para o backend Supabase sem perda silenciosa de dados.
 
 > Resultado do ciclo de 2026-04-22:
@@ -17,6 +19,7 @@ Use este roteiro em qualquer primeira migracao real de unidade ou em reimportaca
 
 - `env.js` configurado com `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG` quando aplicavel.
 - Backend local/remoto acessivel e usuario autenticavel com perfil gravavel na unidade correta.
+- Migration `supabase/migrations/20260502183000_import_guard_preview_integrity.sql` aplicada quando o alvo for Supabase remoto.
 - Operacao conduzida em uma unica janela e, idealmente, sem outro dispositivo editando a mesma unidade durante a homologacao.
 - Base local real ja carregada no navegador que sera migrado.
 
@@ -38,6 +41,7 @@ Use este roteiro em qualquer primeira migracao real de unidade ou em reimportaca
 - Clicar em `Executar dry-run`.
 - Conferir no relatorio:
   - contagens locais coerentes com o Dashboard;
+  - preview granular coerente por periodo e tipo de entidade;
   - recados legados detectados quando existirem;
   - situacao remota em um dos estados seguros:
     - `Backend vazio`
@@ -58,6 +62,8 @@ Use este roteiro em qualquer primeira migracao real de unidade ou em reimportaca
 - Clicar em `Migrar para o backend`.
 - Esperar a conclusao do backup local automatico e do envio transacional.
 - Confirmar o toast final sem erro.
+- Confirmar que a importacao so foi liberada apos aceite explicito do preview.
+- Em homologacao tecnica, validar que payload adulterado ou sem aceite de preview e rejeitado pelo backend.
 
 5. Validar o pos-migracao
 
@@ -89,6 +95,8 @@ Se a validacao falhar:
 ## Criterio de aceite
 
 - Dry-run coerente com a base local real.
+- Preview aceito explicitamente antes de qualquer substituicao destrutiva.
+- Backend remoto rejeita importacao sem `p_preview_accepted=true` ou com integridade invalida.
 - Primeira importacao ou reimportacao concluida sem erro.
 - Pos-migracao remoto bate com a amostra local revisada.
 - Nenhuma perda de historico de meses fechados.

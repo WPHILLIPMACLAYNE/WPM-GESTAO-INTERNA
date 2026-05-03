@@ -39,6 +39,27 @@ O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **
 - **Autonomia**: backup/import em um clique, sem servidor obrigatório.
 - **Estética premium**: design system consolidado em tema escuro com acento dourado.
 
+## Status atual
+
+`main` permanece como baseline estável publicada. A linha atual de evolução concentra o fechamento pós-Reversa e os hardenings de backend/importação descobertos na reconstrução executável.
+
+A baseline recente foi validada em CI com:
+
+- **Testes Unitários + Coverage**: Vitest com provider `@vitest/coverage-v8`.
+- **Testes E2E**: Playwright em Chromium.
+- **Validação de estrutura**: presença de entrypoints, CSP, DOMPurify e módulos críticos.
+- **Teste de responsividade**: script multi-viewport em desktop, tablet e mobile.
+- **Deploy preview**: Vercel ativo para branches de release.
+
+Auditoria executiva registrada em [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md).
+
+Fechamento pos-Reversa iniciado em 2026-05-02:
+
+- integracao local concluida nos blocos 1 a 6;
+- migration `20260502183000_import_guard_preview_integrity.sql` aplicada e validada no Supabase local;
+- schema remoto aplicado no projeto `eautmpqkxibolmcfiacd` com 7 migrations, preservando tabelas legadas em `legacy_periods`, `legacy_archives` e `legacy_profiles`;
+- roteiro operacional em [`Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md`](./Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md).
+
 ---
 
 ## Principais recursos
@@ -252,6 +273,47 @@ npm run test:all
 Relatórios ficam em `playwright-report/` e `test-results/`.
 
 > Esses artefatos são locais e estão no `.gitignore`.
+
+### Matriz de CI
+
+O workflow principal (`.github/workflows/ci.yml`) executa:
+
+| Job | Finalidade |
+|---|---|
+| Testes Unitários | `npm run test:coverage`, upload de coverage e Codecov quando token existe |
+| Testes E2E | `npx playwright test --reporter=line` com Chromium |
+| Validação de Estrutura | checa entrypoints, CSP, DOMPurify, reduced motion e modularização |
+| Teste de Responsividade | executa `Scripts/responsive-test.mjs` em múltiplas viewports |
+| Resumo | consolida o status dos jobs no summary do GitHub Actions |
+
+Para smoke pós-deploy real:
+
+```bash
+npm run smoke:deploy
+```
+
+---
+
+## Qualidade, segurança e auditoria
+
+O projeto recebeu hardening específico para uso em produção browser-first:
+
+- CSP sem `unsafe-inline` em `script-src` e `style-src`.
+- DOMPurify com SRI para sanitização dos patches HTML.
+- Chart.js com SRI.
+- Supabase CDN fixado em versão exata com SRI.
+- Testes de XSS por entidade cobrindo alunos, pendências, eventos, recados, NPS e configurações.
+- Labels de formulários associados a seus campos, incluindo linhas dinâmicas da escala.
+- Service Worker com estratégia de revisão de assets e testes dedicados.
+- Persistência local-first com fila serializada, IndexedDB, espelho localStorage e broadcast cross-tab.
+- Sync Supabase protegido por checkpoint remoto para evitar sobrescrita silenciosa.
+- Importação/sync Supabase guardada por preview aceito e hash de integridade no payload.
+
+Relatórios e guias principais:
+
+- [`Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md`](./Docs/CX_FULLSTACK_SCAN_EXECUCAO_2026-04-23.md)
+- [`Docs/GUIA_CODE_REVIEW_PROJETO.md`](./Docs/GUIA_CODE_REVIEW_PROJETO.md)
+- [`Docs/DEPLOY_OBSERVABILIDADE.md`](./Docs/DEPLOY_OBSERVABILIDADE.md)
 
 ---
 

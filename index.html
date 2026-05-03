@@ -21,7 +21,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
           integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
           crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"
+          integrity="sha384-DBZI/1Gz1C29oeP5N6ORumbrmMNoaze4Afb4/c3JkFv79Wh3n1DIzbLRVbu6sJQT"
+          crossorigin="anonymous"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
   <script src="src/core/env-bootstrap.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
@@ -89,7 +91,7 @@
           <a href="https://wa.me/5531982266089" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2Zm0 1.8c4.47 0 8.11 3.64 8.11 8.11 0 4.47-3.64 8.11-8.11 8.11-1.52 0-3-.42-4.28-1.22l-.31-.18-3.22.84.86-3.14-.2-.32a8.07 8.07 0 0 1-1.25-4.31c0-4.35 3.64-7.89 8.4-7.89Zm-3.44 4.4c-.2 0-.51.07-.78.37s-1 .98-1 2.39 1.03 2.77 1.17 2.96c.15.2 2.02 3.09 4.9 4.33.69.3 1.22.47 1.64.6.69.22 1.31.19 1.81.12.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.25.17-1.37-.07-.12-.27-.2-.56-.34-.3-.15-1.75-.86-2.02-.96-.27-.1-.46-.15-.66.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.34.44-.52.15-.17.2-.3.3-.49.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.58Z"/></svg></a>
           <a href="https://www.linkedin.com/in/wpmaclayne" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14Zm-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.75.6-1.36 1.36-1.36.76 0 1.36.61 1.36 1.36v4.93h2.86ZM6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68Zm1.39 9.94v-8.37H5.5v8.37h2.77Z"/></svg></a>
         </div>
-        <div class="topbar-actions"><button type="button" class="btn btn-ghost" data-action="reset-selected-month" aria-label="Resetar dados do mês selecionado">Resetar mês</button><button type="button" class="btn btn-primary" id="closeMonthBtn" data-action="close-current-month" aria-label="Fechar o mês atual e avançar">▼ Fechar mês</button></div>
+        <div class="topbar-actions"><button type="button" class="btn btn-ghost" data-action="reset-selected-month" aria-label="Resetar dados do mês selecionado">Resetar mês</button><button type="button" class="btn btn-ghost" id="reopenMonthBtn" data-action="reopen-selected-month" aria-label="Reabrir mês fechado selecionado">Reabrir mês</button><button type="button" class="btn btn-primary" id="closeMonthBtn" data-action="close-current-month" aria-label="Fechar o mês atual e avançar">▼ Fechar mês</button></div>
       </div>
     </header>
     <main id="main-content" class="app-main">
@@ -568,9 +570,17 @@
 
     <section class="view" id="settings" role="tabpanel" aria-labelledby="tab-settings" tabindex="0" hidden>
       <div class="settings-health-bar" id="settingsHealthBar" aria-live="polite"></div>
+      <div class="settings-panel-nav" role="tablist" aria-label="Áreas de configurações">
+        <button type="button" class="settings-panel-tab active" data-action="set-settings-panel" data-settings-panel="all" role="tab" aria-selected="true">Tudo</button>
+        <button type="button" class="settings-panel-tab" data-action="set-settings-panel" data-settings-panel="team" role="tab" aria-selected="false">Equipe</button>
+        <button type="button" class="settings-panel-tab" data-action="set-settings-panel" data-settings-panel="data" role="tab" aria-selected="false">Dados</button>
+        <button type="button" class="settings-panel-tab" data-action="set-settings-panel" data-settings-panel="backend" role="tab" aria-selected="false">Backend</button>
+        <button type="button" class="settings-panel-tab" data-action="set-settings-panel" data-settings-panel="diagnostics" role="tab" aria-selected="false">Diagnóstico</button>
+        <button type="button" class="settings-panel-tab" data-action="set-settings-panel" data-settings-panel="audit" role="tab" aria-selected="false">Auditoria</button>
+      </div>
       <div class="settings-shell">
         <div class="settings-main-column">
-          <div class="section glass settings-card settings-card--primary">
+          <div class="section glass settings-card settings-card--primary" data-settings-panel="team">
             <div class="settings-card-head">
               <span class="section-kicker">Preferências e operação</span>
               <h2>Equipe e categorias</h2>
@@ -614,7 +624,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card">
+          <div class="section glass settings-card" data-settings-panel="data">
             <div class="settings-card-head">
               <span class="section-kicker">Dados e manutenção</span>
               <h2>Resumo da base ativa</h2>
@@ -637,7 +647,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card">
+          <div class="section glass settings-card" data-settings-panel="data">
             <div class="settings-card-head">
               <span class="section-kicker">Importar, exportar e restaurar</span>
               <h2>Movimentação de dados</h2>
@@ -675,7 +685,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--critical">
+          <div class="section glass settings-card settings-card--critical" data-settings-panel="data">
             <div class="settings-card-head">
               <span class="section-kicker">Ações críticas</span>
               <h2>Restaurar base de exemplo</h2>
@@ -689,7 +699,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--support settings-maintenance-card">
+          <div class="section glass settings-card settings-card--support settings-maintenance-card" data-settings-panel="data">
             <div class="settings-card-head">
               <span class="section-kicker">Informações e manutenção</span>
               <h2>Sobre o sistema</h2>
@@ -727,7 +737,7 @@
         </div>
 
         <div class="settings-side-column">
-          <div class="section glass settings-card settings-card--support">
+          <div class="section glass settings-card settings-card--support" data-settings-panel="data">
             <div class="settings-card-head">
               <span class="section-kicker">Guia rápido</span>
               <h2>Leitura operacional</h2>
@@ -763,7 +773,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--secondary">
+          <div class="section glass settings-card settings-card--secondary" data-settings-panel="backend">
             <div class="settings-card-head">
               <span class="section-kicker">Backend opcional</span>
               <h2>Supabase Auth e unidade ativa</h2>
@@ -775,7 +785,7 @@
             <div class="settings-card-actions" id="supabaseAuthActions"></div>
           </div>
 
-          <div class="section glass settings-card settings-card--secondary">
+          <div class="section glass settings-card settings-card--secondary" data-settings-panel="backend">
             <div class="settings-card-head">
               <span class="section-kicker">Etapa 7</span>
               <h2>Migração assistida</h2>
@@ -804,7 +814,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--secondary">
+          <div class="section glass settings-card settings-card--secondary" data-settings-panel="diagnostics">
             <div class="settings-card-head">
               <span class="section-kicker">Diagnóstico técnico</span>
               <h2>Integridade e persistência</h2>
@@ -832,7 +842,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--support">
+          <div class="section glass settings-card settings-card--support" data-settings-panel="audit">
             <div class="settings-card-head">
               <span class="section-kicker">Auditoria</span>
               <h2>Cobertura dos períodos</h2>
@@ -843,7 +853,7 @@
             </div>
           </div>
 
-          <div class="section glass settings-card settings-card--secondary">
+          <div class="section glass settings-card settings-card--secondary" data-settings-panel="diagnostics">
             <div class="settings-card-head">
               <span class="section-kicker">Autotestes rápidos</span>
               <h2>Suíte de segurança</h2>

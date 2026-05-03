@@ -1,0 +1,2123 @@
+{
+  "generated_at": "2026-05-02T17:05:27Z",
+  "modules": [
+    {
+      "name": "core",
+      "path": "src/core",
+      "purpose": "Nucleo tecnico do SPA: configuracao global, estado raiz, persistencia, schema, lifecycle mensal, backup/import, Supabase opcional, observabilidade e PWA.",
+      "primary_files": [
+        "src/core/config.js",
+        "src/core/env-bootstrap.js",
+        "src/core/storage.js",
+        "src/core/schema.js",
+        "src/core/period-builder.js",
+        "src/core/seed.js",
+        "src/core/backup.js",
+        "src/core/lifecycle.js",
+        "src/core/supabase.js",
+        "src/core/observability.js",
+        "src/core/pwa.js",
+        "src/main.js",
+        "sw.js"
+      ],
+      "functions": [
+        {
+          "name": "initializeApp",
+          "file": "src/main.js",
+          "params": [],
+          "returns": "Promise<void>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "persistStoredValue",
+          "file": "src/core/storage.js",
+          "params": [
+            "key: string",
+            "value: string",
+            "onQuotaMessage?: string",
+            "options?: object"
+          ],
+          "returns": "Promise<PersistenceResult>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "prepareStoreCandidate",
+          "file": "src/core/backup.js",
+          "params": [
+            "storeLike: Object"
+          ],
+          "returns": "AppStore|null",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "saveStore",
+          "file": "src/core/backup.js",
+          "params": [
+            "storeLike: Object",
+            "options?: boolean|Object"
+          ],
+          "returns": "Promise<boolean>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "normalizeData",
+          "file": "src/core/lifecycle.js",
+          "params": [
+            "data: PeriodData"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "closePeriod",
+          "file": "src/core/lifecycle.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "mapSupabasePeriodToLocal",
+          "file": "src/core/supabase.js",
+          "params": [
+            "periodKey: string",
+            "settingsRow: any",
+            "addonTypeRows: any[]",
+            "studentRows: any[]",
+            "addonSaleRows: any[]",
+            "pendingRows: any[]",
+            "noteRows: any[]",
+            "metricsRow: any|null",
+            "mentionRows: any[]",
+            "scaleDayRows: any[]",
+            "shiftRows: any[]",
+            "eventRows: any[]"
+          ],
+          "returns": "PeriodData",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "saveStoreToSupabase",
+          "file": "src/core/supabase.js",
+          "params": [
+            "storeLike: Object"
+          ],
+          "returns": "Promise<{ok: boolean, skipped?: boolean, reason?: string, data?: any, error?: any}>",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "AppStore",
+          "fields": [
+            {
+              "name": "version",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "activePeriod",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "preferences",
+              "type": "StorePreferences",
+              "required": true
+            },
+            {
+              "name": "periods",
+              "type": "Object<string, PeriodData>",
+              "required": true
+            },
+            {
+              "name": "archives",
+              "type": "Object<string, ArchiveEntry>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "PeriodData",
+          "fields": [
+            {
+              "name": "settings",
+              "type": "PeriodSettings",
+              "required": true
+            },
+            {
+              "name": "students",
+              "type": "Student[]",
+              "required": true
+            },
+            {
+              "name": "pending",
+              "type": "PendingItem[]",
+              "required": true
+            },
+            {
+              "name": "recados",
+              "type": "Recado[]",
+              "required": true
+            },
+            {
+              "name": "nps",
+              "type": "NpsData",
+              "required": true
+            },
+            {
+              "name": "scale",
+              "type": "ScaleEntry[]",
+              "required": true
+            },
+            {
+              "name": "events",
+              "type": "EventItem[]",
+              "required": true
+            },
+            {
+              "name": "addons",
+              "type": "Object<string, Object<string, number[]>>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "supabaseBackendState",
+          "fields": [
+            {
+              "name": "enabled",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "sessionStatus",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "activeUnit",
+              "type": "Object|null",
+              "required": true
+            },
+            {
+              "name": "writable",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "syncStatus",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "conflictStatus",
+              "type": "string",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Mes fechado em storage.archives fica em modo somente leitura e bloqueia acoes de mutacao.",
+          "location": "src/core/lifecycle.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Supabase remoto so pode receber escrita quando a role ativa e admin ou gestor.",
+          "location": "src/core/supabase.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Importacao de backup deve gerar backup preventivo antes de aplicar o payload.",
+          "location": "src/core/backup.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "env.js e local-only e nao deve ser servido pelo Service Worker a partir de cache antigo.",
+          "location": "sw.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "domain",
+        "features",
+        "ui",
+        "utils",
+        "supabase"
+      ],
+      "algorithms": [
+        "fila serializada de persistencia local",
+        "migracao e normalizacao de store versionado",
+        "merge de month-archive em store multi-periodo",
+        "sincronizacao Supabase guardada por checkpoint remoto",
+        "precache PWA versionado por hash de conteudo"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "domain",
+      "path": "src/domain",
+      "purpose": "Selectors derivados e memoizados para KPIs, rankings, filtros, historico e dados do dashboard.",
+      "primary_files": [
+        "src/domain/selectors.js"
+      ],
+      "functions": [
+        {
+          "name": "selecionarIndicadoresDashboard",
+          "file": "src/domain/selectors.js",
+          "params": [],
+          "returns": "DashboardIndicators",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "selecionarTotaisAddons",
+          "file": "src/domain/selectors.js",
+          "params": [],
+          "returns": "AddonTotals",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "selecionarResumoRecepcionistas",
+          "file": "src/domain/selectors.js",
+          "params": [],
+          "returns": "ReceptionistSummary[]",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "selecionarRankingNps",
+          "file": "src/domain/selectors.js",
+          "params": [],
+          "returns": "NpsRankingResult",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "selecionarDadosGraficosDashboard",
+          "file": "src/domain/selectors.js",
+          "params": [
+            "limite?: number"
+          ],
+          "returns": "Object",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "AddonTotals",
+          "fields": [
+            {
+              "name": "porPessoa",
+              "type": "Object<string, number>",
+              "required": true
+            },
+            {
+              "name": "porPessoaTipo",
+              "type": "Object<string, Object<string, number>>",
+              "required": true
+            },
+            {
+              "name": "totalGeral",
+              "type": "number",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "ReceptionistSummary",
+          "fields": [
+            {
+              "name": "nome",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "total",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "taxaFeedback",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "taxaAddon",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "taxaPositiva",
+              "type": "number",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "NpsRankingResult",
+          "fields": [
+            {
+              "name": "ranking",
+              "type": "Array",
+              "required": true
+            },
+            {
+              "name": "totalCitacoes",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "top",
+              "type": "Object|null",
+              "required": true
+            },
+            {
+              "name": "mapaRanking",
+              "type": "Object<string, number>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Feedback respondido e qualquer valor diferente de Pendente.",
+          "location": "src/domain/selectors.js:92",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Tendencia do ranking NPS compara posicao atual contra rankSnapshot anterior.",
+          "location": "src/domain/selectors.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Historico do dashboard caminha para tras a partir do periodo ativo, limitado entre 1 e 12 meses.",
+          "location": "src/domain/selectors.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "core",
+        "utils",
+        "ui"
+      ],
+      "algorithms": [
+        "memoizacao por assinatura JSON e periodo ativo",
+        "agregacao de addons pessoa/tipo/dia",
+        "ranking NPS com tendencia por snapshot",
+        "janela historica reversa de dashboard",
+        "agregacao de indicadores executivos"
+      ],
+      "complexity": "medium"
+    },
+    {
+      "name": "features",
+      "path": "src/features",
+      "purpose": "Acoes de negocio acionadas pela UI: formularios, validacao, CRUD, NPS, CSV, autotestes e migracao assistida.",
+      "primary_files": [
+        "src/features/forms.js",
+        "src/features/crud.js",
+        "src/features/nps.js",
+        "src/features/csv.js",
+        "src/features/diagnostics.js"
+      ],
+      "functions": [
+        {
+          "name": "createCrudHandler",
+          "file": "src/features/crud.js",
+          "params": [
+            "config: CrudHandlerConfig"
+          ],
+          "returns": "function(): Promise<void>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "applyStudentSave",
+          "file": "src/features/forms.js",
+          "params": [
+            "store: PeriodData",
+            "formData: Object",
+            "existingStudent?: Student"
+          ],
+          "returns": "SaveResult",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "registerMention",
+          "file": "src/features/nps.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "downloadCsvFile",
+          "file": "src/features/csv.js",
+          "params": [
+            "filename: string",
+            "rows: string[][]"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "runMigrationDryRun",
+          "file": "src/features/diagnostics.js",
+          "params": [
+            "silent?: boolean"
+          ],
+          "returns": "Promise<Object>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "runAssistedMigrationToSupabase",
+          "file": "src/features/diagnostics.js",
+          "params": [],
+          "returns": "Promise<{ok: boolean, skipped?: boolean, reason?: string, report?: Object}>",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "ValidationResult",
+          "fields": [
+            {
+              "name": "isValid",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "errors",
+              "type": "Object<string, string>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "SaveResult",
+          "fields": [
+            {
+              "name": "ok",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "validation",
+              "type": "ValidationResult",
+              "required": false
+            },
+            {
+              "name": "nextState",
+              "type": "PeriodData",
+              "required": false
+            },
+            {
+              "name": "entity",
+              "type": "Student|PendingItem|EventItem",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "MigrationSnapshot",
+          "fields": [
+            {
+              "name": "periodCount",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "archiveCount",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "totals",
+              "type": "Object",
+              "required": true
+            },
+            {
+              "name": "periods",
+              "type": "Object<string, Object>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Aluno exige nome e matricula, quando informada, deve conter apenas digitos.",
+          "location": "src/features/forms.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Pendencia exige nome e descricao, e sua data deve pertencer ao periodo ativo quando informada.",
+          "location": "src/features/forms.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Evento exige data e titulo, e sua data deve pertencer ao periodo ativo.",
+          "location": "src/features/forms.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Migração assistida so e liberada com backend autenticado, gravavel e comparacao remota segura.",
+          "location": "src/features/diagnostics.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "core",
+        "domain",
+        "ui",
+        "utils",
+        "supabase"
+      ],
+      "algorithms": [
+        "CRUD factory com rollback de estado",
+        "vinculo aluno-addon por dia do periodo",
+        "validacao DOM para entidades operacionais",
+        "exportacao CSV com BOM UTF-8",
+        "dry-run de migracao por contagem de entidades",
+        "gate de readiness para migracao Supabase"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "ui",
+      "path": "src/ui",
+      "purpose": "Renderizacao, eventos delegados, scheduler DOM, acessibilidade, charts, recados e paineis operacionais do SPA.",
+      "primary_files": [
+        "src/ui/render-core.js",
+        "src/ui/events-core.js",
+        "src/ui/back-to-top.js",
+        "src/ui/events-addons.js",
+        "src/ui/events-nps.js",
+        "src/ui/events-pending.js",
+        "src/ui/events-scale.js",
+        "src/ui/events-students.js",
+        "src/ui/render-addons.js",
+        "src/ui/render-dashboard.js",
+        "src/ui/render-events.js",
+        "src/ui/render-nps.js",
+        "src/ui/render-pending.js",
+        "src/ui/render-scale.js",
+        "src/ui/render-settings.js",
+        "src/ui/render-students.js"
+      ],
+      "functions": [
+        {
+          "name": "renderAll",
+          "file": "src/ui/render-core.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "requestRender",
+          "file": "src/ui/render-core.js",
+          "params": [
+            "alvos?: string|string[]"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "executarRenderAgendado",
+          "file": "src/ui/render-core.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "aplicarPatchPorChave",
+          "file": "src/ui/render-core.js",
+          "params": [
+            "container: Element",
+            "html: string",
+            "options?: Object"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "bindUIEvents",
+          "file": "src/ui/events-core.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "dispatchUiBinding",
+          "file": "src/ui/events-core.js",
+          "params": [
+            "event: Event",
+            "bindings: Object[]"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "openModal",
+          "file": "src/ui/events-core.js",
+          "params": [
+            "modalId: string",
+            "options?: Object"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "showToast",
+          "file": "src/ui/events-core.js",
+          "params": [
+            "message: string",
+            "type?: string",
+            "options?: Object"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderDashboardCharts",
+          "file": "src/ui/render-dashboard.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderStudents",
+          "file": "src/ui/render-students.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderPending",
+          "file": "src/ui/render-pending.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderScale",
+          "file": "src/ui/render-scale.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderNps",
+          "file": "src/ui/render-nps.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderEvents",
+          "file": "src/ui/render-events.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "renderSettings",
+          "file": "src/ui/render-settings.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "UI_BINDINGS",
+          "fields": [
+            {
+              "name": "selector",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "stateKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "event",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "targets",
+              "type": "string|string[]",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "estadoRenderizacao",
+          "fields": [
+            {
+              "name": "sujas",
+              "type": "Set<string>",
+              "required": true
+            },
+            {
+              "name": "agendado",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "emExecucao",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "hashes",
+              "type": "Map<string,string>",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "estadoEventos",
+          "fields": [
+            {
+              "name": "uiInicializado",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "dndPendenciasInicializado",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "acessibilidadeInicializada",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "atalhosInicializados",
+              "type": "boolean",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "estadoAcessibilidade",
+          "fields": [
+            {
+              "name": "reducedMotion",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "highContrast",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "visibleFocus",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "liveMessage",
+              "type": "string",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "Recado",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "createdAt",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "readAt",
+              "type": "string|null",
+              "required": false
+            },
+            {
+              "name": "periodKey",
+              "type": "string",
+              "required": true
+            }
+          ],
+          "confidence": "inferred"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Render targets validos ficam limitados a AREAS_RENDERIZACAO.",
+          "location": "src/ui/render-core.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Bindings de UI sao idempotentes por flags em estadoEventos.",
+          "location": "src/ui/events-core.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Filtros de visao sao persistidos em state.ui por saveUIState().",
+          "location": "src/ui/render-core.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Modais preservam foco de retorno e bloqueio de scroll enquanto abertos.",
+          "location": "src/ui/events-core.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Pendencias podem mudar de status por drag/drop ou teclado quando o periodo esta gravavel.",
+          "location": "src/ui/events-pending.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Observacoes NPS usam autosave com debounce de 800ms.",
+          "location": "src/ui/events-nps.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Recados legados sao normalizados e mesclados ao store por periodo.",
+          "location": "src/ui/render-dashboard.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "core",
+        "domain",
+        "features",
+        "utils",
+        "Chart.js",
+        "Supabase UI state"
+      ],
+      "algorithms": [
+        "render scheduler com requestAnimationFrame e areas sujas",
+        "patching DOM por hash/chave com preservacao de foco",
+        "delegacao central de eventos por binding",
+        "drag/drop e navegacao por teclado de pendencias",
+        "lifecycle Chart.js com destroy/recreate e fallback vazio",
+        "normalizacao e migracao de recados legados"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "utils",
+      "path": "src/utils",
+      "purpose": "Helpers globais para sanitizacao, formatacao, CSV, datas, periodos, runtime style CSP, eventos e regras auxiliares de NPS.",
+      "primary_files": [
+        "src/utils/helpers.js"
+      ],
+      "functions": [
+        {
+          "name": "esc",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: any"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "sanitizeHtml",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "html: string"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "applyRuntimeStyleData",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "root?: ParentNode|Element|Document"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "sanitizeDeep",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: any"
+          ],
+          "returns": "any",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "cloneSerializable",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: any"
+          ],
+          "returns": "any",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "clamp",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: number",
+            "min: number",
+            "max: number"
+          ],
+          "returns": "number",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "buildCsvContent",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "rows: Array<string[]>"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "normalizeSearchText",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: any"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "isValidPeriodKey",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "key: string"
+          ],
+          "returns": "boolean",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "getPreviousPeriodKey",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "key: string"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "getNextPeriodKey",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "key: string"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "compareByDateTime",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "a: {date?: string, time?: string}",
+            "b: {date?: string, time?: string}"
+          ],
+          "returns": "number",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "normalizeEventType",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "value: string"
+          ],
+          "returns": "string",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "sortNpsMentionsByRanking",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "mentions?: NpsMention[]"
+          ],
+          "returns": "NpsMention[]",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "normalizeNpsRankSnapshot",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "mentions?: NpsMention[]",
+            "snapshot?: any"
+          ],
+          "returns": "Object<string, number>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "getRiskBand",
+          "file": "src/utils/helpers.js",
+          "params": [
+            "score: number"
+          ],
+          "returns": "RiskBand",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "RuntimeStyleDataset",
+          "fields": [
+            {
+              "name": "data-runtime-style-id",
+              "type": "string",
+              "required": false
+            },
+            {
+              "name": "data-style-width-pct",
+              "type": "number",
+              "required": false
+            },
+            {
+              "name": "data-style-height-px",
+              "type": "number",
+              "required": false
+            },
+            {
+              "name": "data-style-left-pct",
+              "type": "number",
+              "required": false
+            },
+            {
+              "name": "data-style-left-offset-px",
+              "type": "number",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "RiskBand",
+          "fields": [
+            {
+              "name": "label",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "tone",
+              "type": "string",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "PeriodKey",
+          "fields": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "format",
+              "type": "YYYY-MM",
+              "required": true
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "CsvContent",
+          "fields": [
+            {
+              "name": "rows",
+              "type": "Array<Array<string>>",
+              "required": true
+            },
+            {
+              "name": "delimiter",
+              "type": ";",
+              "required": true
+            },
+            {
+              "name": "escapedValue",
+              "type": "string",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "HTML bruto deve passar por DOMPurify quando disponivel; fallback e escape completo via esc().",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Estilos dinamicos sao aplicados via stylesheet runtime para compatibilidade com style-src self.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "PeriodKey valido segue formato YYYY-MM com mes 01..12.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Datas operacionais do periodo usam prefixo currentPeriodKey.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "CSV usa delimitador ponto e virgula e duplica aspas internas.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Ranking NPS ordena por maior count e desempata por nome em pt-BR.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Faixa de risco NPS e clampada entre 0 e 100 antes da classificacao.",
+          "location": "src/utils/helpers.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "DOMPurify",
+        "document/CSSOM",
+        "Element",
+        "Intl.DateTimeFormat",
+        "currentPeriodKey",
+        "MONTH_NAMES",
+        "todayISO"
+      ],
+      "algorithms": [
+        "escape HTML manual",
+        "sanitizacao DOMPurify com allowlist",
+        "runtime CSS rule cache por data-runtime-style-id",
+        "normalizacao recursiva de dados",
+        "CSV semicolon escaping",
+        "navegacao mensal por Date.setMonth",
+        "ranking NPS por count e localeCompare pt-BR",
+        "classificacao NPS por faixas"
+      ],
+      "complexity": "medium"
+    },
+    {
+      "name": "supabase",
+      "path": "supabase",
+      "purpose": "Backend relacional Supabase: schema canônico multi-unidade, RLS por papel, RPCs transacionais, bootstrap admin, seed local e guard de checkpoint de sincronização.",
+      "primary_files": [
+        "supabase/config.toml",
+        "supabase/seed.sql",
+        "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+        "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+        "supabase/migrations/20260422203000_bootstrap_initial_admin.sql",
+        "supabase/migrations/20260422224500_fix_addon_sales_unique_index.sql",
+        "supabase/migrations/20260423090000_sync_checkpoint_guard.sql"
+      ],
+      "functions": [
+        {
+          "name": "set_updated_at",
+          "file": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "params": [],
+          "returns": "trigger",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "handle_auth_user_created",
+          "file": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "params": [],
+          "returns": "trigger",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "current_unit_role",
+          "file": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "params": [
+            "p_unit_id: uuid"
+          ],
+          "returns": "text",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "has_unit_role",
+          "file": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "params": [
+            "p_unit_id: uuid",
+            "p_roles: text[]"
+          ],
+          "returns": "boolean",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "require_unit_role",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_unit_id: uuid",
+            "p_roles: text[]"
+          ],
+          "returns": "uuid",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "replace_period_from_payload",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_unit_id: uuid",
+            "p_period_id: uuid",
+            "p_period_data: jsonb",
+            "p_actor_member_id: uuid"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "close_period_transaction",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_period_id: uuid",
+            "p_archive_payload?: jsonb",
+            "p_next_period_key?: text",
+            "p_next_period_label?: text",
+            "p_reset_next_period?: boolean"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "reset_period_transaction",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_period_id: uuid",
+            "p_backup_payload?: jsonb"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "import_backup_transaction",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_unit_id: uuid",
+            "p_payload: jsonb"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "link_student_attendance_addon_transaction",
+          "file": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "params": [
+            "p_student_attendance_id: uuid",
+            "p_sale_date?: date",
+            "p_quantity?: integer"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "bootstrap_unit_admin",
+          "file": "supabase/migrations/20260422203000_bootstrap_initial_admin.sql",
+          "params": [
+            "p_user_id: uuid",
+            "p_unit_name: text",
+            "p_unit_slug: text",
+            "p_display_name: text",
+            "p_period_key?: text",
+            "p_timezone?: text",
+            "p_month_days?: integer"
+          ],
+          "returns": "table(boot_unit_id uuid, boot_unit_member_id uuid, boot_period_id uuid)",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "get_unit_sync_checkpoint",
+          "file": "supabase/migrations/20260423090000_sync_checkpoint_guard.sql",
+          "params": [
+            "p_unit_id: uuid"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "import_backup_transaction_guarded",
+          "file": "supabase/migrations/20260423090000_sync_checkpoint_guard.sql",
+          "params": [
+            "p_unit_id: uuid",
+            "p_payload: jsonb",
+            "p_expected_checkpoint?: jsonb"
+          ],
+          "returns": "jsonb",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "Unit",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "required": true
+            },
+            {
+              "name": "name",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "slug",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "timezone",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "active",
+              "type": "boolean",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "UnitMember",
+          "fields": [
+            {
+              "name": "unit_id",
+              "type": "uuid",
+              "required": true
+            },
+            {
+              "name": "user_id",
+              "type": "uuid",
+              "required": true
+            },
+            {
+              "name": "display_name",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "role",
+              "type": "admin|gestor|recepcao|professor|leitura",
+              "required": true
+            },
+            {
+              "name": "active",
+              "type": "boolean",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "Period",
+          "fields": [
+            {
+              "name": "unit_id",
+              "type": "uuid",
+              "required": true
+            },
+            {
+              "name": "period_key",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "label",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "status",
+              "type": "open|closed",
+              "required": true
+            },
+            {
+              "name": "closed_at",
+              "type": "timestamptz",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "StudentAttendance",
+          "fields": [
+            {
+              "name": "student_name",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "membership_number",
+              "type": "text",
+              "required": false
+            },
+            {
+              "name": "started_at_date",
+              "type": "date",
+              "required": true
+            },
+            {
+              "name": "nps_notice_status",
+              "type": "Sim|Não|Pendente",
+              "required": true
+            },
+            {
+              "name": "feedback_status",
+              "type": "Respondeu|Não respondeu|Pendente",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "AddonSale",
+          "fields": [
+            {
+              "name": "sale_date",
+              "type": "date",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "source",
+              "type": "manual|student_attendance",
+              "required": true
+            },
+            {
+              "name": "student_attendance_id",
+              "type": "uuid",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "PendingItem",
+          "fields": [
+            {
+              "name": "student_name",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "requested_at_date",
+              "type": "date",
+              "required": true
+            },
+            {
+              "name": "status",
+              "type": "aberto|respondido|concluido",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "SyncCheckpoint",
+          "fields": [
+            {
+              "name": "revision",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "maxUpdatedAt",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "periodCount",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "auditCount",
+              "type": "integer",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Todos os dados operacionais sao particionados por unidade e periodo.",
+          "location": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "RLS permite leitura operacional para membros ativos e escrita conforme papel da unidade.",
+          "location": "supabase/migrations/20260422190000_backend_canonical_schema.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Fechamento e reset de periodo exigem admin ou gestor.",
+          "location": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Importacao de backup exige admin ou gestor e pode substituir dados de periodo.",
+          "location": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Importacao guardada bloqueia conflito remoto com WPM_SYNC_CONFLICT quando checkpoint diverge.",
+          "location": "supabase/migrations/20260423090000_sync_checkpoint_guard.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Bootstrap inicial de admin e restrito a service_role/SQL administrativo.",
+          "location": "supabase/migrations/20260422203000_bootstrap_initial_admin.sql",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Venda de addon derivada de atendimento e mantida como linha unica por atendimento e origem.",
+          "location": "supabase/migrations/20260422194000_backend_transaction_rpcs.sql",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "Postgres 17",
+        "Supabase Auth",
+        "pgcrypto",
+        "RLS",
+        "src/core/supabase.js",
+        "browser backup payload"
+      ],
+      "algorithms": [
+        "RLS por papel de unidade",
+        "conversao JSON local para modelo relacional",
+        "fechamento mensal transacional com template do proximo periodo",
+        "reset mensal preservando metas NPS",
+        "import backup full/month-archive substitutivo",
+        "checkpoint remoto por timestamps e contagens",
+        "advisory lock por unidade",
+        "indice unico normalizado de addon_sales"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "legacy",
+      "path": "Legacy",
+      "purpose": "Snapshot historico da aplicacao monolitica v34, usado como referencia de rastreabilidade e compatibilidade de formatos antigos, nao carregado pelo runtime atual.",
+      "primary_files": [
+        "Legacy/SISTEMA_FINALIZADO.html",
+        "Legacy/app.js"
+      ],
+      "functions": [
+        {
+          "name": "loadStore",
+          "file": "Legacy/app.js",
+          "params": [],
+          "returns": "Promise<AppStore>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "saveStore",
+          "file": "Legacy/app.js",
+          "params": [
+            "storeLike: Object",
+            "options?: boolean|Object"
+          ],
+          "returns": "Promise<boolean>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "normalizeData",
+          "file": "Legacy/app.js",
+          "params": [
+            "data: PeriodData"
+          ],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "migrateStore",
+          "file": "Legacy/app.js",
+          "params": [
+            "store: Object"
+          ],
+          "returns": "AppStore|null",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "prepareStoreCandidate",
+          "file": "Legacy/app.js",
+          "params": [
+            "storeLike: Object"
+          ],
+          "returns": "AppStore|null",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "generatePeriodSeed",
+          "file": "Legacy/app.js",
+          "params": [
+            "periodKey: string"
+          ],
+          "returns": "PeriodData",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "buildCleanPeriodFromTemplate",
+          "file": "Legacy/app.js",
+          "params": [
+            "template: PeriodData",
+            "key?: string"
+          ],
+          "returns": "PeriodData",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "buildBackupPayload",
+          "file": "Legacy/app.js",
+          "params": [
+            "options?: Object"
+          ],
+          "returns": "Promise<Object>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "coerceImportedStore",
+          "file": "Legacy/app.js",
+          "params": [
+            "source: any"
+          ],
+          "returns": "AppStore|null",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "applyImportedStore",
+          "file": "Legacy/app.js",
+          "params": [
+            "parsed: any",
+            "options?: Object"
+          ],
+          "returns": "Promise<BackupSummary>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "runFlowSmokeTests",
+          "file": "Legacy/app.js",
+          "params": [
+            "silent?: boolean"
+          ],
+          "returns": "FlowSmokeReportItem[]",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "initializeApp",
+          "file": "Legacy/app.js",
+          "params": [],
+          "returns": "Promise<void>",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "LegacyStorageKeys",
+          "fields": [
+            {
+              "name": "STORAGE_KEY",
+              "type": "recepcao-smartfit-dashboard-v34",
+              "required": true
+            },
+            {
+              "name": "LEGACY_STORAGE_KEYS",
+              "type": "string[]",
+              "required": true
+            },
+            {
+              "name": "LOCAL_SNAPSHOT_KEY",
+              "type": "controle_recepcao_app_snapshot_v34",
+              "required": true
+            },
+            {
+              "name": "UI_KEY",
+              "type": "controle_recepcao_app_ui_v34",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "LegacyPeriodPayload",
+          "fields": [
+            {
+              "name": "settings",
+              "type": "object",
+              "required": false
+            },
+            {
+              "name": "students",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "pending",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "recados",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "nps",
+              "type": "object",
+              "required": false
+            },
+            {
+              "name": "scale",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "events",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "addons",
+              "type": "object",
+              "required": false
+            },
+            {
+              "name": "escala",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "eventos",
+              "type": "array",
+              "required": false
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "LegacyMonthArchivePayload",
+          "fields": [
+            {
+              "name": "meta.kind",
+              "type": "month-archive",
+              "required": true
+            },
+            {
+              "name": "periodKey",
+              "type": "YYYY-MM",
+              "required": true
+            },
+            {
+              "name": "periodLabel",
+              "type": "string",
+              "required": false
+            },
+            {
+              "name": "data",
+              "type": "PeriodData",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Legacy nao e carregado pelo index.html atual; runtime ativo usa scripts em src/.",
+          "location": "index.html",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Payload de periodo unico legado e aceito quando contem ao menos uma chave operacional conhecida.",
+          "location": "Legacy/app.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "month-archive legado preserva demais periodos e marca o periodo importado em archives.",
+          "location": "Legacy/app.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Stores v33/v24 sao migrados para a chave v34 quando encontrados e validos.",
+          "location": "Legacy/app.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Legacy/app.js e baseline monolitico para rastrear a separacao em core/domain/features/ui/utils.",
+          "location": "Legacy/app.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "DOMPurify",
+        "Chart.js",
+        "IndexedDB",
+        "localStorage",
+        "browser FileReader",
+        "src atual como sucessor modular"
+      ],
+      "algorithms": [
+        "migracao de storage v24/v33/v34",
+        "coercao de payload importado",
+        "seed deterministico por periodo",
+        "persistencia IndexedDB com espelho localStorage",
+        "renderizacao monolitica e scheduler",
+        "diagnostico/smoke test de fluxo"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "tests",
+      "path": "tests",
+      "purpose": "Suite de qualidade com Vitest, Happy DOM, Playwright E2E, service worker, smoke pos-deploy e regressao visual para validar regras puras, app real e fluxos operacionais.",
+      "primary_files": [
+        "vitest.config.js",
+        "playwright.config.js",
+        "tests/helpers/load-real-app.js",
+        "tests/helpers/pure-functions.js",
+        "tests/helpers/fixed-browser-clock.js",
+        "tests/integration/flows.test.js",
+        "tests/unit/runtime-env.test.js",
+        "tests/unit/selectors-real.test.js",
+        "tests/unit/xss-entities.test.js",
+        "tests/e2e/workflows.spec.js",
+        "tests/e2e/app.spec.js",
+        "tests/e2e/service-worker.spec.js",
+        "tests/e2e/post-deploy-smoke.spec.js",
+        "tests/e2e/visual.spec.js",
+        "tests/e2e/visual-states.spec.js"
+      ],
+      "functions": [
+        {
+          "name": "loadRealApp",
+          "file": "tests/helpers/load-real-app.js",
+          "params": [
+            "options?: object"
+          ],
+          "returns": "Promise<TestHarness>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "setStore",
+          "file": "tests/helpers/load-real-app.js",
+          "params": [
+            "store: AppStore"
+          ],
+          "returns": "Promise<void>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "cleanup",
+          "file": "tests/helpers/load-real-app.js",
+          "params": [],
+          "returns": "void",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "seedEmptyStore",
+          "file": "tests/e2e/workflows.spec.js",
+          "params": [
+            "page: Page",
+            "periodKey?: string"
+          ],
+          "returns": "Promise<void>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "seedStoreWithPeriods",
+          "file": "tests/e2e/workflows.spec.js",
+          "params": [
+            "page: Page",
+            "periodKeys: string[]"
+          ],
+          "returns": "Promise<void>",
+          "confidence": "confirmed"
+        },
+        {
+          "name": "installWritableSupabaseMock",
+          "file": "tests/unit/runtime-env.test.js",
+          "params": [
+            "app: TestHarness",
+            "rpcHandler: Function"
+          ],
+          "returns": "Mock",
+          "confidence": "confirmed"
+        }
+      ],
+      "entities": [
+        {
+          "name": "TestHarness",
+          "fields": [
+            {
+              "name": "window",
+              "type": "Happy DOM Window",
+              "required": true
+            },
+            {
+              "name": "setStore",
+              "type": "async function",
+              "required": true
+            },
+            {
+              "name": "cleanup",
+              "type": "function",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "VisualSnapshot",
+          "fields": [
+            {
+              "name": "spec",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "viewport",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "png",
+              "type": "file",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "SupabaseTestMock",
+          "fields": [
+            {
+              "name": "createClient",
+              "type": "function",
+              "required": true
+            },
+            {
+              "name": "auth.getSession",
+              "type": "function",
+              "required": true
+            },
+            {
+              "name": "from(unit_members)",
+              "type": "function",
+              "required": true
+            },
+            {
+              "name": "rpc",
+              "type": "mock",
+              "required": true
+            }
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {
+          "description": "Unitarios e integracao rodam em happy-dom e cobrem src/**/*.js para coverage.",
+          "location": "vitest.config.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "E2E roda em Chromium com servidor HTTP local e um worker para estabilidade.",
+          "location": "playwright.config.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "loadRealApp usa scripts reais do index.html em ordem, ignorando CDN e env.js.",
+          "location": "tests/helpers/load-real-app.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "E2E valida persistencia via storage e reload apos fluxos operacionais.",
+          "location": "tests/e2e/workflows.spec.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Service worker deve usar cache versionado wpm-v34-hash e nao cache legado wpm-v1.",
+          "location": "tests/e2e/service-worker.spec.js",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Dry-run e migracao assistida Supabase consolidam recados legados e bloqueiam divergencia remota.",
+          "location": "tests/unit/runtime-env.test.js",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": [
+        "Vitest",
+        "happy-dom",
+        "Playwright",
+        "Chromium",
+        "python3 -m http.server",
+        "window.__APP_INTERNALS__",
+        "snapshots PNG"
+      ],
+      "algorithms": [
+        "carregamento real do app por concatencao de scripts do index",
+        "seed deterministico para testes visuais e E2E",
+        "validacao de persistencia por storage/reload",
+        "mock de Supabase RPC/checkpoint",
+        "comparacao visual por snapshots",
+        "smoke pos-deploy com Chart.js/SW/backup/import invalido"
+      ],
+      "complexity": "high"
+    }
+  ]
+}

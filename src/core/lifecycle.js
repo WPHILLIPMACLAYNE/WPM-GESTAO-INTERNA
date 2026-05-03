@@ -410,6 +410,11 @@
       badge.classList.toggle('active', !archive);
       const closeBtn = document.getElementById('closeMonthBtn');
       if (closeBtn) closeBtn.disabled = !!archive;
+      const reopenBtn = document.getElementById('reopenMonthBtn');
+      if (reopenBtn) {
+        reopenBtn.disabled = !archive;
+        reopenBtn.setAttribute('aria-disabled', String(!archive));
+      }
       syncCurrentPeriodLockUI();
     }
 
@@ -508,6 +513,99 @@
     }
 
     const closeCurrentMonth = closePeriod;
+
+    /**
+     * Reopens an archived period after explicit authorization and reason capture.
+     * @param {string} [key]
+     * @param {Object} [options]
+     * @returns {Promise<{ok: boolean, reason?: string, periodKey?: string, auditEntry?: Object}>}
+     */
+    async function reopenPeriod(key = currentPeriodKey, options = {}) {
+      const targetKey = String(key || currentPeriodKey);
+      if (!isValidPeriodKey(targetKey)) {
+        showToast('Período inválido para reabertura.', 'warning');
+        return { ok: false, reason: 'invalid-period' };
+      }
+      if (!storage?.archives?.[targetKey]) {
+        showToast(`${getPeriodLabel(targetKey)} já está em andamento.`, 'warning');
+        return { ok: false, reason: 'not-closed', periodKey: targetKey };
+      }
+      if (options.authorized !== true) {
+        showToast('Reabertura exige autorização explícita.', 'warning');
+        return { ok: false, reason: 'authorization-required', periodKey: targetKey };
+      }
+
+      const reason = String(options.reason || '').trim();
+      if (!reason) {
+        showToast('Informe o motivo da reabertura.', 'warning');
+        return { ok: false, reason: 'reason-required', periodKey: targetKey };
+      }
+
+      const previousArchive = cloneSerializable(storage.archives[targetKey]);
+      const previousAudit = Array.isArray(storage.reopenAudit) ? cloneSerializable(storage.reopenAudit) : [];
+      const previousCurrentKey = currentPeriodKey;
+      const previousState = state;
+      const auditEntry = {
+        periodKey: targetKey,
+        reason,
+        reopenedAt: options.reopenedAt || new Date().toISOString(),
+        reopenedBy: String(options.reopenedBy || 'operador'),
+        previousArchive
+      };
+
+      delete storage.archives[targetKey];
+      storage.reopenAudit = previousAudit.concat(auditEntry);
+      ensurePeriod(targetKey, state);
+      currentPeriodKey = targetKey;
+      storage.activePeriod = targetKey;
+      state = storage.periods[targetKey];
+
+      const saved = await saveData({ eventType: 'reopen-month' });
+      if (!saved) {
+        storage.archives[targetKey] = previousArchive;
+        storage.reopenAudit = previousAudit;
+        currentPeriodKey = previousCurrentKey;
+        storage.activePeriod = previousCurrentKey;
+        state = previousState;
+        renderAll();
+        syncPeriodControls();
+        showToast('Falha ao reabrir o mês. Alteração revertida.', 'danger');
+        return { ok: false, reason: 'save-failed', periodKey: targetKey };
+      }
+
+      renderAll();
+      syncPeriodControls();
+      showToast(`✓ ${getPeriodLabel(targetKey)} reaberto.`, 'success');
+      return { ok: true, periodKey: targetKey, auditEntry };
+    }
+
+    /**
+     * Captures a reason and reopens the selected closed period.
+     * @returns {void}
+     */
+    function reopenSelectedMonth() {
+      const targetKey = currentPeriodKey;
+      const currentLabel = getPeriodLabel(targetKey);
+      if (!storage?.archives?.[targetKey]) {
+        showToast(`${currentLabel} já está em andamento.`, 'warning');
+        return;
+      }
+      const promptFn = typeof window !== 'undefined' && typeof window.prompt === 'function'
+        ? window.prompt.bind(window)
+        : null;
+      const reason = String(promptFn ? promptFn(`Motivo para reabrir ${currentLabel}:`, '') : '').trim();
+      if (!reason) {
+        showToast('Informe o motivo da reabertura.', 'warning');
+        return;
+      }
+      showConfirm(`Reabrir ${currentLabel}? O mês voltará a aceitar alterações.`, () => {
+        reopenPeriod(targetKey, {
+          authorized: true,
+          reason,
+          reopenedBy: 'interface'
+        });
+      });
+    }
 
     /**
      * Resets the current period data after exporting a backup.

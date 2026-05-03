@@ -71,6 +71,7 @@
         <div class="kanban-col ${coluna.status === 'aberto' ? 'status-aberto' : ''}" data-drop-status="${coluna.status}">
           <div class="col-head">
             <h3>${coluna.status === 'aberto' ? '<span class="pulse-dot"></span>Abertas' : coluna.status === 'respondido' ? 'Respondidas' : 'Concluídas'}</h3>
+            <span class="kanban-count" aria-label="${coluna.items.length} item(ns) nesta coluna">${coluna.items.length}</span>
           </div>
           <div class="kanban-list"></div>
         </div>

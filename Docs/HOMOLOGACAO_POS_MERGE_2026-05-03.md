@@ -297,3 +297,28 @@ Proxima etapa segura:
 2. Se a tela antiga ainda aparecer, atualizar a pagina uma vez para o service worker assumir o novo cache.
 3. Na aba `Configuracoes` -> `Backend`, confirmar `SDK Carregado`.
 4. Preencher `Nova senha` e `Confirmar senha`, entao clicar `Definir nova senha`.
+
+## Homologacao final da migracao remota
+
+Em 2026-05-03, apos o hotfix do SDK Supabase, a homologacao manual foi concluida no app publicado.
+
+Resultado validado pelo operador:
+
+- Link de recovery mais recente abriu o app publicado em modo de recuperacao.
+- Senha do admin `smartwonkey@gmail.com` foi definida com sucesso.
+- Sessao Supabase autenticada como `WPM` / `smartwonkey@gmail.com`.
+- `SDK` exibido como `Carregado`.
+- Unidade ativa: `Smartfit Pampulha`.
+- Perfil: `admin`.
+- Dry-run de migracao executado com resultado: `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`.
+- Migracao inicial para o backend executada uma unica vez.
+- Recarregamento do backend concluiu com mensagem `Base remota carregada com sucesso`.
+- Fonte ativa apos reload: `Supabase`.
+- Resumo remoto: `12 periodo(s)`, `0 arquivo(s)`, `0 alunos`, `0 pendencias`, `0 eventos`, `0 recados`, `0 mencoes NPS` e `0 linhas addon`.
+- Navegacao manual pelo seletor de meses validou os 12 periodos de janeiro a dezembro.
+
+Status final:
+
+- Homologacao da estrutura remota e do ciclo auth -> dry-run -> migracao -> reload: **aprovada**.
+- Base operacional migrada esta zerada conforme o estado local observado durante a homologacao.
+- Proxima acao recomendada: manter `Sincronizar agora` bloqueado operacionalmente ate existir alteracao real a enviar ou novo criterio de validacao.

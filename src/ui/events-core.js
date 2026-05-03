@@ -45,6 +45,30 @@
     }
 
     /** @returns {Promise<void>} */
+    async function handleSupabaseUpdatePasswordAction() {
+      if (typeof updateSupabasePassword !== 'function') {
+        showToast('Atualização de senha indisponível neste runtime.', 'warning');
+        return;
+      }
+      const password = DOM.value('supabaseNewPasswordInput');
+      const confirmation = DOM.value('supabaseConfirmPasswordInput');
+      if (password !== confirmation) {
+        showToast('As senhas informadas não conferem.', 'warning', 4500);
+        return;
+      }
+      const result = await updateSupabasePassword(password);
+      if (!result.ok) {
+        showToast(result.error || 'Falha ao atualizar senha.', 'warning', 4500);
+        return;
+      }
+      DOM.setValue('supabaseNewPasswordInput', '');
+      DOM.setValue('supabaseConfirmPasswordInput', '');
+      showToast('Senha atualizada com sucesso.', 'success', 4500);
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
     async function handleSupabaseSignOutAction() {
       if (typeof signOutSupabase !== 'function') {
         showToast('Integração Supabase indisponível neste runtime.', 'warning');
@@ -298,6 +322,9 @@
               return true;
             case 'supabase-sign-in':
               handleSupabaseSignInAction();
+              return true;
+            case 'supabase-update-password':
+              handleSupabaseUpdatePasswordAction();
               return true;
             case 'supabase-sign-out':
               handleSupabaseSignOutAction();

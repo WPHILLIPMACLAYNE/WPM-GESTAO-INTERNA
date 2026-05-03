@@ -1214,6 +1214,40 @@
     }
 
     /**
+     * @param {string} password
+     * @returns {Promise<{ok: boolean, error?: string}>}
+     */
+    async function updateSupabasePassword(password) {
+      const client = getSupabaseClient();
+      if (!client?.auth || typeof client.auth.updateUser !== 'function') {
+        return { ok: false, error: 'Supabase Auth indisponível neste runtime.' };
+      }
+
+      const nextPassword = String(password || '');
+      if (nextPassword.trim().length < 8) {
+        return { ok: false, error: 'A nova senha precisa ter pelo menos 8 caracteres.' };
+      }
+
+      updateSupabaseBackendState({
+        syncStatus: 'loading',
+        lastError: null
+      });
+
+      const { data, error } = await client.auth.updateUser({ password: nextPassword });
+      if (error) {
+        updateSupabaseBackendState({
+          syncStatus: 'error',
+          lastError: error.message || 'Falha ao atualizar senha.'
+        });
+        return { ok: false, error: error.message || 'Falha ao atualizar senha.' };
+      }
+
+      __supabaseSessionCache = data?.session || __supabaseSessionCache;
+      await refreshSupabaseBackendState({ forceSession: false });
+      return { ok: true };
+    }
+
+    /**
      * @returns {Promise<{ok: boolean, error?: string}>}
      */
     async function signOutSupabase() {

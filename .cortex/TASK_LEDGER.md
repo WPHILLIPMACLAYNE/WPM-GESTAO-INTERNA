@@ -391,6 +391,36 @@ This file records one durable checkpoint per completed task.
   - authenticate as `smartwonkey@gmail.com`
   - run only `Executar dry-run`
   - do not migrate before preview review
+
+### Task 014
+
+- Date/time: 2026-05-03 11:12:44 -03
+- Branch: `main`
+- HEAD: `320e25d`
+- Task: fix Supabase password recovery redirect and add password update UI for authenticated recovery sessions
+- Files touched:
+  - `src/core/supabase.js`
+  - `src/reconstruction/supabase-adapter.js`
+  - `src/main.js`
+  - `src/ui/events-core.js`
+  - `src/ui/render-settings.js`
+  - `supabase/config.toml`
+  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - Supabase Auth config pushed with `site_url = https://wpm-gestao-interna.vercel.app`
+  - recovery link generation reports `redirectHost = wpm-gestao-interna.vercel.app`
+  - recovery email request returned HTTP 200
+  - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js` OK
+  - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js` OK with `43 passed`
+- Pending:
+  - deploy updated app to production
+  - user opens newest recovery email and defines password in the app
+  - run only `Executar dry-run`
 - Next step:
   - authenticate in the real unit after redeploy
   - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`

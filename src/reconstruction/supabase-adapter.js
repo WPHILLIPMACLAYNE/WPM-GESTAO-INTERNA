@@ -900,6 +900,29 @@ export function createSupabaseAdapter(options = {}) {
     return { ok: true };
   }
 
+  async function updateSupabasePassword(password) {
+    const client = getSupabaseClient();
+    if (!client?.auth || typeof client.auth.updateUser !== 'function') {
+      return { ok: false, error: 'Supabase Auth indisponivel neste runtime.' };
+    }
+    const nextPassword = String(password || '');
+    if (nextPassword.trim().length < 8) {
+      return { ok: false, error: 'A nova senha precisa ter pelo menos 8 caracteres.' };
+    }
+    updateSupabaseBackendState({ syncStatus: 'loading', lastError: null });
+    const { data, error } = await client.auth.updateUser({ password: nextPassword });
+    if (error) {
+      updateSupabaseBackendState({
+        syncStatus: 'error',
+        lastError: error.message || 'Falha ao atualizar senha.',
+      });
+      return { ok: false, error: error.message || 'Falha ao atualizar senha.' };
+    }
+    sessionCache = data?.session || sessionCache;
+    await refreshSupabaseBackendState({ forceSession: false });
+    return { ok: true };
+  }
+
   async function signOutSupabase() {
     const client = getSupabaseClient();
     if (!client?.auth || typeof client.auth.signOut !== 'function') {
@@ -970,6 +993,7 @@ export function createSupabaseAdapter(options = {}) {
     syncCurrentStoreToSupabase,
     reloadAppFromSupabaseSession,
     signInSupabasePassword,
+    updateSupabasePassword,
     signOutSupabase,
     getSupabaseStatus,
     resetSupabaseClient,

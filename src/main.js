@@ -160,6 +160,7 @@
         syncCurrentStoreToSupabase,
         reloadAppFromSupabaseSession,
         signInSupabasePassword,
+        updateSupabasePassword,
         signOutSupabase,
         resetSupabaseClient
       },

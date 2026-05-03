@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 11:03:51 -03
+Last updated: 2026-05-03 11:12:44 -03
 
 ## Current handoff
 
@@ -39,7 +39,9 @@ Current state:
 - Vercel production env is now configured and redeployed; published app reports `hasEnv=true`
 - remote Supabase bootstrap is complete for `Smartfit Pampulha` / `mgcpam2`
 - remote admin is `smartwonkey@gmail.com` with display name `WPM` and role `admin`
-- password recovery/setup email was requested for `smartwonkey@gmail.com`
+- Supabase Auth recovery now redirects to `https://wpm-gestao-interna.vercel.app`
+- app has authenticated password update UI in the Supabase panel
+- newest password recovery/setup email was requested for `smartwonkey@gmail.com`
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
@@ -92,7 +94,7 @@ If a future session reconstructs the context from the persisted recovery files a
 
 Prepare the admin login and dry-run:
 
-1. use the recovery email for `smartwonkey@gmail.com` to define the admin password
+1. use the newest recovery email for `smartwonkey@gmail.com` to define the admin password
 2. open the published app in the browser with the real local base
 3. authenticate in `Smartfit Pampulha`
 4. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`

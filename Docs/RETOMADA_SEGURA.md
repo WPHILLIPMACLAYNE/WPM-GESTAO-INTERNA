@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 11:03:51 -03
+Última atualização: 2026-05-03 11:12:44 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,7 +128,7 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 11:03:51 -03
+Data/hora: 2026-05-03 11:12:44 -03
 
 - Branch atual: `main`
 - Último commit conhecido: `d1abdc4`
@@ -141,7 +141,9 @@ Data/hora: 2026-05-03 11:03:51 -03
   - Supabase remoto recebeu bootstrap inicial da unidade `Smartfit Pampulha`
   - slug informado `MGCPAM2` foi normalizado e gravado como `mgcpam2`
   - admin remoto `smartwonkey@gmail.com` foi criado/confirmado com nome de exibição `WPM`
-  - solicitação de recuperação/definição de senha foi enviada para o e-mail admin
+  - Auth remoto agora aponta recovery para `https://wpm-gestao-interna.vercel.app`
+  - app ganhou painel autenticado para atualizar senha
+  - solicitação de recuperação/definição de senha mais recente foi enviada para o e-mail admin
   - docs de continuidade atualizados para homologação remota funcional
   - nenhuma migração real executada
 - Contexto recuperado e consolidado:
@@ -156,6 +158,12 @@ Data/hora: 2026-05-03 11:03:51 -03
 - Arquivos tocados nesta etapa:
   - `.gitignore`
   - `src/core/env-bootstrap.js`
+  - `src/core/supabase.js`
+  - `src/reconstruction/supabase-adapter.js`
+  - `src/main.js`
+  - `src/ui/events-core.js`
+  - `src/ui/render-settings.js`
+  - `supabase/config.toml`
   - `src/reconstruction/env-bootstrap.js`
   - `vercel.json`
   - `tests/unit/reconstruction-env-bootstrap.test.js`
@@ -175,8 +183,11 @@ Data/hora: 2026-05-03 11:03:51 -03
   - consulta administrativa remota: `public.units` com `Smartfit Pampulha` / `mgcpam2`
   - consulta administrativa remota: `public.unit_members` com `WPM` / `admin`
   - consulta administrativa remota: `public.periods` com `2026-05` aberto
+  - link de recovery validado com `redirectHost = wpm-gestao-interna.vercel.app`
+  - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js` OK
+  - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js` OK com `43 passed`
 - Pendências imediatas:
-  - definir a senha do admin pelo e-mail de recuperação recebido em `smartwonkey@gmail.com`
+  - definir a senha do admin pelo e-mail de recuperação mais recente recebido em `smartwonkey@gmail.com`
   - autenticar no app publicado usando o navegador que contém a base local real
   - executar apenas o dry-run da migração assistida
 - Próximo passo exato mais seguro:

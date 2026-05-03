@@ -598,6 +598,18 @@
               <div class="subtle-note">${esc(backendState.user?.email || '')}</div>
             </div>
           </div>
+          <div class="summary-item summary-item--col1">
+            <div class="settings-about-grid">
+              <label class="settings-about-item" for="supabaseNewPasswordInput">
+                <div class="name">Nova senha</div>
+                <input id="supabaseNewPasswordInput" class="input" type="password" placeholder="••••••••" autocomplete="new-password" />
+              </label>
+              <label class="settings-about-item" for="supabaseConfirmPasswordInput">
+                <div class="name">Confirmar senha</div>
+                <input id="supabaseConfirmPasswordInput" class="input" type="password" placeholder="••••••••" autocomplete="new-password" />
+              </label>
+            </div>
+          </div>
         `
         : `
           <div class="summary-item summary-item--col1">
@@ -617,6 +629,7 @@
         ? `
           <button class="btn btn-success" data-action="supabase-reload">Recarregar do backend</button>
           <button class="btn btn-ghost" data-action="supabase-sync-now" ${backendState.writable ? '' : 'disabled aria-disabled="true" title="Perfil somente leitura no backend"'}>Sincronizar agora</button>
+          <button class="btn btn-ghost" data-action="supabase-update-password">Atualizar senha</button>
           <button class="btn btn-ghost" data-action="supabase-sign-out">Sair</button>
         `
         : `

@@ -1,7 +1,7 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 11:03:51 -03
+Last updated: 2026-05-03 11:12:44 -03
 
 ## Live status
 
@@ -37,6 +37,9 @@ Current 2026-05-03 reading:
 - approved slug `MGCPAM2` was normalized to `mgcpam2`
 - remote admin `smartwonkey@gmail.com` exists as `WPM` with role `admin`
 - production redeploy `dpl_3YL8wrzwXLejpQ4uJmbhYvAGGVCC` is ready with `SUPABASE_UNIT_SLUG=mgcpam2`
+- Supabase Auth site URL now points to `https://wpm-gestao-interna.vercel.app`
+- recovery links now redirect to the Vercel app instead of localhost
+- authenticated Supabase panel now exposes password update fields and action
 - focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
@@ -66,7 +69,7 @@ Confirmed live facts:
 
 After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
 
-1. define the admin password through the recovery email sent to `smartwonkey@gmail.com`
+1. define the admin password through the latest recovery email sent to `smartwonkey@gmail.com`
 2. open the published app in the browser that holds the real local base to migrate
 3. authenticate as `smartwonkey@gmail.com`
 4. run only the assisted-migration dry-run
@@ -80,6 +83,8 @@ Latest validation result:
 5. remote `public.units` includes active `Smartfit Pampulha` / `mgcpam2`
 6. remote `public.unit_members` includes active `WPM` admin
 7. remote `public.periods` includes open `2026-05`
+8. recovery link generation validates `redirectHost = wpm-gestao-interna.vercel.app`
+9. focused password/auth tests passed with `43 passed`
 
 ## CORTEX operating rule
 

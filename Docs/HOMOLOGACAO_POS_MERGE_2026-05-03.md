@@ -205,3 +205,29 @@ Proxima etapa segura:
 4. Confirmar unidade ativa `Smartfit Pampulha` e perfil `admin`.
 5. Executar apenas `Executar dry-run` em `Configuracoes` -> `Migracao assistida`.
 6. Revisar o preview antes de qualquer migracao.
+
+## Correcao do recovery de senha
+
+Ainda em 2026-05-03, o primeiro link de recuperacao abriu `localhost:3000`, que nao estava servindo o app. A causa era a configuracao Auth do Supabase ainda apontando para URL local.
+
+Correcao aplicada:
+
+- `supabase/config.toml` agora usa `site_url = "https://wpm-gestao-interna.vercel.app"`.
+- Redirects permitidos mantem Vercel, `127.0.0.1:3000` e `localhost:3000`.
+- `supabase config push --project-ref eautmpqkxibolmcfiacd --yes` atualizou o Auth remoto.
+- `api.schemas` foi preservado como `["public", "graphql_public"]` para nao deixar alteracao lateral.
+- O app ganhou formulario de atualizacao de senha no painel Supabase autenticado.
+- Novo recovery enviado para `smartwonkey@gmail.com`.
+
+Validacao:
+
+- Link de recovery gerado pela API aponta para `redirectHost = wpm-gestao-interna.vercel.app`.
+- `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js`: OK.
+- `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js`: 43 testes passaram.
+
+Proxima etapa segura:
+
+1. Abrir o e-mail de recuperacao mais recente em `smartwonkey@gmail.com`.
+2. Definir a senha no app publicado usando o novo painel de senha.
+3. Permanecer autenticado na unidade `Smartfit Pampulha`.
+4. Rodar apenas `Executar dry-run`.

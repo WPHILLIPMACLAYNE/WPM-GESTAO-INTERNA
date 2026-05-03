@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 11:03:51 -03
+Last updated: 2026-05-03 11:12:44 -03
 
 ## Purpose
 
@@ -90,13 +90,15 @@ This phrase is a continuity test marker and should be used only when the new ses
 - configured Vercel production public Supabase env vars and redeployed production
 - verified published runtime has `hasEnv=true` and smoke passes against `https://wpm-gestao-interna.vercel.app/`
 - completed remote Supabase unit/admin bootstrap for `Smartfit Pampulha` / `mgcpam2`
-- requested password recovery/setup email for admin `smartwonkey@gmail.com`
+- fixed Supabase Auth recovery redirect to Vercel
+- added password update UI for authenticated recovery sessions
+- requested a new password recovery/setup email for admin `smartwonkey@gmail.com`
 
 ## Exact next step
 
 Close the current checkpoint cleanly, then continue deploy homologation:
 
-1. set the admin password from the recovery email
+1. set the admin password from the newest recovery email
 2. authenticate in the real unit from the browser holding local migration data
 3. run only the migration dry-run
 

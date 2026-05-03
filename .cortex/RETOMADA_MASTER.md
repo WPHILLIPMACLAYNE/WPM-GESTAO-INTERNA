@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 10:34:24 -03
+Last updated: 2026-05-03 10:37:11 -03
 
 ## Purpose
 
@@ -14,7 +14,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - Remote recovery branch: `origin/main`
 - Branch created at: not applicable for this checkpoint
 - Current HEAD reference at creation: `1d34d0b`
-- Current live HEAD: `1d34d0b` plus pending remote-runtime hotfix
+- Current live HEAD: `d1abdc4`
 - Previous continuity base commit: `1d34d0b`
 - Timezone for all continuity records: `America/Sao_Paulo`
 
@@ -85,17 +85,16 @@ This phrase is a continuity test marker and should be used only when the new ses
 - isolated the Playwright HTTP server on port `4173`
 - published the active recovery branch to GitHub with upstream tracking enabled
 - validated the published URLs as reachable but blocked for remote functional homologation because runtime Supabase env was missing
-- prepared a remote-runtime hotfix to load optional `env.js` in deployed HTTP/HTTPS runtimes and generate it on Vercel
+- pushed remote-runtime hotfix `d1abdc4` to load optional `env.js` in deployed HTTP/HTTPS runtimes and generate it on Vercel
 
 ## Exact next step
 
 Close the current checkpoint cleanly, then continue deploy homologation:
 
-1. commit this remote-runtime hotfix and continuity checkpoint on `main`
-2. push to `origin/main`
-3. configure public/browser-safe Supabase env vars in Vercel
-4. redeploy and confirm `/env.js` plus `hasEnv=true`
-5. authenticate in the real unit and run only the migration dry-run
+1. configure public/browser-safe Supabase env vars in Vercel
+2. wait for/retrigger redeploy from `d1abdc4`
+3. confirm `/env.js` plus `hasEnv=true`
+4. authenticate in the real unit and run only the migration dry-run
 
 The latest validation already recorded for this session is:
 

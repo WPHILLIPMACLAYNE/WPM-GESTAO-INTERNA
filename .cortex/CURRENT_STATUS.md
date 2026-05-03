@@ -1,12 +1,12 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 10:34:24 -03
+Last updated: 2026-05-03 10:37:11 -03
 
 ## Live status
 
 - Branch: `main`
-- HEAD: `1d34d0b` with remote-runtime hotfix staged in the worktree
+- HEAD: `d1abdc4`
 - Baseline in production: `origin/main`
 - App version: `v34`
 - Store version: `4`
@@ -28,6 +28,7 @@ Current 2026-05-03 reading:
 - the functional remote dry-run cannot proceed until the deploy publishes a browser-safe `env.js`
 - `src/core/env-bootstrap.js` now loads optional `env.js` in local and deployed HTTP/HTTPS runtimes
 - `vercel.json` now runs `npm run build:env` so Vercel can materialize `env.js` from public/browser-safe env vars
+- runtime hotfix commit `d1abdc4` was pushed to `origin/main`
 - focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
 
 Confirmed live facts:
@@ -57,11 +58,10 @@ Confirmed live facts:
 
 After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
 
-1. commit the remote-runtime hotfix and continuity checkpoint on `main`
-2. push `main` to GitHub
-3. configure only public/browser-safe deploy env vars in Vercel
-4. redeploy and confirm `/env.js` exists without logging secrets
-5. authenticate in the real unit and run only the assisted-migration dry-run
+1. configure only public/browser-safe deploy env vars in Vercel
+2. wait for/retrigger redeploy from `d1abdc4`
+3. confirm `/env.js` exists without logging secrets
+4. authenticate in the real unit and run only the assisted-migration dry-run
 
 Latest validation result:
 

@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 10:34:24 -03
+Última atualização: 2026-05-03 10:37:11 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
 
 ## Baseline oficial
@@ -128,12 +128,12 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 10:34:24 -03
+Data/hora: 2026-05-03 10:37:11 -03
 
 - Branch atual: `main`
-- Último commit conhecido: `1d34d0b`
+- Último commit conhecido: `d1abdc4`
 - Estado do worktree ao fim desta etapa:
-  - hotfix de runtime remoto preparado e ainda pendente de commit/push
+  - hotfix de runtime remoto commitado e enviado para `origin/main`
   - docs de continuidade atualizados para homologação remota funcional
   - nenhuma migração real executada
 - Contexto recuperado e consolidado:
@@ -163,7 +163,6 @@ Data/hora: 2026-05-03 10:34:24 -03
   - `git diff --check` OK
   - `npm run smoke:deploy` OK com `1 passed` contra runtime HTTP local
 - Pendências imediatas:
-  - commitar e fazer push deste hotfix em `main`
   - configurar no Vercel somente variáveis públicas/browser-safe: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
   - redeployar e confirmar `/env.js` publicado sem expor segredo
 - Próximo passo exato mais seguro:

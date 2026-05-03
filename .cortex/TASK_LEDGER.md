@@ -305,9 +305,9 @@ This file records one durable checkpoint per completed task.
 
 ### Task 011
 
-- Date/time: 2026-05-03 10:34:24 -03
+- Date/time: 2026-05-03 10:37:11 -03
 - Branch: `main`
-- HEAD: `1d34d0b` with remote-runtime hotfix pending commit
+- HEAD: `d1abdc4`
 - Task: prepare remote-runtime deploy hotfix so published app can load browser-safe Supabase env and continue functional remote homologation
 - Files touched:
   - `src/core/env-bootstrap.js`
@@ -327,7 +327,6 @@ This file records one durable checkpoint per completed task.
   - `git diff --check` OK
   - `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
 - Pending:
-  - commit and push the hotfix to `origin/main`
   - configure public/browser-safe deploy env vars in Vercel
   - redeploy and confirm `/env.js` plus `hasEnv=true`
 - Next step:

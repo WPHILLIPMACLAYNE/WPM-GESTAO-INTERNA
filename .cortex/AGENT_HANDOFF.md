@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 10:34:24 -03
+Last updated: 2026-05-03 10:37:11 -03
 
 ## Current handoff
 
@@ -9,7 +9,7 @@ This repository already has a functioning CORTEX layer and it must now be mainta
 Current state:
 
 - baseline branch in use: `main`
-- current HEAD reference: `1d34d0b` with remote-runtime hotfix pending commit
+- current HEAD reference: `d1abdc4`
 - previous continuity base commit: `1d34d0b`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - continuity source inside `.cortex/`: `CURRENT_STATUS.md` + `RETOMADA_MASTER.md` + `TASK_LEDGER.md`
@@ -34,6 +34,7 @@ Current state:
 - the next blocker is deploy configuration, not app bootstrap logic
 - `src/core/env-bootstrap.js` now loads optional `env.js` in published HTTP/HTTPS runtimes
 - `vercel.json` now generates `env.js` via `npm run build:env`
+- commit `d1abdc4` is pushed to `origin/main`
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
@@ -84,7 +85,7 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Commit and push the remote-runtime hotfix on `main`, then configure the deploy:
+Configure the deploy for the already-pushed runtime hotfix:
 
 1. configure only public/browser-safe env vars in Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_UNIT_SLUG`
 2. redeploy the app

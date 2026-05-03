@@ -151,6 +151,27 @@
     }
 
     /**
+     * @param {Object<string, Array>} rowsByTable
+     * @param {Array<Object>} periodRows
+     * @returns {boolean}
+     */
+    function hasSupabaseOperationalRows(rowsByTable = {}, periodRows = []) {
+      const hasClosedPeriod = periodRows.some(item => String(item?.status || '') === 'closed');
+      if (hasClosedPeriod) return true;
+      return [
+        rowsByTable.students,
+        rowsByTable.addonSales,
+        rowsByTable.pending,
+        rowsByTable.notes,
+        rowsByTable.metrics,
+        rowsByTable.mentions,
+        rowsByTable.scaleDays,
+        rowsByTable.shifts,
+        rowsByTable.events
+      ].some(rows => Array.isArray(rows) && rows.length > 0);
+    }
+
+    /**
      * @param {unknown} value
      * @returns {boolean}
      */
@@ -862,6 +883,20 @@
           emptyRows.events = eventsRes.data || [];
         }
 
+        const scaleDayIds = (emptyRows.scaleDays || []).map(item => String(item?.id || '')).filter(Boolean);
+        const shifts = (Array.isArray(emptyRows.shifts) ? emptyRows.shifts : []).filter(item => scaleDayIds.includes(String(item?.scale_day_id || '')));
+
+        if (!hasSupabaseOperationalRows({ ...emptyRows, shifts }, periodRows)) {
+          const emptyCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);
+          rememberSupabaseRemoteCheckpoint(emptyCheckpoint);
+          updateSupabaseBackendState({
+            syncStatus: 'idle',
+            source: 'local',
+            conflictStatus: 'clear'
+          });
+          return null;
+        }
+
         const settingsByPeriod = new Map((emptyRows.settings || []).map(item => [String(item.period_id || ''), item]));
         const metricsByPeriod = new Map((emptyRows.metrics || []).map(item => [String(item.period_id || ''), item]));
         const addonTypesByPeriod = groupSupabaseRows(emptyRows.addonTypes, 'period_id');
@@ -872,9 +907,6 @@
         const mentionsByPeriod = groupSupabaseRows(emptyRows.mentions, 'period_id');
         const scaleDaysByPeriod = groupSupabaseRows(emptyRows.scaleDays, 'period_id');
         const eventsByPeriod = groupSupabaseRows(emptyRows.events, 'period_id');
-
-        const scaleDayIds = (emptyRows.scaleDays || []).map(item => String(item?.id || '')).filter(Boolean);
-        const shifts = (Array.isArray(emptyRows.shifts) ? emptyRows.shifts : []).filter(item => scaleDayIds.includes(String(item?.scale_day_id || '')));
 
         const periodsMap = {};
         const archives = {};

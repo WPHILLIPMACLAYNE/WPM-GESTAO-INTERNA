@@ -80,3 +80,22 @@ A proxima etapa segura e decidir se o ambiente local deve:
 2. tratar o Supabase local como alvo descartavel de homologacao e resetar/reseedar antes de repetir o dry-run.
 
 Para ambiente real/remoto, a regra permanece: nao usar reset, nao sobrescrever e nao aceitar preview sem revisao humana das divergencias.
+
+## Atualizacao da etapa seguinte
+
+Ainda em 2026-05-03, o ambiente Supabase local foi tratado como descartavel de homologacao:
+
+- Dump preventivo salvo fora do repositorio antes do reset local.
+- `npx supabase db reset --local --yes` recriou a base com migrations e seed.
+- O seed local criou unidade/admin e um periodo bootstrap vazio.
+- A leitura remota foi ajustada para tratar bootstrap sem linhas operacionais como backend vazio.
+- O algoritmo novo de integridade passou a ser `canonical-sha256-v1`, validado no banco via `extensions.digest`.
+- Backups antigos `canonical-fnv1a32-v1` continuam aceitos pelo verificador do app.
+
+Evidencia pos-ajuste:
+
+- Dry-run antes da migracao: `remoteState=empty`, `canMigrate=true`, `Primeira migracao liberada`.
+- Migracao assistida local: `ok=true`.
+- Dry-run apos migracao: `remoteState=present`, 12 periodos remotos, 0 divergencias, `matches=true`.
+- Contagens no banco local apos migracao: 12 periodos, 360 alunos, 240 pendencias, 120 eventos, 220 vendas de addon, 1 evento de auditoria.
+- `npx supabase migration list --local`: migration `20260503130312` registrada junto das migrations anteriores.

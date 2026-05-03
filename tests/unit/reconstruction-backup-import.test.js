@@ -62,6 +62,10 @@ describe('reconstruction backup import', () => {
       appVersion: 'v34',
       sourceAppId: 'wpm-gestao-interna',
       exportedAt: '2026-05-02T19:00:00.000Z',
+      integrity: expect.objectContaining({
+        algorithm: 'canonical-sha256-v1',
+        hash: expect.stringMatching(/^[0-9a-f]{64}$/),
+      }),
     });
     expect(verifyPayloadIntegrity(payload)).toMatchObject({ ok: true, reason: 'verified' });
     expect(getBackupSummary(payload)).toMatchObject({ periods: 12, students: 1, pending: 1, events: 1, scale: 1 });

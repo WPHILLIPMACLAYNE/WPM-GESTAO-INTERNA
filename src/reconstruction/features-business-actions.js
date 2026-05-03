@@ -348,10 +348,27 @@ export function compareMigrationSnapshots(left, right) {
   return { matches: mismatches.length === 0, mismatches };
 }
 
+function isMigrationSnapshotOperationallyEmpty(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object') return true;
+  if (Number(snapshot.archiveCount || 0) > 0) return false;
+  const totals = snapshot.totals && typeof snapshot.totals === 'object' ? snapshot.totals : {};
+  return [
+    'recados',
+    'students',
+    'pending',
+    'events',
+    'scaleDays',
+    'professorShiftRows',
+    'npsMentions',
+    'addonRows',
+    'addonVolume',
+  ].every((key) => Number(totals[key] || 0) === 0);
+}
+
 export function getMigrationRemoteState(report) {
   const backend = report?.backend || {};
   if (backend.remoteError) return 'error';
-  if (report?.remote) return 'present';
+  if (report?.remote) return isMigrationSnapshotOperationallyEmpty(report.remote) ? 'empty' : 'present';
   if (backend.enabled && backend.sessionStatus === 'authenticated') return 'empty';
   return 'unavailable';
 }
@@ -807,7 +824,7 @@ export function createBusinessActionsRuntime(options = {}) {
         if (remoteStore) {
           remoteSnapshot = buildMigrationStoreSnapshot(remoteStore);
           comparison = compareMigrationSnapshots(localSnapshot.periods, remoteSnapshot.periods);
-          remoteState = 'present';
+          remoteState = isMigrationSnapshotOperationallyEmpty(remoteSnapshot) ? 'empty' : 'present';
         }
       } catch (error) {
         remoteError = error?.message || 'Falha ao carregar a base remota para comparacao.';

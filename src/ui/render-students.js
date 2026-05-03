@@ -38,9 +38,15 @@
       const respondedCount = allRows.filter(item => item.feedback !== 'Pendente').length;
       const pendingFeedbackCount = allRows.filter(item => item.feedback === 'Pendente').length;
       const addonsCount = allRows.filter(item => item.addon).length;
+      const rows = state.students.filter(s => {
+        const hay = normalizeSearchText([s.nome, s.matricula, s.atendimento, s.observacoes, s.addon].join(' '));
+        return (!query || hay.includes(query)) && (!person || s.atendimento === person) && (!feedback || s.feedback === feedback);
+      });
+      const activeFilters = Boolean(query || person || feedback);
+      const visibleStudents = rows.length;
       aplicarHtmlSeMudou(
         document.getElementById('studentsSectionTitle'),
-        `ALUNOS NOVOS (MÊS) — ${totalStudents} registro${totalStudents === 1 ? '' : 's'}`
+        `ALUNOS NOVOS (MÊS) — ${activeFilters ? `${visibleStudents}/${totalStudents}` : totalStudents} registro${totalStudents === 1 ? '' : 's'}`
       );
       aplicarHtmlSeMudou(
         document.getElementById('studentsSummaryBar'),
@@ -48,6 +54,7 @@
           <div class="students-summary-item students-summary-item--total">
             <span class="students-summary-label">Total de alunos</span>
             <strong class="students-summary-value">${totalStudents}</strong>
+            <span class="students-summary-meta">${activeFilters ? `${visibleStudents} exibidos` : 'Sem filtros ativos'}</span>
           </div>
           <div class="students-summary-item students-summary-item--attendants">
             <span class="students-summary-label">Atendimentos por atendente</span>
@@ -64,10 +71,6 @@
           </div>
         `
       );
-      const rows = state.students.filter(s => {
-        const hay = normalizeSearchText([s.nome, s.matricula, s.atendimento, s.observacoes, s.addon].join(' '));
-        return (!query || hay.includes(query)) && (!person || s.atendimento === person) && (!feedback || s.feedback === feedback);
-      });
       if (!rows.length) {
         aplicarHtmlSeMudou(tbody, `<tr><td colspan="11"><div class="empty"><strong>Nenhum atendimento encontrado</strong>Ajuste os filtros acima ou clique em <em>Novo atendimento</em> para registrar o primeiro aluno do mês.</div></td></tr>`);
         return;

@@ -18,6 +18,7 @@ const VIEWPORTS = [
 const TABS = [
   { id: 'tab-dashboard', label: 'Dashboard' },
   { id: 'tab-students', label: 'Alunos' },
+  { id: 'tab-addons', label: 'Addons' },
   { id: 'tab-pending', label: 'Pendências' },
   { id: 'tab-nps', label: 'NPS' },
   { id: 'tab-scale', label: 'Escala' },
@@ -119,6 +120,47 @@ async function testViewport(browser, vp) {
   }
 
   // Check pending table if on pending tab
+  await page.locator('#tab-addons').click();
+  await page.waitForTimeout(300);
+
+  const addonsGrid = page.locator('#addonsGrid');
+  if (await addonsGrid.isVisible().catch(() => false)) {
+    const addonMetrics = await page.evaluate(() => {
+      const grid = document.querySelector('#addonsGrid');
+      const firstBlock = document.querySelector('#addons .person-block');
+      return {
+        people: document.querySelectorAll('#addons .person-block').length,
+        gridOverflow: grid ? grid.scrollWidth - grid.clientWidth : 0,
+        blockMaxHeight: firstBlock ? getComputedStyle(firstBlock).maxHeight : 'N/A',
+        blockOverflowY: firstBlock ? getComputedStyle(firstBlock).overflowY : 'N/A'
+      };
+    });
+    console.log(`  ℹ️  Addons cards: ${addonMetrics.people}; gridOverflow=${addonMetrics.gridOverflow}px; blockMaxH=${addonMetrics.blockMaxHeight}; overflowY=${addonMetrics.blockOverflowY}`);
+  }
+
+  await page.locator('#tab-scale').click();
+  await page.waitForTimeout(300);
+
+  const scaleBoard = page.locator('#scaleBoard');
+  if (await scaleBoard.isVisible().catch(() => false)) {
+    const scaleMetrics = await page.evaluate(() => {
+      const board = document.querySelector('#scaleBoard');
+      const firstRow = document.querySelector('#scale .scale-board-row');
+      const matrix = document.querySelector('#scale .schedule-matrix');
+      return {
+        rows: document.querySelectorAll('#scale .scale-board-row').length,
+        boardDisplay: board ? getComputedStyle(board).display : 'N/A',
+        boardOverflow: board ? board.scrollWidth - board.clientWidth : 0,
+        firstRowHeight: firstRow ? Math.round(firstRow.getBoundingClientRect().height) : 0,
+        firstRowMaxHeight: firstRow ? getComputedStyle(firstRow).maxHeight : 'N/A',
+        firstRowOverflowY: firstRow ? getComputedStyle(firstRow).overflowY : 'N/A',
+        matrixMaxHeight: matrix ? getComputedStyle(matrix).maxHeight : 'N/A',
+        matrixOverflow: matrix ? matrix.scrollHeight - matrix.clientHeight : 0,
+      };
+    });
+    console.log(`  ℹ️  Escala board: rows=${scaleMetrics.rows}; display=${scaleMetrics.boardDisplay}; boardOverflow=${scaleMetrics.boardOverflow}px; firstRowH=${scaleMetrics.firstRowHeight}px; rowMaxH=${scaleMetrics.firstRowMaxHeight}; rowOverflowY=${scaleMetrics.firstRowOverflowY}; matrixMaxH=${scaleMetrics.matrixMaxHeight}; matrixOverflow=${scaleMetrics.matrixOverflow}px`);
+  }
+
   await page.locator('#tab-pending').click();
   await page.waitForTimeout(300);
   

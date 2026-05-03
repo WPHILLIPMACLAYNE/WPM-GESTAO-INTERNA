@@ -69,6 +69,23 @@
     }
 
     /** @returns {Promise<void>} */
+    async function handleSupabaseRecoverPasswordAction() {
+      if (typeof requestSupabasePasswordRecovery !== 'function') {
+        showToast('Recuperação de senha indisponível neste runtime.', 'warning');
+        return;
+      }
+      const email = DOM.value('supabaseEmailInput').trim();
+      const result = await requestSupabasePasswordRecovery(email);
+      if (!result.ok) {
+        showToast(result.error || 'Falha ao enviar recuperação de senha.', 'warning', 4500);
+        return;
+      }
+      showToast('E-mail de recuperação enviado. Abra o link mais recente e defina a nova senha nesta tela.', 'success', 6500);
+      renderAll();
+      syncPeriodControls();
+    }
+
+    /** @returns {Promise<void>} */
     async function handleSupabaseSignOutAction() {
       if (typeof signOutSupabase !== 'function') {
         showToast('Integração Supabase indisponível neste runtime.', 'warning');
@@ -325,6 +342,9 @@
               return true;
             case 'supabase-update-password':
               handleSupabaseUpdatePasswordAction();
+              return true;
+            case 'supabase-recover-password':
+              handleSupabaseRecoverPasswordAction();
               return true;
             case 'supabase-sign-out':
               handleSupabaseSignOutAction();

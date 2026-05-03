@@ -165,6 +165,105 @@ describe('Backend (Supabase) — fallback offline', () => {
     expect(backend.getSupabaseClient()).toBe(client);
   });
 
+  it('solicita recuperação de senha Supabase com redirect para o app atual', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend } = app.window.__APP_INTERNALS__;
+    const resetPasswordForEmail = vi.fn().mockResolvedValue({ data: {}, error: null });
+    app.window.supabase = {
+      createClient() {
+        return {
+          auth: {
+            onAuthStateChange() {},
+            resetPasswordForEmail
+          }
+        };
+      }
+    };
+    app.window.__APP_ENV__.SUPABASE_URL = 'https://fake.supabase.co';
+    app.window.__APP_ENV__.SUPABASE_ANON_KEY = 'fake-anon-key';
+    backend.resetSupabaseClient();
+
+    const result = await backend.requestSupabasePasswordRecovery('smartwonkey@gmail.com');
+
+    expect(result).toEqual({ ok: true, redirectTo: 'http://localhost/' });
+    expect(resetPasswordForEmail).toHaveBeenCalledWith('smartwonkey@gmail.com', {
+      redirectTo: 'http://localhost/'
+    });
+  });
+
+  it('ativa modo de recuperação de senha ao receber evento PASSWORD_RECOVERY', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { backend, persistence } = app.window.__APP_INTERNALS__;
+    let authCallback = null;
+    const session = {
+      user: {
+        id: 'user-1',
+        email: 'admin@wpm.local',
+        user_metadata: { full_name: 'Admin WPM' }
+      }
+    };
+    app.window.supabase = {
+      createClient() {
+        return {
+          auth: {
+            onAuthStateChange(callback) {
+              authCallback = callback;
+            },
+            getSession: vi.fn().mockResolvedValue({ data: { session }, error: null }),
+            updateUser: vi.fn().mockResolvedValue({ data: { session }, error: null })
+          },
+          from(table) {
+            if (table !== 'unit_members') throw new Error(`Tabela inesperada no mock: ${table}`);
+            return {
+              select: vi.fn().mockResolvedValue({
+                data: [
+                  {
+                    id: 'member-1',
+                    display_name: 'Admin',
+                    role: 'admin',
+                    active: true,
+                    unit: {
+                      id: 'unit-1',
+                      name: 'WPM Unidade Local',
+                      slug: 'wpm-unidade-local',
+                      timezone: 'America/Sao_Paulo',
+                      active: true
+                    }
+                  }
+                ],
+                error: null
+              })
+            };
+          },
+          rpc: vi.fn().mockResolvedValue({ data: null, error: null })
+        };
+      }
+    };
+    app.window.__APP_ENV__.SUPABASE_URL = 'https://fake.supabase.co';
+    app.window.__APP_ENV__.SUPABASE_ANON_KEY = 'fake-anon-key';
+    app.window.__APP_ENV__.SUPABASE_UNIT_SLUG = 'wpm-unidade-local';
+    await app.setStore(await persistence.loadStore({ skipRemote: true }));
+    backend.resetSupabaseClient();
+    backend.getSupabaseClient();
+
+    await authCallback('PASSWORD_RECOVERY', session);
+
+    expect(backend.getSupabaseBackendState()).toMatchObject({
+      sessionStatus: 'authenticated',
+      passwordRecovery: true,
+      passwordRecoveryError: null
+    });
+    expect(app.window.document.getElementById('settings').classList.contains('active')).toBe(true);
+    expect(app.window.document.getElementById('supabaseNewPasswordInput')).toBeTruthy();
+    expect(app.window.document.getElementById('supabaseConfirmPasswordInput')).toBeTruthy();
+
+    await backend.updateSupabasePassword('nova-senha-segura');
+
+    expect(backend.getSupabaseBackendState().passwordRecovery).toBe(false);
+  });
+
   it('loadStore prefere store remoto quando o adapter remoto retorna base valida', async () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;

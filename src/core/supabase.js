@@ -63,6 +63,8 @@
       syncPolicy: 'local-first-guarded',
       syncStatus: 'idle',
       conflictStatus: 'clear',
+      passwordRecovery: false,
+      passwordRecoveryError: null,
       lastSyncAt: null,
       lastRemoteCheckpoint: null,
       lastError: null
@@ -101,6 +103,64 @@
           ? supabaseBackendState.memberships.map(item => ({ ...item }))
           : []
       });
+    }
+
+    /** @returns {URLSearchParams} */
+    function getSupabaseUrlAuthParams() {
+      const params = new URLSearchParams();
+      if (typeof window === 'undefined') return params;
+      const collect = raw => {
+        const clean = String(raw || '').replace(/^[?#]/, '');
+        if (!clean) return;
+        new URLSearchParams(clean).forEach((value, key) => params.set(key, value));
+      };
+      collect(window.location?.search || '');
+      collect(window.location?.hash || '');
+      return params;
+    }
+
+    /** @returns {{isRecovery: boolean, error: string|null}} */
+    function detectSupabasePasswordRecoveryFromUrl() {
+      const params = getSupabaseUrlAuthParams();
+      const type = String(params.get('type') || '').toLowerCase();
+      const error = params.get('error_description') || params.get('error') || null;
+      return {
+        isRecovery: type === 'recovery',
+        error: error ? decodeURIComponent(String(error).replace(/\+/g, ' ')) : null
+      };
+    }
+
+    /** @returns {string} */
+    function getSupabasePasswordRecoveryRedirectUrl() {
+      if (typeof window === 'undefined' || !window.location) return '';
+      if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        return `${window.location.origin}${window.location.pathname}`;
+      }
+      return 'https://wpm-gestao-interna.vercel.app/';
+    }
+
+    /**
+     * @param {any|null} session
+     * @param {{error?: string|null, showToastMessage?: boolean}} [options]
+     * @returns {void}
+     */
+    function activateSupabasePasswordRecoveryMode(session = null, options = {}) {
+      updateSupabaseBackendState({
+        sessionStatus: session?.user ? 'authenticated' : supabaseBackendState.sessionStatus,
+        user: session?.user ? snapshotSupabaseUser(session.user) : supabaseBackendState.user,
+        passwordRecovery: true,
+        passwordRecoveryError: options.error || null,
+        lastError: options.error || null
+      });
+      if (typeof saveUIState === 'function') saveUIState({ activeTab: 'settings' });
+      if (typeof setActiveTab === 'function') setActiveTab('settings', true);
+      if (typeof renderAll === 'function') renderAll();
+      if (options.showToastMessage !== false && typeof showToast === 'function') {
+        const message = options.error
+          ? `Link de recuperação inválido ou expirado: ${options.error}`
+          : 'Modo de recuperação de senha ativo. Informe a nova senha em Configurações.';
+        showToast(message, options.error ? 'warning' : 'success', 6500);
+      }
     }
 
     /**
@@ -605,6 +665,11 @@
           user: snapshotSupabaseUser(session?.user || null),
           lastError: null
         });
+        if (event === 'PASSWORD_RECOVERY') {
+          activateSupabasePasswordRecoveryMode(session || null);
+          if (session?.user) await refreshSupabaseBackendState({ forceSession: false });
+          return;
+        }
         if (event === 'SIGNED_OUT') {
           updateSupabaseBackendState({
             memberships: [],
@@ -613,6 +678,8 @@
             source: 'local',
             syncStatus: 'idle',
             conflictStatus: 'clear',
+            passwordRecovery: false,
+            passwordRecoveryError: null,
             lastRemoteCheckpoint: null
           });
           __supabaseLastRemoteCheckpoint = null;
@@ -657,6 +724,13 @@
         );
         __supabaseInitErrorReason = null;
         bindSupabaseAuthListener(__supabaseClientCache);
+        const recoveryFromUrl = detectSupabasePasswordRecoveryFromUrl();
+        if (recoveryFromUrl.isRecovery || recoveryFromUrl.error) {
+          activateSupabasePasswordRecoveryMode(null, {
+            error: recoveryFromUrl.error,
+            showToastMessage: Boolean(recoveryFromUrl.error)
+          });
+        }
         updateSupabaseBackendState({
           enabled: true,
           hasEnv: true,
@@ -1243,8 +1317,40 @@
       }
 
       __supabaseSessionCache = data?.session || __supabaseSessionCache;
+      updateSupabaseBackendState({
+        passwordRecovery: false,
+        passwordRecoveryError: null
+      }, false);
       await refreshSupabaseBackendState({ forceSession: false });
       return { ok: true };
+    }
+
+    /**
+     * @param {string} email
+     * @returns {Promise<{ok: boolean, error?: string, redirectTo?: string}>}
+     */
+    async function requestSupabasePasswordRecovery(email) {
+      const client = getSupabaseClient();
+      if (!client?.auth || typeof client.auth.resetPasswordForEmail !== 'function') {
+        return { ok: false, error: 'Supabase Auth indisponível neste runtime.' };
+      }
+      const normalizedEmail = String(email || '').trim();
+      if (!normalizedEmail) return { ok: false, error: 'Informe o e-mail para recuperar a senha.' };
+      const redirectTo = getSupabasePasswordRecoveryRedirectUrl();
+      const { error } = await client.auth.resetPasswordForEmail(normalizedEmail, { redirectTo });
+      if (error) {
+        updateSupabaseBackendState({
+          syncStatus: 'error',
+          lastError: error.message || 'Falha ao enviar recuperação de senha.'
+        });
+        return { ok: false, error: error.message || 'Falha ao enviar recuperação de senha.' };
+      }
+      updateSupabaseBackendState({
+        passwordRecovery: false,
+        passwordRecoveryError: null,
+        lastError: null
+      });
+      return { ok: true, redirectTo };
     }
 
     /**
@@ -1273,6 +1379,8 @@
         source: 'local',
         syncStatus: 'idle',
         conflictStatus: 'clear',
+        passwordRecovery: false,
+        passwordRecoveryError: null,
         lastRemoteCheckpoint: null,
         lastError: null
       });
@@ -1326,6 +1434,8 @@
         source: 'local',
         syncStatus: 'idle',
         conflictStatus: 'clear',
+        passwordRecovery: false,
+        passwordRecoveryError: null,
         lastSyncAt: null,
         lastRemoteCheckpoint: null,
         lastError: null

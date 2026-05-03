@@ -235,3 +235,35 @@ Proxima etapa segura:
 2. Definir a senha no app publicado usando o novo painel de senha.
 3. Permanecer autenticado na unidade `Smartfit Pampulha`.
 4. Rodar apenas `Executar dry-run`.
+
+## Hotfix do fluxo de recuperacao no app publicado
+
+Ainda em 2026-05-03, foi identificado que o link de recuperacao chegava ao app publicado, mas o usuario nao tinha um fluxo claro e direto para concluir a troca de senha. O app dependia do estado autenticado implicito do Supabase e nao destacava o modo `PASSWORD_RECOVERY`.
+
+Correcao aplicada:
+
+- `src/core/supabase.js` agora detecta `type=recovery`/erros de recovery na URL e trata o evento Auth `PASSWORD_RECOVERY`.
+- O estado Supabase passou a guardar `passwordRecovery` e `passwordRecoveryError`.
+- `src/ui/render-settings.js` passou a mostrar mensagem de recuperacao, campos de nova senha e acoes de `Enviar reset de senha`/`Definir nova senha`.
+- `src/ui/events-core.js` ganhou acao para solicitar novo recovery diretamente pelo painel.
+- `src/main.js` expoe `requestSupabasePasswordRecovery` em `APP_INTERNALS.backend`.
+- Testes novos cobrem envio de recovery com `redirectTo` do app atual e ativacao do modo `PASSWORD_RECOVERY`.
+
+Validacao:
+
+- `node --check src/core/supabase.js src/main.js src/ui/events-core.js src/ui/render-settings.js`: OK.
+- `npx vitest run tests/unit/runtime-env.test.js tests/unit/selectors-real.test.js tests/unit/xss-entities.test.js`: 47 testes passaram.
+- `npx vitest run --maxWorkers=1 --minWorkers=1`: 267 testes passaram.
+- Deploy de producao: `dpl_CCWKoJaiNjvmNpe5f3TmMFwgb72V`.
+- Alias publicado: `https://wpm-gestao-interna.vercel.app`.
+- `https://wpm-gestao-interna.vercel.app/`: HTTP `200`.
+- `https://wpm-gestao-interna.vercel.app/env.js`: `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG=mgcpam2` carregados.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy`: 1 teste Playwright passou.
+- Novo recovery reenviado para `smartwonkey@gmail.com`: HTTP `200`.
+
+Proxima etapa segura:
+
+1. Abrir somente o e-mail de recuperacao mais recente em `smartwonkey@gmail.com`.
+2. Definir a nova senha no app publicado.
+3. Fazer login no backend e confirmar unidade `Smartfit Pampulha`, perfil `admin`.
+4. Depois disso, seguir para o dry-run de migracao assistida.

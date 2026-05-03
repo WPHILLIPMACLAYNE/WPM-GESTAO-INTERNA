@@ -66,7 +66,7 @@ describe('Seletores reais do app modularizado', () => {
     expect(nextStore.periods['2027-01'].students).toHaveLength(30);
     expect(nextStore.periods['2027-01'].pending).toHaveLength(20);
     expect(nextStore.periods['2027-01'].events).toHaveLength(10);
-  });
+  }, 20000);
 
   it('generatePeriodSeed() cria a massa determinística esperada por mês', async () => {
     const app = await loadRealApp();

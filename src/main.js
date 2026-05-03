@@ -161,6 +161,7 @@
         reloadAppFromSupabaseSession,
         signInSupabasePassword,
         updateSupabasePassword,
+        requestSupabasePasswordRecovery,
         signOutSupabase,
         resetSupabaseClient
       },

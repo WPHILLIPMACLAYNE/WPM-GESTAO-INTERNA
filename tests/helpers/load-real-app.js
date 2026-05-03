@@ -75,7 +75,9 @@ export async function loadRealApp(options = {}) {
   window.cancelAnimationFrame = globalThis.cancelAnimationFrame;
   window.crypto = crypto.webcrypto;
   window.structuredClone = globalThis.structuredClone;
-  window.DOMPurify = { sanitize: value => value };
+  if (!options.disableDOMPurify) {
+    window.DOMPurify = { sanitize: value => value };
+  }
   window.__APP_ENV__ = Object.assign({
     SUPABASE_URL: null,
     SUPABASE_ANON_KEY: null,

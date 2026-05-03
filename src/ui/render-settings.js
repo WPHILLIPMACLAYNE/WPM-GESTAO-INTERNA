@@ -573,6 +573,10 @@
         helperText = 'O contrato de ambiente existe, mas o SDK do Supabase não foi carregado neste runtime.';
       } else if (backendState.syncStatus === 'conflict') {
         helperText = 'O backend mudou desde a última leitura deste dispositivo. Recarregue do backend antes de tentar sincronizar novamente.';
+      } else if (backendState.passwordRecovery && backendState.passwordRecoveryError) {
+        helperText = `O link de recuperação retornou erro: ${backendState.passwordRecoveryError}. Solicite um novo e-mail de recuperação e use o link mais recente.`;
+      } else if (backendState.passwordRecovery) {
+        helperText = 'Recuperação de senha ativa. Digite uma nova senha abaixo e confirme para concluir o reset.';
       } else if (backendState.sessionStatus === 'authenticated') {
         helperText = backendState.source === 'supabase'
           ? 'A base ativa está vindo do backend com espelho local preservado.'
@@ -589,6 +593,7 @@
       const sessionPill = getSupabasePillClass(backendState.sessionStatus);
       const syncPill = getSupabasePillClass(backendState.syncStatus);
       const sourcePill = backendState.source === 'supabase' ? 'ok' : 'info';
+      const showPasswordForm = backendState.sessionStatus === 'authenticated' || Boolean(backendState.passwordRecovery);
       const authBlock = backendState.sessionStatus === 'authenticated'
         ? `
           <div class="summary-item summary-item--col1">
@@ -625,6 +630,22 @@
             </div>
           </div>
         `;
+      const passwordRecoveryBlock = showPasswordForm && backendState.sessionStatus !== 'authenticated'
+        ? `
+          <div class="summary-item summary-item--col1">
+            <div class="settings-about-grid">
+              <label class="settings-about-item" for="supabaseNewPasswordInput">
+                <div class="name">Nova senha</div>
+                <input id="supabaseNewPasswordInput" class="input" type="password" placeholder="••••••••" autocomplete="new-password" />
+              </label>
+              <label class="settings-about-item" for="supabaseConfirmPasswordInput">
+                <div class="name">Confirmar senha</div>
+                <input id="supabaseConfirmPasswordInput" class="input" type="password" placeholder="••••••••" autocomplete="new-password" />
+              </label>
+            </div>
+          </div>
+        `
+        : '';
       const actionButtons = backendState.sessionStatus === 'authenticated'
         ? `
           <button class="btn btn-success" data-action="supabase-reload">Recarregar do backend</button>
@@ -634,6 +655,8 @@
         `
         : `
           <button class="btn btn-success" data-action="supabase-sign-in" ${status.enabled ? '' : 'disabled aria-disabled="true"'}>Entrar no backend</button>
+          <button class="btn btn-ghost" data-action="supabase-recover-password" ${status.enabled ? '' : 'disabled aria-disabled="true"'}>Enviar reset de senha</button>
+          ${backendState.passwordRecovery && !backendState.passwordRecoveryError ? '<button class="btn btn-ghost" data-action="supabase-update-password">Definir nova senha</button>' : ''}
         `;
 
       host.innerHTML = `
@@ -662,6 +685,7 @@
           </div>
         </div>
         ${authBlock}
+        ${passwordRecoveryBlock}
         <div class="summary-item summary-item--col4">
           <div>
             <div class="name">Fonte ativa</div>

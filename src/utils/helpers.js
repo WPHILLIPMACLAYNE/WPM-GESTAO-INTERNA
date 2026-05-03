@@ -18,7 +18,76 @@
         .replace(/\//g, '&#x2F;');
     }
 
-    /** @param {string} html - Raw HTML string. @returns {string} Sanitized HTML via DOMPurify. */
+    const SANITIZE_ALLOWED_TAGS = new Set([
+      'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'p', 'br', 'span',
+      'div', 'article', 'section', 'header', 'footer', 'h1', 'h2', 'h3',
+      'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+      'form', 'input', 'select', 'option', 'textarea', 'button', 'label',
+      'code', 'pre', 'blockquote', 'small', 'sub', 'sup', 'mark', 'time',
+      'abbr', 'address', 'cite', 'data', 'dfn', 'kbd', 'samp', 'var',
+      'details', 'summary', 'dialog', 'figure', 'figcaption', 'main', 'nav',
+      'output', 'progress', 'meter'
+    ]);
+
+    const SANITIZE_ALLOWED_ATTRS = new Set([
+      'href', 'title', 'target', 'rel', 'alt', 'class', 'id',
+      'role', 'tabindex', 'type', 'value', 'placeholder', 'required',
+      'disabled', 'readonly', 'checked', 'selected', 'for', 'name', 'min',
+      'max', 'step', 'pattern', 'maxlength', 'minlength', 'autocomplete',
+      'autofocus', 'form', 'action', 'method', 'enctype', 'novalidate',
+      'draggable', 'contenteditable', 'hidden', 'colspan', 'rowspan',
+      'scope', 'headers', 'abbr', 'axis', 'dir', 'lang', 'xml:lang',
+      'translate'
+    ]);
+
+    function isSafeUrl(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return true;
+      if (raw.startsWith('#') || raw.startsWith('/') || raw.startsWith('./') || raw.startsWith('../')) return true;
+      try {
+        const parsed = new URL(raw, window.location?.href || 'https://local.invalid/');
+        return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    function sanitizeHtmlFallback(html) {
+      const template = document.createElement('template');
+      template.innerHTML = String(html || '');
+
+      const sanitizeNode = node => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+        const tagName = node.tagName.toLowerCase();
+        if (!SANITIZE_ALLOWED_TAGS.has(tagName)) {
+          node.replaceWith(...Array.from(node.childNodes));
+          return;
+        }
+
+        Array.from(node.attributes).forEach(attr => {
+          const name = attr.name.toLowerCase();
+          const allowed = SANITIZE_ALLOWED_ATTRS.has(name)
+            || name.startsWith('data-')
+            || name.startsWith('aria-');
+          if (!allowed || name.startsWith('on')) {
+            node.removeAttribute(attr.name);
+            return;
+          }
+          if ((name === 'href' || name === 'src' || name === 'action') && !isSafeUrl(attr.value)) {
+            node.removeAttribute(attr.name);
+          }
+          if (name === 'target' && node.getAttribute('target') === '_blank') {
+            node.setAttribute('rel', 'noopener noreferrer');
+          }
+        });
+      };
+
+      Array.from(template.content.querySelectorAll('*')).forEach(sanitizeNode);
+      return template.innerHTML;
+    }
+
+    /** @param {string} html - Raw HTML string. @returns {string} Sanitized HTML via DOMPurify or local allowlist fallback. */
     function sanitizeHtml(html) {
       if (typeof DOMPurify !== 'undefined' && DOMPurify.sanitize) {
         return DOMPurify.sanitize(html, {
@@ -48,8 +117,8 @@
           RETURN_DOM_FRAGMENT: false
         });
       }
-      console.warn('DOMPurify indisponível — usando fallback esc()');
-      return esc(html);
+      console.warn('DOMPurify indisponível — usando fallback local com allowlist');
+      return sanitizeHtmlFallback(html);
     }
 
     /**

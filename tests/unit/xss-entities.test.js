@@ -191,4 +191,41 @@ describe('XSS por entidade', () => {
     expect(tbody.querySelector('[data-xss="central-row"]')).toBeNull();
     expect(tbody.textContent).toContain('XSS-CENTRAL');
   });
+
+  it('mantem templates renderizados quando DOMPurify externo nao carrega', async () => {
+    const app = await loadRealApp({ disableDOMPurify: true });
+    cleanup = app.cleanup;
+
+    const { config, schema, rendering } = app.window.__APP_INTERNALS__;
+    const periodKey = '2026-08';
+    const period = schema.buildCleanPeriodFromTemplate(null, periodKey);
+    await app.setStore({
+      version: config.STORE_VERSION,
+      activePeriod: periodKey,
+      periods: {
+        [periodKey]: period
+      },
+      archives: {}
+    });
+
+    rendering.renderAll();
+    await new Promise(resolve => setTimeout(resolve, 60));
+
+    const hero = app.window.document.querySelector('#heroSummary');
+    expect(hero?.querySelector('.mini-stat')).toBeTruthy();
+    expect(hero?.textContent || '').not.toContain('<div class="mini-stat"');
+
+    const container = app.window.document.createElement('tbody');
+    app.window.document.body.appendChild(container);
+    rendering.aplicarPatchLinhas(
+      container,
+      [{ id: 'fallback-row', name: '<img src=x data-xss="fallback">XSS-FALLBACK<script>alert(1)</script>' }],
+      item => item.id,
+      item => `<tr><td>${item.name}</td></tr>`
+    );
+
+    expect(container.querySelector('[data-xss="fallback"]')).toBeNull();
+    expect(container.querySelector('script')).toBeNull();
+    expect(container.textContent).toContain('XSS-FALLBACK');
+  });
 });

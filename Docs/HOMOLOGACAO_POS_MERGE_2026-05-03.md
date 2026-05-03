@@ -2,7 +2,9 @@
 
 Data: 2026-05-03
 
-Objetivo: registrar a primeira homologacao funcional apos o merge da integracao pos-Reversa na `main`, validando as travas destrutivas do backend e o fluxo browser contra Supabase local.
+Objetivo: registrar a primeira homologacao funcional apos o merge da integracao pos-Reversa na `main`, iniciada contra Supabase local e concluida em producao com Vercel + Supabase remoto.
+
+Status atual: homologacao remota concluida em 2026-05-03. O proximo bloco do projeto e o piloto operacional controlado em producao, sem novas features ate a persistencia real minima ser comprovada.
 
 ## Escopo
 
@@ -322,3 +324,15 @@ Status final:
 - Homologacao da estrutura remota e do ciclo auth -> dry-run -> migracao -> reload: **aprovada**.
 - Base operacional migrada esta zerada conforme o estado local observado durante a homologacao.
 - Proxima acao recomendada: manter `Sincronizar agora` bloqueado operacionalmente ate existir alteracao real a enviar ou novo criterio de validacao.
+
+## Etapa seguinte: piloto operacional controlado
+
+O proximo passo do projeto e executar um piloto minimo em producao, com escopo controlado e evidencia registrada:
+
+1. Criar um atendimento real ou controlado em `Maio/2026`.
+2. Salvar localmente e acionar `Sincronizar agora` uma unica vez, de forma intencional.
+3. Usar `Recarregar do backend` para confirmar que o registro retorna do Supabase remoto.
+4. Registrar data, usuario, unidade, mes, acao executada, resultado e qualquer divergencia observada.
+5. Repetir somente depois, se o primeiro ciclo passar, com uma pendencia ou uma venda de addon controlada.
+
+Enquanto esta etapa nao estiver documentada, o projeto permanece em **pos-homologacao remota / pre-piloto operacional**.

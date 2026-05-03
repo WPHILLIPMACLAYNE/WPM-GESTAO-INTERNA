@@ -1,8 +1,8 @@
 # PROXIMOS_PASSOS — Roadmap pós-estabilização
 
-Data: 2026-04-10 · Última atualização: 2026-05-02
-Baseline estável em produção: `origin/main` @ `bc6307f` (GitHub Pages v34)
-Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
+Data: 2026-04-10 · Última atualização: 2026-05-03
+Baseline remoto homologado: `origin/main` @ `191383e` (Vercel v34 + Supabase remoto)
+Objetivo atual: sair da homologação técnica e entrar em piloto operacional controlado sem reabrir regressão.
 
 > **Atualização 2026-04-16** — Overhaul de UI/UX (polish layer v1) entregue.
 > Escopo: design system consolidado, hierarquia de z-index corrigida, microinterações,
@@ -65,6 +65,14 @@ Objetivo: evoluir para backend sem reabrir regressão no deploy estável.
 > 7 migrations com preservacao das tabelas legadas em `legacy_periods`,
 > `legacy_archives` e `legacy_profiles`.
 > Roteiro: [`FECHAMENTO_POS_REVERSA_2026-05-02.md`](./FECHAMENTO_POS_REVERSA_2026-05-02.md).
+
+> **Atualização 2026-05-03** — Homologação remota funcional concluída em produção.
+> O Vercel publica `env.js` com Supabase remoto, o SDK Supabase foi vendorizado para não depender de CDN,
+> recovery/senha/login foram validados com `smartwonkey@gmail.com`, a unidade `Smartfit Pampulha`
+> (`mgcpam2`) autenticou com perfil `admin`, o dry-run retornou `12 periodo(s) locais, backend remoto vazio,
+> 0 divergencia(s)`, a migração inicial foi executada uma única vez, o reload do backend retornou
+> `Base remota carregada com sucesso` e os 12 meses de janeiro a dezembro foram navegados manualmente.
+> Fonte de verdade: [`HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./HOMOLOGACAO_POS_MERGE_2026-05-03.md).
 
 ## Etapa 0 — Proteger baseline
 
@@ -359,6 +367,64 @@ Critério de aceite:
 
 - Release validável em produção com checklist objetivo.
 - Rollback não depende de tentativa manual no navegador.
+
+## Etapa 11 — Piloto operacional controlado em produção
+
+Prioridade: imediata.
+
+Status 2026-05-03: próxima etapa. A migração remota estrutural está homologada, mas ainda falta provar persistência com um dado operacional real ou controlado criado após a migração.
+
+Objetivo:
+
+- Confirmar que o ciclo de uso real funciona em produção: criar dado -> salvar localmente -> sincronizar intencionalmente -> recarregar do backend -> reencontrar o dado vindo do Supabase.
+
+Ações:
+
+- Usar o app publicado em `https://wpm-gestao-interna.vercel.app`.
+- Fazer login como `smartwonkey@gmail.com`.
+- Confirmar `SDK Carregado`, unidade `Smartfit Pampulha`, perfil `admin` e fonte ativa `Supabase`.
+- Criar **um** atendimento controlado em `Maio/2026`.
+- Conferir que o atendimento aparece na UI antes de qualquer sync.
+- Executar `Sincronizar agora` uma única vez e somente para esse dado conhecido.
+- Executar `Recarregar do backend`.
+- Confirmar que o atendimento voltou do Supabase.
+- Registrar evidência em `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md` ou documento de piloto dedicado.
+- Repetir o padrão com **uma** pendência ou **um** addon somente depois do atendimento passar.
+
+Critério de aceite:
+
+- Dado criado no app publicado retorna após reload remoto.
+- Não há divergência ou conflito remoto.
+- O operador sabe quando usar `Recarregar do backend` e `Sincronizar agora`.
+- Nenhum backup é importado durante o piloto.
+
+Guardrails:
+
+- Não clicar em `Sincronizar agora` repetidamente.
+- Não usar `Importar backup` sem preview revisado e aprovação explícita.
+- Não iniciar features novas até o piloto mínimo estar documentado.
+
+## Etapa 12 — Runbook operacional pós-piloto
+
+Prioridade: alta após a Etapa 11.
+
+Ações:
+
+- Documentar regras simples para equipe:
+  - quando usar `Recarregar do backend`;
+  - quando usar `Sincronizar agora`;
+  - quando exportar backup;
+  - quando importação é proibida;
+  - o que fazer em conflito remoto;
+  - como validar mês ativo antes de lançar dados.
+- Atualizar README e docs de homologação com linguagem operacional.
+- Criar checklist curto de abertura/fechamento do dia.
+
+Critério de aceite:
+
+- Um operador consegue usar o app sem conhecer detalhes técnicos de Supabase.
+- A equipe evita ações destrutivas por padrão.
+- O próximo desenvolvimento parte de um protocolo operacional claro.
 
 ## Ordem recomendada de commits
 

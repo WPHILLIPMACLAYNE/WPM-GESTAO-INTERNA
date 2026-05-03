@@ -1,13 +1,21 @@
 # BUGS_CONHECIDOS — WPM Gestão Interna
 
 Data original: 2026-04-10
-Última revisão de contexto: 2026-04-22
-Baseline atual em produção: `origin/main` (`bc6307f`)
+Última revisão de contexto: 2026-05-03
+Baseline atual em produção: `origin/main` (`191383e`, Vercel v34 + Supabase remoto homologado)
 Escopo: inventário histórico de bugs/riscos levantados em auditorias anteriores.
 
-> Status dos itens pode ter mudado desde a auditoria original.
-> Antes de executar qualquer correção, revalidar cada item no baseline atual.
+> Status dos itens mudou desde a auditoria original.
+> Este arquivo permanece como inventário histórico de risco; antes de executar qualquer correção,
+> revalidar cada item contra `CURRENT_STATUS.md`, `MIGRATION_STATUS.md` e `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`.
 > Referência estrutural corrente: `MODULE_MAP.md`, `QWEN.md` e `MIGRATION_STATUS.md`.
+
+## Leitura atual em 2026-05-03
+
+- O baseline de produção deixou de ser o GitHub Pages antigo e passou a ser o Vercel publicado em `https://wpm-gestao-interna.vercel.app`.
+- A cadeia Supabase remota foi homologada: env publicado, SDK vendorizado, recovery, login, dry-run, migração inicial e reload remoto passaram.
+- O próximo risco operacional não é mais bootstrap de backend; é validar persistência real no **piloto operacional controlado** antes de novas features.
+- Itens antigos de PWA/cache, rollback, scripts de teste, Playwright, duplicidade, seed NPS e CDN Supabase foram tratados em ciclos posteriores; use este arquivo apenas como histórico até uma nova auditoria completa.
 
 ## CRÍTICO
 

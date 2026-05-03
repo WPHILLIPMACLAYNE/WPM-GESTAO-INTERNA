@@ -1,40 +1,43 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 11:15:38 -03
+Last updated: 2026-05-03 13:29:27 -03
 
 ## Purpose
 
-This is the master recovery guide for interrupted-session work on the active `VSCODEX` branch.
+This is the master recovery guide for interrupted-session work on `WPM-GESTAO-INTERNA`.
 
-If work is resumed after VS Code closes, chat context is lost, or an agent changes, this file should provide the shortest safe path back into the project.
+If work is resumed after VS Code closes, chat context is lost, or an agent changes, this file provides the shortest safe path back into the project.
 
 ## Active recovery identity
 
 - Recovery branch: `main`
 - Remote recovery branch: `origin/main`
-- Branch created at: not applicable for this checkpoint
-- Current HEAD reference at creation: `1d34d0b`
-- Current live HEAD: `d1abdc4`
-- Previous continuity base commit: `1d34d0b`
+- Current live HEAD: `191383e`
+- Current production stage: remote Supabase migration homologated
 - Timezone for all continuity records: `America/Sao_Paulo`
 
 ## Current project state
 
-- The live working line is post-Reversa `main`, remote-runtime deploy enablement, and homologation-safe Supabase dry-run
-- The saved repo line to continue is no longer the old `VSCODEX1807` branch
-- The app baseline is `v34`
-- The repo now has a project-specific review guide and a local PWA/offline validation path
-- The repo completed Etapa 3 and started Etapa 4 security hardening before backend expansion
-- The local post-merge Supabase homologation passed, but published deploys still need browser-safe `env.js` before real-unit authentication
+- The app baseline is `v34`.
+- The production runtime is `https://wpm-gestao-interna.vercel.app`.
+- Vercel generates and serves `env.js` with public/browser-safe Supabase env.
+- Supabase project `eautmpqkxibolmcfiacd` is the remote backend used in production.
+- The active unit is `Smartfit Pampulha`, slug `mgcpam2`.
+- The admin user is `smartwonkey@gmail.com`, display name `WPM`, role `admin`.
+- Supabase SDK is loaded from the vendored local file `src/vendor/supabase-js-2.104.0.umd.js`.
+- Service worker precaches the vendored Supabase SDK.
+- Recovery, password setup, login, dry-run, initial migration, backend reload, and January-to-December navigation were manually validated on 2026-05-03.
+- The migrated remote dataset currently contains 12 periods and zero operational records.
 
 ## Mandatory read order on resume
 
-1. `Docs/RETOMADA_SEGURA.md`
-2. `.cortex/CURRENT_STATUS.md`
-3. `.cortex/RETOMADA_MASTER.md`
-4. `.cortex/TASK_LEDGER.md`
-5. `.cortex/AGENT_HANDOFF.md`
-6. `git status`, current branch, recent commits
+1. `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+2. `Docs/RETOMADA_SEGURA.md`
+3. `.cortex/CURRENT_STATUS.md`
+4. `.cortex/RETOMADA_MASTER.md`
+5. `.cortex/TASK_LEDGER.md`
+6. `.cortex/AGENT_HANDOFF.md`
+7. `git status`, current branch, recent commits
 
 ## Mandatory update order after each completed task
 
@@ -43,70 +46,59 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 3. `.cortex/RETOMADA_MASTER.md`
 4. `.cortex/AGENT_HANDOFF.md` if next step changed
 5. `.cortex/TASK_LEDGER.md`
+6. related project docs such as `Docs/PROXIMOS_PASSOS.md`, `MIGRATION_STATUS.md`, or `README.md` when their facts drift
 
 ## Commit rule
 
-- If a task takes more than 7 minutes and finishes in a correct state, commit it on the active `VSCODEX` branch.
-- Always record the Sao Paulo date/time in the continuity files when updating them.
-- If the task is not yet safe to commit, the continuity files still must be updated before stopping.
+- Commit stable documentation or code checkpoints.
+- Always record the Sao Paulo date/time in continuity files when updating them.
+- If a task is not yet safe to commit, leave a complete checkpoint before stopping.
 
 ## Session handoff test
 
-If a new Codex session resumes this branch using the standard recovery commands and correctly identifies:
+If a new Codex session resumes this repo using the standard recovery commands and correctly identifies:
 
-- branch `VSCODEX1807`
-- continuity commit lineage from `623b50a`
-- this master recovery file
-- the current task ledger entry for this handoff test
+- branch `main`
+- current live HEAD at or after `191383e`
+- production runtime `https://wpm-gestao-interna.vercel.app`
+- stage `remote Supabase migration homologated`
+- next stage `controlled production pilot`
 
-then it must begin its first recovery confirmation response with the exact phrase:
+then it may begin its first recovery confirmation response with:
 
 `AHAA, CONSEGUI!`
 
-This phrase is a continuity test marker and should be used only when the new session has actually reconstructed the intended context from the persisted files.
+This phrase is a continuity test marker and should be used only when context was reconstructed from persisted files.
 
 ## Latest completed continuity work
 
-- converted `.cortex/` into a living continuity layer
-- created `VSCODEX1807` as the active recovery branch
-- established the timestamped recovery-branch rule `VSCODEXHHMM`
-- synchronized the continuity protocol across the main recovery files
-- validated the local executable baseline end-to-end
-- stabilized Playwright visual snapshots by freezing browser time in the visual suites
-- tied the service worker cache identity to `APP_VERSION` + precache-manifest hash
-- added a project-specific code review guide linked from `AGENTS.md`
-- hardened the service worker with scope-safe app-shell caching, network-first fetching, and update messaging
-- added dedicated Playwright coverage for service-worker registration and offline shell behavior
-- fixed NPS `rankSnapshot` generation/normalization to use `mentionId -> position`
-- moved duplicate-event confirmation before persistence and normalized the duplicate title comparison
-- strengthened CRUD and direct event rollback behavior when persistence fails
-- removed inline JavaScript from the app shell and tightened `script-src`
-- added SRI to DOMPurify/Chart.js CDN scripts
-- isolated the Playwright HTTP server on port `4173`
-- published the active recovery branch to GitHub with upstream tracking enabled
-- validated the published URLs as reachable but blocked for remote functional homologation because runtime Supabase env was missing
-- pushed remote-runtime hotfix `d1abdc4` to load optional `env.js` in deployed HTTP/HTTPS runtimes and generate it on Vercel
-- verified Vercel serves `/env.js` with HTTP `200`, but Supabase public env values are still absent
-- configured Vercel production public Supabase env vars and redeployed production
-- verified published runtime has `hasEnv=true` and smoke passes against `https://wpm-gestao-interna.vercel.app/`
-- completed remote Supabase unit/admin bootstrap for `Smartfit Pampulha` / `mgcpam2`
-- fixed Supabase Auth recovery redirect to Vercel
-- added password update UI for authenticated recovery sessions
-- deployed password update UI to production in `dpl_F97AVZAbANPAhFDXH4v6Rna462X4`
-- requested a new password recovery/setup email for admin `smartwonkey@gmail.com` after deploy
+- Remote runtime env enabled on Vercel.
+- Remote Supabase unit/admin bootstrap completed.
+- Auth recovery redirect fixed to Vercel.
+- Published password update/recovery flow implemented.
+- Supabase SDK loading made independent of CDN by vendoring `@supabase/supabase-js@2.104.0`.
+- Service worker precache updated for the vendored SDK.
+- Published app validated with `hasSdk=true`, `SDK Carregado`, and visible recovery password fields.
+- Recovery email was received by the operator.
+- Admin password was defined successfully.
+- Published app authenticated into `Smartfit Pampulha` as `admin`.
+- Dry-run approved first migration: 12 local periods, empty remote backend, 0 divergences.
+- Migration to backend executed once.
+- Reload from backend returned `Base remota carregada com sucesso`.
+- Manual navigation from January to December validated the remote period structure.
+- Final homologation documented in `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`.
 
 ## Exact next step
 
-Close the current checkpoint cleanly, then continue deploy homologation:
+Start **Etapa 11 - Piloto operacional controlado em producao**.
 
-1. set the admin password from the newest recovery email
-2. authenticate in the real unit from the browser holding local migration data
-3. run only the migration dry-run
+Minimal safe sequence:
 
-The latest validation already recorded for this session is:
+1. create one controlled atendimento in `Maio/2026` using the published app;
+2. save locally and confirm it appears in the UI;
+3. intentionally use `Sincronizar agora` once only for that known change;
+4. click `Recarregar do backend`;
+5. confirm the atendimento returns from Supabase;
+6. document the result before testing a pendencia or addon.
 
-1. `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
-2. `git diff --check` OK
-3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
-4. `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
-5. remote unit/member/period bootstrap checks OK
+Do not start broader features until this production pilot proves real-data persistence.

@@ -1,98 +1,101 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 11:15:38 -03
+Last updated: 2026-05-03 13:29:27 -03
 
 ## Live status
 
 - Branch: `main`
-- HEAD: `d1abdc4`
-- Baseline in production: `origin/main`
+- HEAD: `191383e`
+- Remote tracking branch: `origin/main`
+- Local and remote state: aligned at `191383e05fb6312605ca694c49c794a74f5927d5`
+- Baseline in production: Vercel alias `https://wpm-gestao-interna.vercel.app`
+- Latest production deploy validated in this block: `dpl_3Qnt3pQX1kkE5889RvoxVLMELRMD`
 - App version: `v34`
 - Store version: `4`
 - Runtime model: browser-only SPA with classic `<script>` files in fixed order
-- Active recovery branch: `main` after post-Reversa merge
-- Recovery branch created at: not applicable for this checkpoint
-- Previous continuity base commit: `1d34d0b`
-- Remote tracking branch: `origin/main`
+- Backend model: Supabase remote with local-first guarded sync and checkpoint protection
+- Current operational stage: **remote Supabase migration homologated; ready for controlled production pilot**
+
+## What is now complete
+
+The former blocker chain was completed on 2026-05-03:
+
+- Vercel production publishes browser-safe runtime env through generated `env.js`.
+- Published app loads Supabase env for remote project `eautmpqkxibolmcfiacd`.
+- Production unit was bootstrapped as `Smartfit Pampulha`.
+- Runtime slug is `mgcpam2`.
+- Remote admin is `smartwonkey@gmail.com`, display name `WPM`, role `admin`.
+- Supabase Auth recovery redirects to `https://wpm-gestao-interna.vercel.app`.
+- Password recovery flow works in the published app.
+- Supabase SDK is vendored at `src/vendor/supabase-js-2.104.0.umd.js`, loaded locally before `src/core/supabase.js`, and precached by `sw.js`.
+- Recovery mode no longer renders before the local store exists.
+- Password was defined successfully from the latest recovery email.
+- Admin login was confirmed in the published app.
+- Dry-run reported `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`.
+- Assisted migration was executed once.
+- Reload from backend completed with `Base remota carregada com sucesso`.
+- Fonte ativa after reload: `Supabase`.
+- Remote summary after reload: `12 periodo(s)`, `0 arquivo(s)`, `0 alunos`, `0 pendencias`, `0 eventos`, `0 recados`, `0 mencoes NPS`, `0 linhas addon`.
+- Manual month navigation validated January through December.
 
 ## Current working reading
 
-The project is operationally mature, baseline-validated, and now locally hardened on the most urgent PWA/cache risks, while still architecturally fragile.
+The project has crossed from backend enablement into a production-pilot stage.
 
-Current 2026-05-03 reading:
+Important interpretation:
 
-- local Supabase homologation passed after reset/reseed of a disposable local target
-- published GitHub Pages and Vercel URLs both answered `200`
-- both published artifacts booted in local-first mode but did not expose Supabase runtime env
-- the functional remote dry-run cannot proceed until the deploy publishes a browser-safe `env.js`
-- `src/core/env-bootstrap.js` now loads optional `env.js` in local and deployed HTTP/HTTPS runtimes
-- `vercel.json` now runs `npm run build:env` so Vercel can materialize `env.js` from public/browser-safe env vars
-- runtime hotfix commit `d1abdc4` was pushed to `origin/main`
-- after continuity commit `847904a`, Vercel served `/env.js` with HTTP `200`, but the file still contained no Supabase public env values
-- Vercel production env is now configured with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_UNIT_SLUG`
-- production redeploy `dpl_AfbGoSzFa6eSsvst5BByFznNmGgJ` is ready and aliased to `https://wpm-gestao-interna.vercel.app`
-- published runtime now reports `hasEnv=true`, `hasSdk=true`, and Supabase enabled
-- remote Supabase initial bootstrap is complete for `Smartfit Pampulha`
-- approved slug `MGCPAM2` was normalized to `mgcpam2`
-- remote admin `smartwonkey@gmail.com` exists as `WPM` with role `admin`
-- production redeploy `dpl_3YL8wrzwXLejpQ4uJmbhYvAGGVCC` is ready with `SUPABASE_UNIT_SLUG=mgcpam2`
-- Supabase Auth site URL now points to `https://wpm-gestao-interna.vercel.app`
-- recovery links now redirect to the Vercel app instead of localhost
-- authenticated Supabase panel now exposes password update fields and action
-- production deploy `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` published the password update panel
-- recovery email was resent after the password panel deploy
-- focused validation passed with 44 Vitest tests and one Playwright smoke against local HTTP runtime
+- The remote structure, auth path, recovery path, dry-run, initial migration, and backend reload are approved.
+- The migrated operational dataset is empty/zeroed, matching the local state observed during homologation.
+- The remote database is usable as the canonical mirror for the current production unit.
+- `Sincronizar agora` should remain operationally conservative: use it only after a deliberate real-data change and after confirming the operator understands it sends the local store to Supabase.
+- `Importar backup` remains a high-risk operation and should not be used casually in production.
 
-Confirmed live facts:
+## Latest validation evidence
 
-- `index.html` script order remains a hard runtime contract
-- `window.__APP_INTERNALS__` is exposed and part of the continuity surface
-- `package.json` already points `test:e2e` and `test:visual` to `Scripts/...`
-- `todayISO()` already uses local-date formatting
-- the local baseline now validates with `npm test`, Playwright structure checks, responsive smoke, and dedicated service-worker coverage
-- Playwright visual suites required a fixed browser clock to stop date-driven snapshot drift
-- `Docs/GUIA_CODE_REVIEW_PROJETO.md` now defines severity, evidence, and validation expectations for this repo
-- `sw.js` cache identity is now tied to `APP_VERSION` plus a hash of the active precache manifest
-- service worker registration, manifest scope, and precache paths are now safe for root or subpath deploys
-- the app shell now uses network-first fetches with cached offline fallback
-- Etapa 3 logic hardening is now completed locally in `eaa4559`
-- `rankSnapshot` now normalizes to `{ mentionId: position }` in generated and legacy-normalized NPS data
-- duplicate-event confirmation now runs before persistence and compares normalized titles plus date/time
-- CRUD rollback now restores `state`, `storage.periods`, selector cache, and affected render targets when persistence fails
-- direct event delete/duplicate paths now restore their previous event collection on persistence failure
-- Etapa 4 security hardening started in `5eb1324`
-- `script-src` no longer depends on `'unsafe-inline'`
-- DOMPurify and Chart.js CDN tags now use SRI plus `crossorigin="anonymous"`
-- former inline app-shell scripts now live in `src/core/env-bootstrap.js`, `src/ui/back-to-top.js`, and `src/core/pwa.js`
-- Playwright HTTP tests now use an isolated `127.0.0.1:4173` server and never reuse an unrelated process
+- `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/security-config.test.js tests/unit/reconstruction-service-worker-pwa.test.js tests/unit/service-worker-config.test.js --maxWorkers=1 --minWorkers=1` OK with `48 passed`.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`.
+- Published HTML contains `src/vendor/supabase-js-2.104.0.umd.js` and no Supabase CDN script.
+- Published `sw.js` precaches `src/vendor/supabase-js-2.104.0.umd.js`.
+- Playwright runtime validation on `https://wpm-gestao-interna.vercel.app/?type=recovery` confirmed `hasSdk=true`, `SDK Carregado`, `passwordRecovery=true`, and visible password fields.
+- Manual operator validation confirmed successful password setup, login, dry-run, migration, backend reload, and month navigation.
 
 ## Current safe next step
 
-After the validated baseline, service-worker hardening, Etapa 3 logic hardening, Etapa 4 CSP hardening slice, and post-merge local homologation:
+Do **not** start a new feature yet.
 
-1. define the admin password through the latest recovery email sent to `smartwonkey@gmail.com`
-2. open the published app in the browser that holds the real local base to migrate
-3. authenticate as `smartwonkey@gmail.com`
-4. run only the assisted-migration dry-run
+Next stage: **Etapa 11 - Piloto operacional controlado em producao**.
 
-Latest validation result:
+Recommended order:
 
-1. `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK with `44 passed`
-2. `git diff --check` OK
-3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
-4. `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
-5. remote `public.units` includes active `Smartfit Pampulha` / `mgcpam2`
-6. remote `public.unit_members` includes active `WPM` admin
-7. remote `public.periods` includes open `2026-05`
-8. recovery link generation validates `redirectHost = wpm-gestao-interna.vercel.app`
-9. focused password/auth tests passed with `43 passed`
-10. published runtime validates `hasUpdatePassword=true`
-11. public smoke after password panel deploy passed with `1 passed`
+1. Freeze and document `main @ 191383e` as the first remote Supabase homologated baseline.
+2. Execute a minimal real-data pilot in the published app:
+   - create one controlled atendimento in `Maio/2026`;
+   - save locally;
+   - use `Sincronizar agora` once only if the operator intentionally wants to send that change;
+   - reload from backend;
+   - confirm the record returns from Supabase.
+3. Repeat the same pattern for one pendencia or one addon only after the first atendimento passes.
+4. Close/reopen the browser, log in, reload from backend, and confirm persistence survives a fresh session.
+5. Update operational runbook language for:
+   - when to use `Recarregar do backend`;
+   - when to use `Sincronizar agora`;
+   - when to export backup;
+   - when import is allowed.
+
+## Guardrails
+
+Do not:
+
+- click `Sincronizar agora` repeatedly;
+- use `Importar backup` without a reviewed preview and explicit intent;
+- assume old GitHub Pages runtime is the canonical production runtime;
+- trust historical docs over `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md` and this status file;
+- start feature work before the controlled pilot proves real-data persistence.
 
 ## CORTEX operating rule
 
-`.cortex/` is now a living continuity layer, not a one-time bootstrap snapshot.
+`.cortex/` is a living continuity layer.
 
 After every completed task:
 
@@ -109,21 +112,18 @@ Protocol details live in `UPDATE_PROTOCOL.md`.
 For present-state decisions, trust these in order:
 
 1. live code in `index.html`, `src/`, `sw.js`, configs
-2. `Docs/RETOMADA_SEGURA.md`
-3. `CURRENT_STATUS.md`
-4. `RETOMADA_MASTER.md`
-5. `TASK_LEDGER.md`
-6. `MODULE_MAP.md`
-7. other audit/reference docs as dated evidence
+2. `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+3. `Docs/RETOMADA_SEGURA.md`
+4. `.cortex/CURRENT_STATUS.md`
+5. `.cortex/RETOMADA_MASTER.md`
+6. `.cortex/TASK_LEDGER.md`
+7. `Docs/PROXIMOS_PASSOS.md`
+8. other audit/reference docs as dated evidence
 
 ## Main unresolved pressures
 
-- script-order coupling
-- shared mutable globals
-- storage, backup, and lifecycle centrality
-- documentation drift across historical docs
-- deploy/rollback validation in a reused browser is still pending outside local tests
-- admin password setup and real-browser dry-run are required before any migration
-- `style-src 'unsafe-inline'` still remains because of inline style attributes/templates
-- production CSP/clickjacking headers still need deploy-platform implementation
-- XSS regression tests per entity still need to be added
+- script-order coupling and shared mutable globals remain architectural constraints;
+- sync is still store-level, not entity-level merge;
+- real-data pilot has not yet been executed;
+- operational runbook needs to make `Recarregar`, `Sincronizar`, backup and import rules explicit for non-developer use;
+- documentation drift must be actively controlled because older roadmap sections contain historical local-homologation facts.

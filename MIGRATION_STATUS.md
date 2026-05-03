@@ -1,19 +1,28 @@
 # MIGRATION_STATUS.md
 
-## Estado Atual (2026-04-22)
+## Estado Atual (2026-05-03)
 
-- Baseline estável em produção: `origin/main` (`bc6307f`, GitHub Pages v34).
-- Runtime atual usa módulos `render-*` e `events-*` (ver `MODULE_MAP.md`).
-- Estrutura documental corrente alinhada em `MODULE_MAP.md` e `QWEN.md`.
-- Última validação local concluída antes desta atualização documental:
-  - `npm test -- --reporter=dot` → `140/140`
-  - `node --check sw.js src/core/pwa.js` → `OK`
-  - `npx playwright test tests/e2e/service-worker.spec.js --project=chromium` → `3/3`
-- Último marco funcional fechado nesta trilha: `bd0216c` (`fix(pwa): versionar cache do service worker por revisao`).
-- Avanço pós-homologação: sync Supabase local-first guardada por checkpoint remoto de unidade
-  (`get_unit_sync_checkpoint` + `import_backup_transaction_guarded`) para bloquear sobrescrita
-  silenciosa em edição concorrente multi-dispositivo.
-- Neste ambiente local, Playwright pode falhar por dependência de sistema ausente (`libatk-1.0.so.0`); validar E2E em CI/runner com deps completas.
+- Baseline remoto homologado: `origin/main` (`191383e`, Vercel v34 + Supabase remoto).
+- Runtime publicado principal: `https://wpm-gestao-interna.vercel.app`.
+- Backend remoto: Supabase project `eautmpqkxibolmcfiacd`.
+- Unidade ativa homologada: `Smartfit Pampulha`.
+- Slug ativo: `mgcpam2`.
+- Admin remoto homologado: `smartwonkey@gmail.com` / `WPM` / `admin`.
+- Runtime atual usa módulos `render-*` e `events-*` (ver `MODULE_MAP.md`) e carrega Supabase pelo bundle local `src/vendor/supabase-js-2.104.0.umd.js`.
+- Sync Supabase permanece local-first guardada por checkpoint remoto de unidade (`get_unit_sync_checkpoint` + `import_backup_transaction_guarded`) para bloquear sobrescrita silenciosa em edição concorrente multi-dispositivo.
+- Homologação remota concluída:
+  - recovery e definição de senha do admin passaram no app publicado;
+  - login remoto autenticou no perfil `admin`;
+  - dry-run retornou `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`;
+  - migração inicial foi executada uma única vez;
+  - reload do backend retornou `Base remota carregada com sucesso`;
+  - fonte ativa após reload ficou `Supabase`;
+  - navegação manual validou janeiro a dezembro;
+  - base operacional remota está zerada conforme o estado local observado.
+- Validação técnica mais recente:
+  - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/security-config.test.js tests/unit/reconstruction-service-worker-pwa.test.js tests/unit/service-worker-config.test.js --maxWorkers=1 --minWorkers=1` -> `48 passed`;
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` -> `1 passed`.
+- Próxima etapa: piloto operacional controlado com um dado real ou controlado, antes de novas features.
 - Fluxo seguro para evoluções: `Docs/RETOMADA_SEGURA.md`.
 
 > **Importante:** o restante deste documento é histórico de auditorias anteriores e

@@ -2,13 +2,13 @@
 
 Data: 2026-05-02
 
-Atualizacao 2026-05-03: homologacao pos-merge registrada em [`HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./HOMOLOGACAO_POS_MERGE_2026-05-03.md). O browser autenticou no Supabase local com perfil gravavel, mas a migracao assistida ficou corretamente bloqueada por `remote-mismatch` em `2026-04`.
+Atualizacao 2026-05-03 13:29: homologacao pos-merge registrada em [`HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./HOMOLOGACAO_POS_MERGE_2026-05-03.md). O bloqueio local inicial por `remote-mismatch` foi superado no alvo remoto correto: Vercel publicou env Supabase, o SDK foi vendorizado, recovery/senha/login passaram, o dry-run retornou `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`, a migracao inicial foi executada uma vez e o reload remoto carregou a base Supabase com sucesso.
 
 Objetivo: iniciar a etapa de fechamento e homologacao da integracao pos-Reversa, separando o que ja esta validado localmente do que ainda precisa ser aplicado no Supabase alvo.
 
 ## Estado executivo
 
-Status: integracao pos-Reversa concluida localmente.
+Status: integracao pos-Reversa concluida localmente e homologacao remota funcional concluida em producao.
 
 Blocos locais concluidos:
 

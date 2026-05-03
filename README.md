@@ -41,7 +41,7 @@ O projeto nasceu para substituir planilhas e mensagens soltas, oferecendo uma **
 
 ## Status atual
 
-`main` permanece como baseline estável publicada. A linha atual de evolução concentra o fechamento pós-Reversa e os hardenings de backend/importação descobertos na reconstrução executável.
+`main` permanece como baseline estável publicada. Em 2026-05-03, o projeto fechou a homologação remota funcional em Vercel + Supabase e entrou no estágio de **piloto operacional controlado em produção**.
 
 A baseline recente foi validada em CI com:
 
@@ -59,6 +59,19 @@ Fechamento pos-Reversa iniciado em 2026-05-02:
 - migration `20260502183000_import_guard_preview_integrity.sql` aplicada e validada no Supabase local;
 - schema remoto aplicado no projeto `eautmpqkxibolmcfiacd` com 7 migrations, preservando tabelas legadas em `legacy_periods`, `legacy_archives` e `legacy_profiles`;
 - roteiro operacional em [`Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md`](./Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md).
+
+Homologação remota concluída em 2026-05-03:
+
+- produção ativa em `https://wpm-gestao-interna.vercel.app`;
+- Supabase remoto `eautmpqkxibolmcfiacd` configurado para a unidade `Smartfit Pampulha` (`mgcpam2`);
+- admin `smartwonkey@gmail.com` autenticado como `WPM` com perfil `admin`;
+- recovery/senha/login validados no app publicado;
+- SDK Supabase vendorizado em `src/vendor/supabase-js-2.104.0.umd.js` e precacheado pelo service worker;
+- dry-run remoto: `12 periodo(s) locais`, backend remoto vazio e `0 divergencia(s)`;
+- migração inicial executada uma única vez;
+- reload do backend confirmou `Base remota carregada com sucesso`;
+- 12 meses navegados manualmente de janeiro a dezembro;
+- fonte atual de homologação: [`Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md).
 
 ---
 
@@ -252,6 +265,7 @@ Homologação operacional real da migração assistida:
 - o roteiro está em [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md);
 - em 2026-04-22 o fluxo foi validado em navegador real com sessão autenticada, dry-run consistente,
   snapshot local, pós-migração remoto e fechamento de mês sobre a base remota.
+- em 2026-05-03 o fluxo remoto publicado foi validado em Vercel + Supabase real com admin `smartwonkey@gmail.com`, unidade `Smartfit Pampulha`, dry-run sem divergências, migração inicial e reload remoto bem-sucedido.
 
 ---
 
@@ -302,7 +316,7 @@ O projeto recebeu hardening específico para uso em produção browser-first:
 - CSP sem `unsafe-inline` em `script-src` e `style-src`.
 - DOMPurify com SRI para sanitização dos patches HTML.
 - Chart.js com SRI.
-- Supabase CDN fixado em versão exata com SRI.
+- Supabase JS vendorizado localmente em versão exata para não depender de CDN no fluxo de auth/recovery.
 - Testes de XSS por entidade cobrindo alunos, pendências, eventos, recados, NPS e configurações.
 - Labels de formulários associados a seus campos, incluindo linhas dinâmicas da escala.
 - Service Worker com estratégia de revisão de assets e testes dedicados.
@@ -429,6 +443,7 @@ O app funciona offline após a primeira visita:
 | [`Docs/PROXIMOS_PASSOS.md`](./Docs/PROXIMOS_PASSOS.md) | Roadmap de evolução (Fase 0 → backend) |
 | [`Docs/BACKEND_CANONICO.md`](./Docs/BACKEND_CANONICO.md) | ERD lógico, papéis e transações canônicas do backend |
 | [`Docs/HOMOLOGACAO_MIGRACAO_REAL.md`](./Docs/HOMOLOGACAO_MIGRACAO_REAL.md) | Checklist operacional da migração assistida real |
+| [`Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`](./Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md) | Homologação remota Vercel + Supabase, recovery, dry-run, migração e reload |
 | [`Docs/BUGS_CONHECIDOS.md`](./Docs/BUGS_CONHECIDOS.md) | Bugs e riscos rastreados |
 | [`Docs/DIAGNOSTICO_MOBILE.md`](./Docs/DIAGNOSTICO_MOBILE.md) | Análise mobile + Bug 2/Bug 3 |
 | [`Docs/MAPA_ENTIDADES.md`](./Docs/MAPA_ENTIDADES.md) | Modelo de dados para backend |
@@ -443,9 +458,10 @@ O app funciona offline após a primeira visita:
 
 - [x] **Fase 0** — Infraestrutura de runtime, Supabase base e observabilidade
 - [x] **UI/UX Overhaul v1** — Design system, empty states ricos, back-to-top, a11y
-- [ ] **Cache-busting do Service Worker** — versionamento por commit hash
+- [x] **Cache-busting do Service Worker** — versionamento por manifesto/revisão de assets e precache do SDK Supabase local
 - [x] **Hardening CSP + Testes XSS** — headers Vercel, SRI, XSS por entidade
-- [~] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, homologação operacional real e guarda de conflito por checkpoint prontos; ainda falta merge fino por entidade
+- [x] **Backend canônico (Supabase)** — schema, auth, RLS, sync híbrida, migração assistida, recovery, SDK local, homologação remota e guarda de conflito por checkpoint prontos
+- [ ] **Piloto operacional controlado** — validar um atendimento real/controlado criado em produção, sincronizado e recarregado do Supabase
 - [ ] **Multi-unidade** — suporte a várias recepções no mesmo backend
 - [ ] **Relatórios exportáveis** — PDF mensal consolidado
 

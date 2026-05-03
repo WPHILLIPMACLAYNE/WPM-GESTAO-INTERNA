@@ -1,6 +1,6 @@
 # TASK_LEDGER
 
-Last updated: 2026-04-22 16:08:54 -03
+Last updated: 2026-05-03 13:29:27 -03
 
 This file records one durable checkpoint per completed task.
 
@@ -428,3 +428,45 @@ This file records one durable checkpoint per completed task.
   - authenticate in the real unit after redeploy
   - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
   - do not click `Migrar para o backend` before human preview review
+
+### Task 015
+
+- Date/time: 2026-05-03 13:29:27 -03
+- Branch: `main`
+- HEAD: `191383e`
+- Task: close the remote Supabase homologation stage and update continuity documents to the current production-pilot baseline
+- Files touched:
+  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `Docs/HOMOLOGACAO_MIGRACAO_REAL.md`
+  - `Docs/FECHAMENTO_POS_REVERSA_2026-05-02.md`
+  - `Docs/RETOMADA_SEGURA.md`
+  - `Docs/PROXIMOS_PASSOS.md`
+  - `Docs/BUGS_CONHECIDOS.md`
+  - `MIGRATION_STATUS.md`
+  - `README.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validated facts:
+  - recovery email was received and opened
+  - password setup succeeded in the published app
+  - Supabase session authenticated as `WPM` / `smartwonkey@gmail.com`
+  - unit `Smartfit Pampulha` and role `admin` were visible
+  - dry-run result was `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`
+  - initial migration ran once
+  - backend reload returned `Base remota carregada com sucesso`
+  - active source after reload was `Supabase`
+  - remote summary showed 12 periods and zero operational records
+  - manual month navigation validated January through December
+- Validation:
+  - `git status --short --branch` confirmed `main...origin/main` before docs update
+  - current live commit before docs update was `191383e`
+  - docs were cross-checked against `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+- Pending:
+  - commit and push this documentation refresh
+  - run a controlled production pilot with one real or controlled atendimento
+- Next step:
+  - do not start feature work yet
+  - execute **Etapa 11 - Piloto operacional controlado em producao**
+  - document the result before broadening usage

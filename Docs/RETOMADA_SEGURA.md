@@ -1,14 +1,15 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 11:15:38 -03
-Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção.
+Última atualização: 2026-05-03 13:29:27 -03
+Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção, preservando o baseline remoto Supabase já homologado.
 
 ## Baseline oficial
 
-- Deploy atual (GitHub Pages): `origin/main`
-- Commit de referência: `bc6307f` (2026-04-17)
-- Versão visual: `v34`
+- Deploy atual: `https://wpm-gestao-interna.vercel.app`
+- Branch oficial: `origin/main`
+- Commit de referência homologado: `191383e` (2026-05-03)
+- Versão visual/runtime: `v34` com backend Supabase remoto homologado
 
 ## Regras de proteção
 
@@ -128,75 +129,59 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 11:15:38 -03
+Data/hora: 2026-05-03 13:29:27 -03
 
 - Branch atual: `main`
-- Último commit conhecido: `d1abdc4`
+- Último commit conhecido: `191383e`
+- Estado local/remoto: `main` alinhado com `origin/main`
+- Runtime publicado principal: `https://wpm-gestao-interna.vercel.app`
+- Estágio atual: **homologação remota Supabase concluída; próximo bloco é piloto operacional controlado**
 - Estado do worktree ao fim desta etapa:
-  - hotfix de runtime remoto commitado e enviado para `origin/main`
-  - Vercel já responde `/env.js` com HTTP `200`
-  - Vercel production recebeu `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`
-  - redeploy de produção gerou `env.js` com `3/9` chaves preenchidas
-  - app publicado agora mostra `hasEnv=true`, `hasSdk=true` e `enabled=true`
-  - Supabase remoto recebeu bootstrap inicial da unidade `Smartfit Pampulha`
-  - slug informado `MGCPAM2` foi normalizado e gravado como `mgcpam2`
-  - admin remoto `smartwonkey@gmail.com` foi criado/confirmado com nome de exibição `WPM`
-  - Auth remoto agora aponta recovery para `https://wpm-gestao-interna.vercel.app`
-  - app ganhou painel autenticado para atualizar senha
-  - deploy de produção `dpl_F97AVZAbANPAhFDXH4v6Rna462X4` publicou o painel de senha
-  - solicitação de recuperação/definição de senha mais recente foi reenviada após o deploy do painel
-  - docs de continuidade atualizados para homologação remota funcional
-  - nenhuma migração real executada
-- Contexto recuperado e consolidado:
-  - a integração pós-Reversa já está em `main`
-  - a homologação Supabase local pós-merge passou contra alvo local descartável
-  - GitHub Pages e Vercel respondem `200`, mas ambos estavam sem `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG` em runtime
-  - sem `env.js` publicado, não há como autenticar na unidade real nem executar o dry-run remoto funcional
+  - Vercel publica `env.js` com `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`
+  - app publicado carrega Supabase pelo bundle local `src/vendor/supabase-js-2.104.0.umd.js`
+  - `sw.js` precacheia o bundle local do Supabase
+  - Supabase remoto `eautmpqkxibolmcfiacd` recebeu unidade `Smartfit Pampulha`
+  - slug ativo: `mgcpam2`
+  - admin remoto: `smartwonkey@gmail.com`, display `WPM`, role `admin`
+  - recovery de senha foi recebido, aberto e concluído com sucesso
+  - sessão publicada autenticou no Supabase
+  - dry-run retornou `12 periodo(s) locais, backend remoto vazio, 0 divergencia(s)`
+  - migração inicial foi executada uma única vez
+  - reload remoto retornou `Base remota carregada com sucesso`
+  - fonte ativa após reload: `Supabase`
+  - operador navegou manualmente de janeiro a dezembro pelo seletor de meses
+- Contexto consolidado:
+  - a etapa de backend/migração estrutural não é mais a próxima etapa
+  - a base remota tem 12 períodos e zero registros operacionais, coerente com o estado local observado
+  - a próxima etapa é validar persistência de uso real com um dado controlado
 - Tarefa concluída nesta etapa:
-  - `src/core/env-bootstrap.js` passa a carregar `env.js` opcional também em deploy HTTP/HTTPS
-  - `vercel.json` passa a executar `npm run build:env`
-  - README, deploy docs, homologação e `.cortex/` foram alinhados
-- Arquivos tocados nesta etapa:
-  - `.gitignore`
-  - `src/core/env-bootstrap.js`
-  - `src/core/supabase.js`
-  - `src/reconstruction/supabase-adapter.js`
-  - `src/main.js`
-  - `src/ui/events-core.js`
-  - `src/ui/render-settings.js`
-  - `supabase/config.toml`
-  - `src/reconstruction/env-bootstrap.js`
-  - `vercel.json`
-  - `tests/unit/reconstruction-env-bootstrap.test.js`
+  - recovery remoto, senha, login, dry-run, migração, reload e navegação mensal foram homologados
+  - homologação final foi registrada em `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - docs de continuidade foram atualizados para o estágio correto
+- Arquivos tocados no bloco de atualização documental:
   - `README.md`
-  - `Docs/DEPLOY_OBSERVABILIDADE.md`
-  - `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
+  - `MIGRATION_STATUS.md`
+  - `Docs/PROXIMOS_PASSOS.md`
   - `Docs/RETOMADA_SEGURA.md`
   - `.cortex/CURRENT_STATUS.md`
   - `.cortex/AGENT_HANDOFF.md`
   - `.cortex/RETOMADA_MASTER.md`
   - `.cortex/TASK_LEDGER.md`
-- Validação executada:
-  - `npx vitest run tests/unit/reconstruction-env-bootstrap.test.js tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/reconstruction-service-worker-pwa.test.js` OK com `44 passed`
-  - `git diff --check` OK
-  - `npm run smoke:deploy` OK com `1 passed` contra runtime HTTP local
+- Validação executada nesta linha de homologação:
+  - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/security-config.test.js tests/unit/reconstruction-service-worker-pwa.test.js tests/unit/service-worker-config.test.js --maxWorkers=1 --minWorkers=1` OK com `48 passed`
   - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK com `1 passed`
-  - consulta administrativa remota: `public.units` com `Smartfit Pampulha` / `mgcpam2`
-  - consulta administrativa remota: `public.unit_members` com `WPM` / `admin`
-  - consulta administrativa remota: `public.periods` com `2026-05` aberto
-  - link de recovery validado com `redirectHost = wpm-gestao-interna.vercel.app`
-  - `node --check src/core/supabase.js src/reconstruction/supabase-adapter.js src/main.js src/ui/render-settings.js src/ui/events-core.js` OK
-  - `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-supabase-adapter.test.js tests/unit/reconstruction-app-shell.test.js` OK com `43 passed`
-  - runtime publicado validado com `hasUpdatePassword=true`
-  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK com `1 passed` após o deploy do painel
-  - recovery reenviado após deploy: HTTP `200`
+  - validação Playwright do modo recovery publicado confirmou `hasSdk=true`, `SDK Carregado`, `passwordRecovery=true`
+  - validação manual confirmou `Base remota carregada com sucesso`
 - Pendências imediatas:
-  - definir a senha do admin pelo e-mail de recuperação mais recente recebido em `smartwonkey@gmail.com`
-  - autenticar no app publicado usando o navegador que contém a base local real
-  - executar apenas o dry-run da migração assistida
+  - executar piloto operacional controlado com um atendimento real ou controlado
+  - documentar o resultado antes de testar pendência/addon ou iniciar feature nova
 - Próximo passo exato mais seguro:
-  - autenticar na unidade real e executar apenas `Executar dry-run` em `Configurações -> Migração assistida`
-  - não clicar em `Migrar para o backend` antes de revisão humana do preview
+  - criar um atendimento controlado em `Maio/2026`
+  - salvar localmente
+  - usar `Sincronizar agora` uma única vez, de forma intencional
+  - executar `Recarregar do backend`
+  - confirmar que o atendimento voltou do Supabase
+  - registrar evidência
 
 ## Checkpoint histórico anterior
 

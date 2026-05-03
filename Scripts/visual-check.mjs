@@ -16,7 +16,7 @@ const VIEWPORTS = [
   { name: 'android-360',    width: 360,  height: 800  },
 ];
 
-const TAB_IDS = ['dashboard', 'students', 'pending', 'nps', 'scale', 'events', 'settings'];
+const TAB_IDS = ['dashboard', 'students', 'addons', 'pending', 'nps', 'scale', 'events', 'settings'];
 
 const OUT = '/tmp/screenshots';
 mkdirSync(OUT, { recursive: true });
@@ -84,6 +84,42 @@ for (const vp of VIEWPORTS) {
         return t ? getComputedStyle(t).minWidth : 'N/A';
       });
       console.log(`    Student table min-width: ${tableMinW}`);
+    }
+
+    if (tab === 'addons') {
+      const addonMetrics = await page.evaluate(() => {
+        const grid = document.querySelector('#addonsGrid');
+        const firstBlock = document.querySelector('#addons .person-block');
+        const firstDayGrid = document.querySelector('#addons .day-grid');
+        return {
+          cards: document.querySelectorAll('#addons .person-block').length,
+          gridDisplay: grid ? getComputedStyle(grid).display : 'N/A',
+          gridOverflow: grid ? grid.scrollWidth - grid.clientWidth : 0,
+          blockMaxHeight: firstBlock ? getComputedStyle(firstBlock).maxHeight : 'N/A',
+          blockOverflowY: firstBlock ? getComputedStyle(firstBlock).overflowY : 'N/A',
+          dayGridMaxHeight: firstDayGrid ? getComputedStyle(firstDayGrid).maxHeight : 'N/A',
+        };
+      });
+      console.log(`    Addons: cards=${addonMetrics.cards}, grid=${addonMetrics.gridDisplay}, gridOverflow=${addonMetrics.gridOverflow}px, blockMaxH=${addonMetrics.blockMaxHeight}, blockOverflowY=${addonMetrics.blockOverflowY}, dayGridMaxH=${addonMetrics.dayGridMaxHeight}`);
+    }
+
+    if (tab === 'scale') {
+      const scaleMetrics = await page.evaluate(() => {
+        const board = document.querySelector('#scaleBoard');
+        const firstRow = document.querySelector('#scale .scale-board-row');
+        const matrix = document.querySelector('#scale .schedule-matrix');
+        return {
+          rows: document.querySelectorAll('#scale .scale-board-row').length,
+          boardDisplay: board ? getComputedStyle(board).display : 'N/A',
+          boardOverflow: board ? board.scrollWidth - board.clientWidth : 0,
+          firstRowHeight: firstRow ? Math.round(firstRow.getBoundingClientRect().height) : 0,
+          firstRowMaxHeight: firstRow ? getComputedStyle(firstRow).maxHeight : 'N/A',
+          firstRowOverflowY: firstRow ? getComputedStyle(firstRow).overflowY : 'N/A',
+          matrixMaxHeight: matrix ? getComputedStyle(matrix).maxHeight : 'N/A',
+          matrixOverflow: matrix ? matrix.scrollHeight - matrix.clientHeight : 0,
+        };
+      });
+      console.log(`    Escala: rows=${scaleMetrics.rows}, board=${scaleMetrics.boardDisplay}, boardOverflow=${scaleMetrics.boardOverflow}px, firstRowH=${scaleMetrics.firstRowHeight}px, rowMaxH=${scaleMetrics.firstRowMaxHeight}, rowOverflowY=${scaleMetrics.firstRowOverflowY}, matrixMaxH=${scaleMetrics.matrixMaxHeight}, matrixOverflow=${scaleMetrics.matrixOverflow}px`);
     }
 
     const path = `${OUT}/${vp.name}_${tab}.png`;

@@ -1675,8 +1675,8 @@
       padding: 0 4px 6px 0;
     }
     #pending #pendingKanban.kanban {
-      grid-template-columns: repeat(3, minmax(240px, 1fr));
-      min-width: 740px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      min-width: 0;
       width: 100%;
       align-items: start;
     }
@@ -1693,6 +1693,7 @@
     #pending .ticket {
       padding: 12px 12px 11px;
       gap: 8px;
+      min-height: 132px;
       border-radius: 16px;
       border-left: 3px solid var(--line);
     }
@@ -1720,6 +1721,7 @@
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       line-clamp: 2;
+      min-height: calc(2 * 1.45em);
       overflow: hidden;
     }
     #pending .ticket .foot {
@@ -6416,6 +6418,1269 @@
       #scale .schedule-matrix,
       #events .event-consolidated-card:has(#eventsTableBody) {
         display: none;
+      }
+    }
+
+    /* ── UI audit corrective layer: layout density + responsive containment ── */
+    html,
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .app {
+      overflow-x: clip;
+    }
+    .app-main {
+      grid-template-columns: minmax(0, 1fr);
+      min-width: 0;
+      width: 100%;
+    }
+    .tabs,
+    .view {
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+    }
+    #settings .settings-shell {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    #settings .settings-main-column,
+    #settings .settings-side-column {
+      grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+      gap: 16px;
+    }
+    #settings .settings-main-column > .settings-card:first-child {
+      grid-column: 1 / -1;
+    }
+    #settings .settings-card {
+      border-radius: 16px;
+    }
+    #settings .settings-card-head {
+      gap: 8px;
+      padding-bottom: 12px;
+    }
+    #settings .settings-card-head h2 {
+      font-size: clamp(19px, 1.45vw, 24px);
+      line-height: 1.18;
+    }
+    #settings .settings-card-head p {
+      font-size: 13px;
+      line-height: 1.48;
+    }
+    #settings .settings-card-body {
+      gap: 14px;
+      padding-top: 14px;
+    }
+    #settings .settings-card-actions {
+      gap: 10px;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    #settings .settings-card-actions .btn,
+    #settings .settings-card-actions .import-label {
+      min-height: 42px;
+      padding: 10px 14px;
+      flex-basis: 180px;
+    }
+    #settings .settings-card-foot {
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    #settings .settings-form-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    #settings .settings-field-card--full {
+      grid-column: auto;
+    }
+    #settings .settings-field-card {
+      padding: 14px;
+      border-radius: 14px;
+    }
+    #settings textarea {
+      min-height: 128px;
+      max-height: 220px;
+    }
+    #settings .summary-item,
+    #settings .summary-item--col1 {
+      padding: 14px;
+      border-radius: 14px;
+      gap: 10px;
+    }
+    #settings .settings-help-step {
+      padding: 14px;
+    }
+    #settings .settings-about-grid {
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    }
+    #settings #periodAuditList {
+      max-height: min(52vh, 560px);
+    }
+    #settings .settings-panel-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      background: rgba(255,255,255,.025);
+    }
+    #settings .settings-panel-tab {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      color: #eeeeee;
+      cursor: pointer;
+      font: 800 12px/1 Montserrat, system-ui, sans-serif;
+      min-height: 38px;
+      padding: 10px 14px;
+      transition: background var(--motion-base) var(--ease-out),
+                  border-color var(--motion-base) var(--ease-out),
+                  color var(--motion-base) var(--ease-out),
+                  transform var(--motion-base) var(--ease-out);
+    }
+    #settings .settings-panel-tab:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,194,15,.24);
+      background: rgba(255,194,15,.08);
+    }
+    #settings .settings-panel-tab.active {
+      border-color: rgba(255,194,15,.42);
+      background: var(--primary);
+      color: #111111;
+      box-shadow: 0 10px 22px rgba(255,194,15,.18);
+    }
+    #settings .settings-card[hidden] {
+      display: none !important;
+    }
+    #settings .settings-main-column:not(:has(.settings-card:not([hidden]))),
+    #settings .settings-side-column:not(:has(.settings-card:not([hidden]))) {
+      display: none !important;
+    }
+
+    #students .toolbar {
+      align-items: end;
+      gap: 16px;
+    }
+    #students .toolbar-title h2 {
+      font-size: clamp(21px, 1.55vw, 28px);
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+    #students .toolbar-title p {
+      max-width: 68ch;
+      white-space: normal;
+    }
+    #students .students-toolbar-actions {
+      grid-template-columns: minmax(220px, 1fr) minmax(152px, .55fr) minmax(152px, .55fr) minmax(118px, auto);
+      gap: 10px;
+      max-width: 100%;
+    }
+    #students .students-toolbar-actions > input,
+    #students .students-toolbar-actions > select,
+    #students .students-toolbar-actions > .btn {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+    #students .students-summary-bar {
+      grid-template-columns: minmax(112px, .45fr) minmax(0, 1.35fr) minmax(180px, .7fr) minmax(112px, .45fr);
+      gap: 10px;
+      margin: 12px 0;
+      padding: 8px;
+      border-radius: 16px;
+    }
+    #students .students-summary-item,
+    #students .students-summary-item--total,
+    #students .students-summary-item--attendants,
+    #students .students-summary-item--feedback,
+    #students .students-summary-item--addons {
+      grid-column: auto;
+      min-height: 62px;
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+    #students .students-summary-label {
+      font-size: 9px;
+      letter-spacing: .1em;
+    }
+    #students .students-summary-value {
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+    #students .students-summary-item--total .students-summary-value,
+    #students .students-summary-item--addons .students-summary-value {
+      font-size: clamp(22px, 1.75vw, 28px);
+    }
+    #students .students-summary-item--attendants .students-summary-value {
+      display: -webkit-box;
+      font-size: 13px;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+    }
+    #students .students-summary-item--feedback .students-summary-value {
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    #students .students-summary-meta {
+      font-size: 10px;
+      line-height: 1.35;
+    }
+    #students .table-wrap {
+      max-height: min(58vh, 620px);
+      overflow: auto;
+      scrollbar-gutter: stable;
+    }
+    #students .student-table {
+      min-width: 1296px;
+      table-layout: fixed;
+    }
+    #students .student-table th,
+    #students .student-table td {
+      padding: 10px 8px;
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+    #students .student-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      font-size: 10px;
+      letter-spacing: .04em;
+    }
+    #students .student-table th:nth-child(1),
+    #students .student-table td:nth-child(1) { width: 138px; }
+    #students .student-table th:nth-child(2),
+    #students .student-table td:nth-child(2) { width: 88px; }
+    #students .student-table th:nth-child(3),
+    #students .student-table td:nth-child(3) { width: 132px; }
+    #students .student-table th:nth-child(4),
+    #students .student-table td:nth-child(4) { width: 104px; }
+    #students .student-table th:nth-child(5),
+    #students .student-table td:nth-child(5) { width: 112px; }
+    #students .student-table th:nth-child(6),
+    #students .student-table td:nth-child(6) { width: 92px; }
+    #students .student-table th:nth-child(7),
+    #students .student-table td:nth-child(7) { width: 122px; }
+    #students .student-table th:nth-child(8),
+    #students .student-table td:nth-child(8) { width: 120px; }
+    #students .student-table th:nth-child(9),
+    #students .student-table td:nth-child(9) { width: 96px; }
+    #students .student-table th:nth-child(10),
+    #students .student-table td:nth-child(10) { width: 168px; }
+    #students .student-table th:nth-child(11),
+    #students .student-table td:nth-child(11) { width: 124px; }
+    #students .student-table .table-input {
+      min-height: 34px;
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+    #students .student-table .table-input[type="date"],
+    #students .student-table .table-input[type="time"] {
+      min-width: 0;
+      padding-right: 8px;
+    }
+    #students .student-table td:nth-child(10) .cell-text.multiline {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    #students .student-table td.right {
+      white-space: nowrap;
+    }
+    #students .student-table td.right .btn {
+      min-height: 32px;
+      margin-left: 4px;
+      padding: 7px 9px;
+    }
+
+    #pending > .grid-3 {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    #pending .pending-status-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    #pending .pending-status-card,
+    #pending .pending-status-card--total {
+      grid-column: auto;
+      grid-template-columns: 1fr;
+      justify-items: center;
+      min-height: 74px;
+      padding: 13px 16px;
+      text-align: center;
+    }
+    #pending .pending-status-card--total .pending-status-value {
+      justify-self: center;
+    }
+    #pending .toolbar {
+      align-items: end;
+      gap: 16px;
+    }
+    #pending .toolbar-actions {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto auto;
+      gap: 10px;
+      align-items: center;
+      min-width: min(520px, 100%);
+    }
+    #pending .toolbar-actions > input,
+    #pending .toolbar-actions > .btn {
+      width: 100%;
+      margin: 0;
+    }
+    #pending > .grid-3 > .section {
+      min-width: 0;
+    }
+    #pending .kanban-scroll {
+      max-height: none;
+      overflow: visible;
+      padding-right: 0;
+    }
+    #pending #pendingKanban.kanban {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      min-width: 0;
+    }
+    #pending .kanban-col {
+      min-height: 0;
+    }
+    #pending .kanban-col .col-head {
+      align-items: center;
+    }
+    #pending .kanban-count {
+      display: inline-grid;
+      min-width: 30px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px;
+      background: rgba(255,255,255,.045);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    #pending .kanban-list {
+      max-height: min(52vh, 520px);
+    }
+
+    @media (min-width: 1500px) {
+      #pending > .grid-3 {
+        grid-template-columns: minmax(620px, .95fr) minmax(620px, 1.05fr);
+        gap: 18px;
+      }
+      #pending .pending-table {
+        min-width: 960px;
+      }
+      #pending .kanban-list {
+        max-height: min(56vh, 620px);
+      }
+    }
+
+    #addons .addon-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+    #addons .toolbar {
+      align-items: end;
+      gap: 14px;
+    }
+    #addons .toolbar-title h2 {
+      font-size: clamp(22px, 1.55vw, 28px);
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+    #addons .toolbar-title p {
+      max-width: 64ch;
+      white-space: normal;
+    }
+    #addons .toolbar-actions {
+      display: grid;
+      grid-template-columns: minmax(132px, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-width: min(270px, 100%);
+    }
+    #addons .toolbar-actions > select,
+    #addons .toolbar-actions > .btn {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+    #addons .person-block {
+      height: auto;
+      min-height: 0;
+      max-height: min(70vh, 680px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 14px;
+      scrollbar-gutter: stable;
+    }
+    #addons .person-head {
+      position: sticky;
+      top: -14px;
+      z-index: 2;
+      align-items: start;
+      gap: 8px;
+      margin: 0 0 10px;
+      padding: 0 0 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(32,32,32,.98), rgba(32,32,32,.92));
+    }
+    #addons .person-head h3 {
+      display: -webkit-box;
+      flex: 1 1 220px;
+      max-width: 100%;
+      font-size: 17px;
+      line-height: 1.24;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+    }
+    #addons .person-head .pill {
+      min-height: 28px;
+      padding: 6px 10px;
+      line-height: 1.15;
+    }
+    #addons .chart-box--spaced {
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 14px;
+    }
+    #addons .chart-box--spaced .toolbar--compact {
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    #addons .chart-box--spaced .toolbar--compact strong {
+      display: -webkit-box;
+      max-width: 100%;
+      font-size: 14px;
+      line-height: 1.28;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+    }
+    #addons .chart-box--spaced .toolbar--compact .pill {
+      min-height: 28px;
+      padding: 6px 10px;
+    }
+    #addons .day-grid {
+      grid-template-columns: repeat(auto-fit, minmax(46px, 1fr));
+      gap: 6px;
+      max-height: min(32vh, 236px);
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+    #addons .day-cell {
+      padding: 6px;
+      border-radius: 10px;
+    }
+    #addons .day-cell .day {
+      margin-bottom: 4px;
+      font-size: 9px;
+      line-height: 1.2;
+      letter-spacing: .04em;
+    }
+    #addons .day-cell input {
+      min-height: 34px;
+      padding: 7px 4px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    #addons .addons-ranking-card {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 18px;
+    }
+    #addons .addons-ranking-head {
+      align-items: end;
+      margin-bottom: 10px;
+    }
+    #addons .addons-ranking-list {
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: 10px;
+    }
+    #addons .addons-ranking-item {
+      min-height: 62px;
+      padding: 10px 12px;
+      gap: 10px;
+    }
+    #addons .addons-ranking-name {
+      display: -webkit-box;
+      white-space: normal;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    #addons .addons-ranking-total {
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+
+    #scale .toolbar {
+      align-items: end;
+      gap: 14px;
+    }
+    #scale .toolbar-title h2 {
+      font-size: clamp(22px, 1.55vw, 28px);
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+    #scale .toolbar-title p {
+      max-width: 68ch;
+      white-space: normal;
+    }
+    #scale .toolbar-actions {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto auto auto;
+      gap: 10px;
+      align-items: center;
+      max-width: 100%;
+    }
+    #scale .toolbar-actions > input,
+    #scale .toolbar-actions > .btn {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+    #scale .schedule-note-box {
+      margin-bottom: 12px;
+      padding: 13px 15px;
+      border-radius: 14px;
+      line-height: 1.55;
+    }
+    #scale .scale-legend {
+      gap: 8px;
+      margin-top: 10px;
+    }
+    #scale .scale-legend-item {
+      min-height: 32px;
+      padding: 7px 10px;
+      font-size: 11px;
+    }
+    #scale .schedule-topbar {
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    #scale .schedule-kpis {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    #scale .schedule-kpi {
+      min-height: 96px;
+      padding: 13px 15px;
+      border-radius: 14px;
+    }
+    #scale .schedule-kpi-label {
+      font-size: 9px;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+    }
+    #scale .schedule-kpi-value {
+      font-size: 25px;
+      margin-bottom: 6px;
+    }
+    #scale .schedule-kpi-foot {
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    #scale .scale-ops-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 14px;
+    }
+    #scale .scale-ops-sep {
+      display: none;
+    }
+    #scale .scale-ops-item {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-height: 58px;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      background: rgba(255,255,255,.028);
+    }
+    #scale .scale-ops-item > span:first-child {
+      color: rgba(255,255,255,.62);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+    #scale .scale-ops-item strong {
+      display: block;
+      min-width: 0;
+      color: var(--primary);
+      font-size: 13px;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #scale .scale-ops-item span:last-child {
+      color: #d8d8d8;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+    #scale .scale-board-wrap {
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    #scale .scale-board {
+      gap: 10px;
+    }
+    #scale .scale-board-row {
+      grid-template-columns: minmax(110px, .58fr) minmax(248px, 1.24fr) minmax(198px, .88fr) minmax(148px, .68fr);
+      border-radius: 16px;
+      min-height: 0;
+    }
+    #scale .scale-board-day,
+    #scale .scale-board-prof,
+    #scale .scale-board-recep,
+    #scale .scale-board-side {
+      padding: 11px 12px;
+    }
+    #scale .scale-board-day {
+      gap: 5px;
+    }
+    #scale .scale-board-day .date {
+      font-size: 24px;
+    }
+    #scale .scale-board-day .month {
+      font-size: 10px;
+      letter-spacing: .1em;
+    }
+    #scale .scale-board-day .weekday {
+      padding: 6px 8px;
+      font-size: 9px;
+      letter-spacing: .1em;
+    }
+    #scale .scale-board-prof,
+    #scale .scale-board-recep {
+      gap: 8px;
+    }
+    #scale .scale-board-head {
+      font-size: 9px;
+      letter-spacing: .11em;
+    }
+    #scale .scale-board-shift {
+      grid-template-columns: minmax(82px, .34fr) minmax(0, 1fr);
+      gap: 8px;
+      min-height: 46px;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    #scale .scale-board-time,
+    #scale .scale-board-name {
+      font-size: 14px;
+      line-height: 1.18;
+    }
+    #scale .scale-board-swap,
+    #scale .scale-board-note {
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    #scale .scale-board-note {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      overflow: hidden;
+    }
+    #scale .scale-board-note--spaced {
+      margin-top: 9px;
+    }
+    #scale .scale-tone-pill {
+      padding: 6px 8px;
+      font-size: 9px;
+      letter-spacing: .1em;
+    }
+    #scale .scale-board-actions {
+      gap: 6px;
+    }
+    #scale .scale-board-actions .btn {
+      min-height: 32px;
+      padding: 7px 9px;
+    }
+    #scale .schedule-matrix {
+      max-height: min(46vh, 520px);
+      overflow: auto;
+      scrollbar-gutter: stable;
+    }
+    #scale .schedule-matrix thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    #scale .schedule-matrix table {
+      min-width: 900px;
+    }
+    #scale .schedule-matrix th,
+    #scale .schedule-matrix td {
+      padding: 10px 8px;
+      font-size: 12.5px;
+    }
+
+    #events .event-calendar-grid {
+      grid-template-columns: repeat(7, minmax(76px, 1fr));
+      min-width: 560px;
+      gap: 8px;
+    }
+    #events .event-calendar-day {
+      min-height: 98px;
+      border-radius: 14px;
+    }
+    .view {
+      scroll-margin-top: 190px;
+    }
+
+    @media (max-width: 1180px) {
+      #settings .settings-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #students .students-toolbar-actions {
+        grid-template-columns: minmax(0, 1fr) minmax(150px, .55fr);
+      }
+      #students .students-toolbar-actions > .btn {
+        grid-column: auto;
+      }
+      #students .students-summary-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #addons .toolbar-actions {
+        grid-template-columns: minmax(120px, 1fr) auto;
+      }
+      #addons .addon-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(310px, 100%), 1fr));
+      }
+      #pending #pendingKanban.kanban {
+        grid-template-columns: 1fr;
+      }
+      #pending .kanban-list {
+        max-height: 320px;
+      }
+      #scale .toolbar-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+      #scale .toolbar-actions > input {
+        grid-column: 1 / -1;
+      }
+      #scale .schedule-kpis,
+      #scale .scale-ops-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        gap: 10px;
+        padding: 12px;
+      }
+      .topbar-left,
+      .topbar-right,
+      .period-controls,
+      .topbar-actions {
+        width: 100%;
+      }
+      .period-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(86px, auto);
+      }
+      .period-label,
+      .month-status-badge {
+        grid-column: 1 / -1;
+      }
+      .period-select,
+      .period-year {
+        min-width: 0;
+        width: 100%;
+        font-size: 16px;
+      }
+      .topbar-social {
+        order: 1;
+      }
+      .topbar-actions {
+        order: 2;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .topbar-actions .btn {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 10px;
+      }
+      #pending .pending-status-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      #pending .pending-status-card,
+      #pending .pending-status-card--total {
+        min-height: 62px;
+        padding: 10px 12px;
+        border-radius: 14px;
+      }
+      #pending .pending-status-label {
+        font-size: 9px;
+        letter-spacing: .11em;
+      }
+      #pending .pending-status-value {
+        font-size: 27px;
+      }
+      #pending .toolbar {
+        gap: 12px;
+      }
+      #pending .toolbar-title h2 {
+        font-size: 22px;
+      }
+      #pending .toolbar-title p {
+        max-width: 100%;
+        white-space: normal;
+        overflow: visible;
+        overflow-wrap: anywhere;
+        text-overflow: clip;
+      }
+      #pending .toolbar-actions {
+        grid-template-columns: 1fr;
+        min-width: 0;
+        width: 100%;
+      }
+      #pending .table-wrap {
+        max-height: min(52vh, 440px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 2px;
+      }
+      #pending .pending-table tbody {
+        gap: 10px;
+      }
+      #pending .pending-table tr {
+        padding: 12px;
+        border-radius: 14px;
+      }
+      #pending .pending-table td {
+        grid-template-columns: minmax(82px, .36fr) minmax(0, 1fr);
+        gap: 8px;
+      }
+      #pending .pending-table td.right {
+        grid-template-columns: 1fr;
+      }
+      #pending .pending-table td.right::before {
+        grid-column: 1 / -1;
+      }
+      #pending .pending-table td.right > .btn {
+        min-height: 38px;
+      }
+      #pending .kanban-col .col-head {
+        min-height: 30px;
+      }
+      #pending .kanban-count {
+        min-width: 28px;
+        height: 26px;
+      }
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        overflow: visible;
+        padding: 0 0 8px;
+      }
+      .tab-btn {
+        justify-content: center;
+        min-width: 0;
+        width: 100%;
+        font-size: 12px;
+        min-height: 40px;
+        padding: 9px 12px;
+      }
+      #settings {
+        gap: 14px;
+      }
+      #settings .settings-health-bar {
+        gap: 8px 12px;
+        padding: 10px 12px;
+      }
+      #settings .settings-panel-nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow: visible;
+        padding: 7px;
+      }
+      #settings .settings-panel-tab {
+        width: 100%;
+        min-height: 38px;
+        padding: 9px 10px;
+      }
+      #settings .settings-main-column,
+      #settings .settings-side-column,
+      #settings .settings-form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      #settings .settings-main-column,
+      #settings .settings-side-column {
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x mandatory;
+        scrollbar-gutter: stable;
+      }
+      #settings .settings-main-column > .settings-card,
+      #settings .settings-side-column > .settings-card {
+        flex: 0 0 min(344px, 91vw);
+        width: min(344px, 91vw);
+        scroll-snap-align: start;
+      }
+      #settings .settings-main-column > .settings-card:first-child {
+        flex-basis: min(360px, 92vw);
+        width: min(360px, 92vw);
+      }
+      #settings .settings-card {
+        border-radius: 14px;
+      }
+      #settings .settings-card-head h2 {
+        font-size: 21px;
+      }
+      #settings .settings-card-actions {
+        flex-direction: column;
+      }
+      #settings textarea {
+        min-height: 132px;
+      }
+      #settings #periodAuditList,
+      #settings .rank-list,
+      #settings .summary-list {
+        max-height: min(52vh, 430px);
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      #settings .settings-card--primary .settings-card-body,
+      #settings .settings-maintenance-card .settings-card-body {
+        max-height: min(58vh, 520px);
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      #students .toolbar {
+        align-items: stretch;
+        gap: 12px;
+      }
+      #students .toolbar-title h2 {
+        font-size: 22px;
+      }
+      #students .students-toolbar-actions,
+      #students .students-summary-bar {
+        grid-template-columns: 1fr;
+      }
+      #students .students-summary-item--attendants .students-summary-value {
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+      }
+      #students .table-wrap {
+        max-height: none;
+        overflow: visible;
+      }
+      #addons .toolbar {
+        align-items: stretch;
+        gap: 12px;
+      }
+      #addons .toolbar-title h2 {
+        font-size: 22px;
+      }
+      #addons .toolbar-actions {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+      #pending .kanban-scroll {
+        max-height: none;
+      }
+      #pending .kanban-col {
+        max-height: none;
+        overflow: visible;
+      }
+      #pending .kanban-list {
+        max-height: min(46vh, 390px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+      }
+      #addons .day-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        max-height: 232px;
+      }
+      #addons .addon-grid {
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x mandatory;
+      }
+      #addons .person-block {
+        flex: 0 0 min(330px, 88vw);
+        width: min(330px, 88vw);
+        max-height: min(72vh, 560px);
+        padding: 12px;
+        scroll-snap-align: start;
+      }
+      #addons .person-head {
+        top: -12px;
+      }
+      #addons .addons-ranking-list {
+        grid-template-columns: 1fr;
+      }
+      #scale .toolbar {
+        align-items: stretch;
+        gap: 12px;
+      }
+      #scale .toolbar-title h2 {
+        font-size: 22px;
+      }
+      #scale .toolbar-actions {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+      #scale .toolbar-actions > input {
+        grid-column: auto;
+      }
+      #scale .schedule-note-box {
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 12px;
+      }
+      #scale .scale-legend {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      #scale .schedule-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      #scale .schedule-kpi {
+        min-height: 84px;
+        padding: 10px 12px;
+      }
+      #scale .schedule-kpi-value {
+        font-size: 23px;
+      }
+      #scale .scale-ops-summary {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 7px;
+      }
+      #scale .scale-ops-item {
+        min-height: 0;
+        padding: 9px 10px;
+      }
+      #scale .scale-board-row {
+        grid-template-columns: 1fr;
+        max-height: min(74vh, 520px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+      }
+      #scale .scale-board-day {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-content: center;
+        align-items: center;
+        gap: 4px 8px;
+      }
+      #scale .scale-board-day .date {
+        grid-row: 1 / 3;
+        font-size: 24px;
+      }
+      #scale .scale-board-day .month {
+        font-size: 10px;
+      }
+      #scale .scale-board-day .weekday {
+        width: fit-content;
+        max-width: 100%;
+        padding: 5px 7px;
+        font-size: 9px;
+      }
+      #scale .scale-board-prof,
+      #scale .scale-board-recep,
+      #scale .scale-board-side {
+        gap: 8px;
+      }
+      #scale .scale-board-shift {
+        grid-template-columns: minmax(74px, .34fr) minmax(0, 1fr);
+        min-height: 40px;
+        padding: 7px 9px;
+      }
+      #scale .scale-board-time,
+      #scale .scale-board-name {
+        font-size: 13px;
+      }
+      #scale .scale-board-swap,
+      #scale .scale-board-note {
+        font-size: 10.5px;
+      }
+      #scale .scale-board-side {
+        justify-content: start;
+      }
+      #scale .scale-board-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #scale .scale-board-actions .btn {
+        justify-content: center;
+        width: 100%;
+      }
+      #events .event-calendar-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      #events .event-calendar-grid {
+        grid-template-columns: repeat(7, minmax(76px, 1fr));
+        min-width: 560px;
+      }
+      #events .event-weekday-head {
+        display: block;
+      }
+      #events .event-calendar-day {
+        min-height: 96px;
+      }
+      #events .event-stack,
+      #events .event-overview-grid,
+      #scale .scale-board-wrap {
+        gap: 12px;
+      }
+      #events .event-list,
+      #events #eventsUpcoming,
+      #scale .scale-board {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x mandatory;
+      }
+      #events .event-card,
+      #scale .scale-board-row {
+        flex: 0 0 min(330px, 88vw);
+        width: min(330px, 88vw);
+        scroll-snap-align: start;
+      }
+      #events .event-card {
+        min-height: 0;
+      }
+      #events .events-quick-summary,
+      #events .event-overview-grid .schedule-kpis {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #dashboard .dashboard-visual-grid,
+      #dashboard #dashboardInsights,
+      #dashboard #dashboardCards,
+      #dashboard > .grid-2,
+      #dashboard .dashboard-balance-row,
+      #nps .nps-grid {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x mandatory;
+      }
+      #dashboard .dashboard-chart-card,
+      #dashboard #dashboardInsights > *,
+      #dashboard #dashboardCards > .card,
+      #dashboard > .grid-2 > .section,
+      #dashboard .dashboard-balance-row > .section,
+      #nps .nps-grid > .section {
+        flex: 0 0 min(336px, 88vw);
+        width: min(336px, 88vw);
+        scroll-snap-align: start;
+      }
+      #dashboard #dashboardCards > .card {
+        min-height: 132px;
+      }
+      #dashboard #dashboardCards > .card .card-value {
+        font-size: 26px;
+      }
+      #dashboard .dashboard-chart-shell {
+        min-height: 190px;
+      }
+      #dashboard .dashboard-chart-shell canvas {
+        height: 190px !important;
+      }
+      #dashboard .dashboard-section {
+        max-height: min(78vh, 620px);
+        overflow-y: auto;
+      }
+      #dashboard .recados-section {
+        max-height: none;
+      }
+      #dashboard .recados-form {
+        gap: 10px;
+      }
+      #nps .nps-grid > .section {
+        max-height: min(80vh, 640px);
+        overflow-y: auto;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .app {
+        padding: 8px;
+      }
+      .brand-title {
+        white-space: normal;
+      }
+      .topbar-actions {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #pending .pending-status-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+      #pending .pending-table td {
+        grid-template-columns: 1fr;
+      }
+      #pending .pending-table td::before {
+        margin-bottom: -2px;
+      }
+      #settings .settings-panel-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #settings .settings-field-card,
+      #settings .summary-item,
+      #settings .summary-item--col1 {
+        padding: 12px;
+      }
+      #settings .settings-main-column > .settings-card,
+      #settings .settings-side-column > .settings-card,
+      #settings .settings-main-column > .settings-card:first-child {
+        flex-basis: min(328px, 90vw);
+        width: min(328px, 90vw);
+      }
+      #addons .day-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 

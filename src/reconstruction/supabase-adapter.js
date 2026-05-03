@@ -84,6 +84,22 @@ export function isSupabaseSyncConflictError(error) {
     || /WPM_SYNC_CONFLICT|checkpoint remoto divergente|recarregue do backend/i.test(message);
 }
 
+function hasSupabaseOperationalRows(rowsByTable = {}, periodRows = []) {
+  const hasClosedPeriod = periodRows.some((item) => String(item?.status || '') === 'closed');
+  if (hasClosedPeriod) return true;
+  return [
+    rowsByTable.studentRows,
+    rowsByTable.addonSaleRows,
+    rowsByTable.pendingRows,
+    rowsByTable.noteRows,
+    rowsByTable.metricRows,
+    rowsByTable.mentionRows,
+    rowsByTable.scaleDayRows,
+    rowsByTable.shiftRows,
+    rowsByTable.eventRows,
+  ].some((rows) => Array.isArray(rows) && rows.length > 0);
+}
+
 export function snapshotSupabaseUser(user) {
   if (!user || typeof user !== 'object') return null;
   return {
@@ -620,6 +636,25 @@ export function createSupabaseAdapter(options = {}) {
         selectRows(client, 'events', 'id, period_id, event_date, event_time, type, title, place, owner_name_snapshot, status, description', [['in', 'period_id', periodIds]]),
       ]);
 
+      const scaleDayIds = scaleDayRows.map((item) => String(item?.id || '')).filter(Boolean);
+      const filteredShifts = shiftRows.filter((item) => scaleDayIds.includes(String(item?.scale_day_id || '')));
+      if (!hasSupabaseOperationalRows({
+        studentRows,
+        addonSaleRows,
+        pendingRows,
+        noteRows,
+        metricRows,
+        mentionRows,
+        scaleDayRows,
+        shiftRows: filteredShifts,
+        eventRows,
+      }, periodRows)) {
+        const emptyCheckpoint = await readSupabaseSyncCheckpoint(client, backendState.activeUnit.unitId).catch(() => null);
+        rememberSupabaseRemoteCheckpoint(emptyCheckpoint);
+        updateSupabaseBackendState({ syncStatus: 'idle', source: 'local', conflictStatus: 'clear' });
+        return null;
+      }
+
       const settingsByPeriod = new Map(settingsRows.map((item) => [String(item.period_id || ''), item]));
       const metricsByPeriod = new Map(metricRows.map((item) => [String(item.period_id || ''), item]));
       const addonTypesByPeriod = groupSupabaseRows(addonTypeRows, 'period_id');
@@ -630,8 +665,6 @@ export function createSupabaseAdapter(options = {}) {
       const mentionsByPeriod = groupSupabaseRows(mentionRows, 'period_id');
       const scaleDaysByPeriod = groupSupabaseRows(scaleDayRows, 'period_id');
       const eventsByPeriod = groupSupabaseRows(eventRows, 'period_id');
-      const scaleDayIds = scaleDayRows.map((item) => String(item?.id || '')).filter(Boolean);
-      const filteredShifts = shiftRows.filter((item) => scaleDayIds.includes(String(item?.scale_day_id || '')));
       const periods = {};
       const archives = {};
 

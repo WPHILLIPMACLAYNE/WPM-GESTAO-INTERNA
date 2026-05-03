@@ -308,6 +308,35 @@ describe('reconstruction features business actions', () => {
     })).toMatchObject({ canMigrate: true });
   });
 
+  it('trata snapshot remoto bootstrap sem dados operacionais como primeira migracao', () => {
+    const local = buildMigrationStoreSnapshot(buildStorage());
+    const remote = buildMigrationStoreSnapshot(buildStorage(buildPeriod({
+      students: [],
+      pending: [],
+      recados: [],
+      nps: {
+        score: 0,
+        monthlyGoal: 75,
+        semesterGoal: 80,
+        observations: '',
+        mentions: [],
+        rankSnapshot: {},
+      },
+      scale: [],
+      events: [],
+      addons: {},
+    })));
+    const comparison = compareMigrationSnapshots(local.periods, remote.periods);
+
+    expect(comparison.mismatches.length).toBeGreaterThan(0);
+    expect(getMigrationReadiness({
+      local,
+      remote,
+      comparison,
+      backend: { enabled: true, sessionStatus: 'authenticated', writable: true },
+    })).toMatchObject({ canMigrate: true, label: 'Primeira migracao liberada' });
+  });
+
   it('bloqueia ou executa migracao assistida conforme dry-run e sync', async () => {
     const blockedRuntime = createBusinessActionsRuntime({
       storage: buildStorage(),

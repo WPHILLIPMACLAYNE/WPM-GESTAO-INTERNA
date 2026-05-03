@@ -277,6 +277,49 @@ describe('reconstruction Supabase adapter', () => {
     });
   });
 
+  it('trata unidade bootstrap sem linhas operacionais como backend vazio', async () => {
+    const client = createFakeClient({
+      tables: {
+        unit_members: membershipRows(),
+        periods: [
+          { id: 'period-05', unit_id: 'unit-z', period_key: '2026-05', label: 'Maio/2026', status: 'open', closed_at: null },
+        ],
+        period_settings: [
+          { period_id: 'period-05', team_snapshot: ['Ana'], reception_snapshot: ['Ana'], professor_snapshot: ['Caio'], month_days: 31 },
+        ],
+        addon_types: [],
+        student_attendances: [],
+        addon_sales: [],
+        pending_items: [],
+        shift_notes: [],
+        nps_period_metrics: [],
+        nps_mentions: [],
+        scale_days: [],
+        scale_professor_shifts: [],
+        events: [],
+      },
+      rpcHandler: async (fn) => {
+        if (fn === 'get_unit_sync_checkpoint') {
+          return { data: { revision: '', maxUpdatedAt: '', periodCount: 1, auditCount: 0 }, error: null };
+        }
+        return { data: null, error: null };
+      },
+    });
+    const adapter = createSupabaseAdapter({
+      globalLike: createGlobalEnv({ SUPABASE_UNIT_SLUG: 'z' }),
+      clientFactory: () => client,
+    });
+
+    const store = await adapter.loadStoreFromSupabase(buildStore());
+
+    expect(store).toBeNull();
+    expect(adapter.getSupabaseBackendState()).toMatchObject({
+      source: 'local',
+      syncStatus: 'idle',
+      conflictStatus: 'clear',
+    });
+  });
+
   it('sincroniza via RPC guardada quando backend esta vazio e memoriza novo checkpoint', async () => {
     const emptyCheckpoint = { revision: '', maxUpdatedAt: '', periodCount: 0, auditCount: 0 };
     const syncedCheckpoint = { revision: 'synced', maxUpdatedAt: '2026-05-02T20:00:00.000Z', periodCount: 12, auditCount: 1 };

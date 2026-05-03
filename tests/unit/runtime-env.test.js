@@ -312,8 +312,8 @@ describe('Backend (Supabase) — fallback offline', () => {
       kind: 'app-backup',
       sourceAppId: 'wpm-gestao-interna',
       integrity: expect.objectContaining({
-        algorithm: 'canonical-fnv1a32-v1',
-        hash: expect.stringMatching(/^[0-9a-f]{8}$/)
+        algorithm: 'canonical-sha256-v1',
+        hash: expect.stringMatching(/^[0-9a-f]{64}$/)
       })
     }));
     expect(backend.getSupabaseBackendState().lastRemoteCheckpoint).toEqual(syncedCheckpoint);
@@ -445,6 +445,45 @@ describe('Backend (Supabase) — fallback offline', () => {
     const readiness = diagnostics.getMigrationReadiness(report);
 
     expect(report.backend.remoteState).toBe('empty');
+    expect(readiness.canMigrate).toBe(true);
+    expect(readiness.label).toBe('Primeira migração liberada');
+  });
+
+  it('runMigrationDryRun trata periodo bootstrap remoto vazio como primeira migracao liberada', async () => {
+    const app = await loadRealApp();
+    cleanup = app.cleanup;
+    const { diagnostics, persistence } = app.window.__APP_INTERNALS__;
+    const baseStore = await persistence.loadStore({ skipRemote: true });
+    const remoteStore = structuredClone(baseStore);
+    Object.values(remoteStore.periods || {}).forEach(period => {
+      period.students = [];
+      period.pending = [];
+      period.recados = [];
+      period.scale = [];
+      period.events = [];
+      period.addons = {};
+      period.nps = {
+        score: 0,
+        monthlyGoal: 75,
+        semesterGoal: 80,
+        observations: '',
+        mentions: [],
+        rankSnapshot: {}
+      };
+    });
+    app.window.getSupabaseStatus = () => ({ enabled: true, sessionStatus: 'authenticated' });
+    app.window.getSupabaseBackendState = () => ({
+      sessionStatus: 'authenticated',
+      source: 'supabase',
+      writable: true
+    });
+    app.window.loadStoreFromSupabase = vi.fn().mockResolvedValue(remoteStore);
+
+    const report = await diagnostics.runMigrationDryRun(true);
+    const readiness = diagnostics.getMigrationReadiness(report);
+
+    expect(report.remote.periodCount).toBeGreaterThan(0);
+    expect(report.comparison.mismatches.length).toBeGreaterThan(0);
     expect(readiness.canMigrate).toBe(true);
     expect(readiness.label).toBe('Primeira migração liberada');
   });

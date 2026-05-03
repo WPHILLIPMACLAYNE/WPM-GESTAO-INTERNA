@@ -360,6 +360,37 @@ This file records one durable checkpoint per completed task.
   - run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
 - Next step:
   - after remote bootstrap, authenticate in the published app and run only `Executar dry-run`
+
+### Task 013
+
+- Date/time: 2026-05-03 11:03:51 -03
+- Branch: `main`
+- HEAD: `4aedb32`
+- Task: create remote Supabase initial unit/admin bootstrap and align Vercel runtime slug
+- Inputs:
+  - unit name: `Smartfit Pampulha`
+  - provided slug: `MGCPAM2`
+  - stored slug: `mgcpam2`
+  - admin email: `smartwonkey@gmail.com`
+  - admin display name: `WPM`
+- Validation:
+  - Auth user created and confirmed
+  - `public.users` mirror found
+  - `public.bootstrap_unit_admin(...)` returned 1 row
+  - Vercel `SUPABASE_UNIT_SLUG` updated to `mgcpam2`
+  - production deploy `dpl_3YL8wrzwXLejpQ4uJmbhYvAGGVCC` completed
+  - published runtime reports `hasEnv=true`, `unitSlug=mgcpam2`, `enabled=true`, `hasSdk=true`
+  - remote `public.units` contains active `Smartfit Pampulha` / `mgcpam2`
+  - remote `public.unit_members` contains active `WPM` / `admin`
+  - remote `public.periods` contains open `2026-05`
+  - `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
+- Pending:
+  - admin password must be set from the recovery email sent to `smartwonkey@gmail.com`
+  - dry-run must be executed from the browser that contains the real local base to migrate
+- Next step:
+  - authenticate as `smartwonkey@gmail.com`
+  - run only `Executar dry-run`
+  - do not migrate before preview review
 - Next step:
   - authenticate in the real unit after redeploy
   - run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`

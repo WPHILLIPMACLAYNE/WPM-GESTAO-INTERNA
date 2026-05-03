@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 10:55:37 -03
+Last updated: 2026-05-03 11:03:51 -03
 
 ## Current handoff
 
@@ -37,7 +37,9 @@ Current state:
 - commit `d1abdc4` is pushed to `origin/main`
 - Vercel now serves `/env.js` with HTTP `200`, but the deploy still lacks Supabase public env values, so `hasEnv=false`
 - Vercel production env is now configured and redeployed; published app reports `hasEnv=true`
-- remote Supabase `public.units` is still empty, and dev local credentials do not exist remotely
+- remote Supabase bootstrap is complete for `Smartfit Pampulha` / `mgcpam2`
+- remote admin is `smartwonkey@gmail.com` with display name `WPM` and role `admin`
+- password recovery/setup email was requested for `smartwonkey@gmail.com`
 - no real migration was executed in this checkpoint
 
 ## What must happen after each completed task
@@ -88,11 +90,10 @@ If a future session reconstructs the context from the persisted recovery files a
 
 ## Next safe step
 
-Bootstrap the remote backend before dry-run:
+Prepare the admin login and dry-run:
 
-1. define/approve unit name, unit slug, admin e-mail and display name
-2. create/confirm the remote Auth admin user
-3. run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
-4. authenticate in the real unit
-5. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
-6. do not click `Migrar para o backend` before human preview review
+1. use the recovery email for `smartwonkey@gmail.com` to define the admin password
+2. open the published app in the browser with the real local base
+3. authenticate in `Smartfit Pampulha`
+4. run only `Executar dry-run` in `Configuracoes` -> `Migracao assistida`
+5. do not click `Migrar para o backend` before human preview review

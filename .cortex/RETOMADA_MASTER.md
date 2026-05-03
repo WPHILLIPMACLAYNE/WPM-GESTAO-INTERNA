@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 10:55:37 -03
+Last updated: 2026-05-03 11:03:51 -03
 
 ## Purpose
 
@@ -89,16 +89,16 @@ This phrase is a continuity test marker and should be used only when the new ses
 - verified Vercel serves `/env.js` with HTTP `200`, but Supabase public env values are still absent
 - configured Vercel production public Supabase env vars and redeployed production
 - verified published runtime has `hasEnv=true` and smoke passes against `https://wpm-gestao-interna.vercel.app/`
-- confirmed remote Supabase still has no units, so real dry-run awaits initial unit/admin bootstrap
+- completed remote Supabase unit/admin bootstrap for `Smartfit Pampulha` / `mgcpam2`
+- requested password recovery/setup email for admin `smartwonkey@gmail.com`
 
 ## Exact next step
 
 Close the current checkpoint cleanly, then continue deploy homologation:
 
-1. define/approve real remote bootstrap data
-2. create/confirm remote Auth admin user
-3. run `public.bootstrap_unit_admin(...)` once via administrative SQL/service_role
-4. authenticate in the real unit and run only the migration dry-run
+1. set the admin password from the recovery email
+2. authenticate in the real unit from the browser holding local migration data
+3. run only the migration dry-run
 
 The latest validation already recorded for this session is:
 
@@ -106,3 +106,4 @@ The latest validation already recorded for this session is:
 2. `git diff --check` OK
 3. `npm run smoke:deploy` OK with `1 passed` against local HTTP runtime
 4. `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy` OK with `1 passed`
+5. remote unit/member/period bootstrap checks OK

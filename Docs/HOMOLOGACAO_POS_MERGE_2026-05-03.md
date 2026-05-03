@@ -168,3 +168,40 @@ Proxima etapa segura:
 4. Autenticar no app publicado.
 5. Executar somente o dry-run de migracao assistida.
 6. Nao executar migracao antes da revisao humana do preview.
+
+## Bootstrap remoto inicial
+
+Ainda em 2026-05-03, o bootstrap remoto inicial foi executado com dados aprovados:
+
+- Unidade: `Smartfit Pampulha`.
+- Slug informado: `MGCPAM2`.
+- Slug gravado/normalizado: `mgcpam2`.
+- Admin: `smartwonkey@gmail.com`.
+- Nome de exibicao: `WPM`.
+
+Execucao:
+
+- Usuario Auth remoto criado e confirmado.
+- Espelho em `public.users` confirmado.
+- `public.bootstrap_unit_admin(...)` executada uma unica vez via `service_role`/API administrativa.
+- Solicitação de recuperação/definição de senha enviada para `smartwonkey@gmail.com`.
+- `SUPABASE_UNIT_SLUG` de producao no Vercel atualizado para `mgcpam2`.
+- Redeploy de producao concluido: `dpl_3YL8wrzwXLejpQ4uJmbhYvAGGVCC`.
+
+Validacao:
+
+- Runtime publicado: `hasEnv=true`, `hasSdk=true`, `enabled=true`, `unitSlug=mgcpam2`.
+- Supabase remoto:
+  - `public.units`: `Smartfit Pampulha`, slug `mgcpam2`, ativa.
+  - `public.unit_members`: `WPM`, role `admin`, ativo, unidade `mgcpam2`.
+  - `public.periods`: periodo `2026-05`, status `open`, unidade `mgcpam2`.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy`: 1 teste Playwright passou.
+
+Proxima etapa segura:
+
+1. Usar o e-mail de recuperação recebido em `smartwonkey@gmail.com` para definir a senha do admin remoto.
+2. Abrir `https://wpm-gestao-interna.vercel.app/` no navegador que contem a base local real a migrar.
+3. Fazer login como `smartwonkey@gmail.com`.
+4. Confirmar unidade ativa `Smartfit Pampulha` e perfil `admin`.
+5. Executar apenas `Executar dry-run` em `Configuracoes` -> `Migracao assistida`.
+6. Revisar o preview antes de qualquer migracao.

@@ -90,6 +90,7 @@ describe('reconstruction service worker pwa', () => {
     expect(APP_VERSION).toBe('v34');
     expect(SW_CACHE_STRATEGY_VERSION).toBe('runtime-v2');
     expect(PRECACHE_ASSET_PATHS).toContain('index.html');
+    expect(PRECACHE_ASSET_PATHS).toContain('src/vendor/supabase-js-2.104.0.umd.js');
     expect(PRECACHE_ASSET_PATHS).toContain('src/core/pwa.js');
     expect(PRECACHE_ASSET_PATHS).toContain('src/main.js');
     expect(hashCacheManifest('same')).toBe(hashCacheManifest('same'));

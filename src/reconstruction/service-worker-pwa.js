@@ -12,6 +12,7 @@ export const PRECACHE_ASSET_PATHS = Object.freeze([
   'icons/icon-512.svg',
   'icons/icon-maskable-512.svg',
   'src/core/env-bootstrap.js',
+  'src/vendor/supabase-js-2.104.0.umd.js',
   'src/utils/helpers.js',
   'src/core/config.js',
   'src/core/observability.js',

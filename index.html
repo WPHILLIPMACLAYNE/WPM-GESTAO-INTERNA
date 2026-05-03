@@ -21,11 +21,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
           integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
           crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"
-          integrity="sha384-DBZI/1Gz1C29oeP5N6ORumbrmMNoaze4Afb4/c3JkFv79Wh3n1DIzbLRVbu6sJQT"
-          crossorigin="anonymous"></script>
   <!-- Contrato de ambiente runtime: defaults seguros antes de carregar env.js opcional -->
   <script src="src/core/env-bootstrap.js"></script>
+  <!-- Supabase JS vendorizado: evita bloqueio/falha de CDN no fluxo de recovery. -->
+  <script src="src/vendor/supabase-js-2.104.0.umd.js"></script>
   <!-- Módulos da aplicação (ordem de carregamento importa) -->
   <script src="src/utils/helpers.js"></script>
   <script src="src/core/config.js"></script>

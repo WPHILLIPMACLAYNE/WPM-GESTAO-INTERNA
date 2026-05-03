@@ -82,9 +82,10 @@ describe('reconstruction app shell', () => {
     expect(fs.existsSync(path.join(ROOT_DIR, 'styles.css'))).toBe(true);
   });
 
-  it('carrega CDNs esperadas com versao fixa e atributos de seguranca', () => {
+  it('carrega CDNs externas esperadas e Supabase vendorizado', () => {
     const html = readFile('index.html');
     const cdn = getCdnScripts(html);
+    const localSources = getLocalScriptSources(html);
 
     expect(cdn.dompurify).toMatchObject({
       src: 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js',
@@ -94,10 +95,9 @@ describe('reconstruction app shell', () => {
       src: 'https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js',
       attrs: expect.objectContaining({ integrity: expect.any(String), crossorigin: 'anonymous' }),
     });
-    expect(cdn.supabase).toMatchObject({
-      src: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0',
-      attrs: expect.objectContaining({ integrity: expect.stringMatching(/^sha384-/), crossorigin: 'anonymous' }),
-    });
+    expect(cdn.scripts.some((script) => script.src.includes('@supabase/supabase-js'))).toBe(false);
+    expect(localSources).toContain('src/vendor/supabase-js-2.104.0.umd.js');
+    expect(fs.existsSync(path.join(ROOT_DIR, 'src/vendor/supabase-js-2.104.0.umd.js'))).toBe(true);
   });
 
   it('preserva ordem de scripts classicos e main antes dos auxiliares finais', () => {

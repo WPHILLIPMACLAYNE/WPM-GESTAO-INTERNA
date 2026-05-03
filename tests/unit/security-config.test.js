@@ -38,11 +38,10 @@ describe('Configuração de segurança', () => {
     expect(headerMap['X-Content-Type-Options']).toBe('nosniff');
   });
 
-  it('cliente Supabase via CDN usa versao exata, SRI e CORS anonimo', () => {
+  it('cliente Supabase usa bundle local versionado', () => {
     const html = readFile('index.html');
-    const match = html.match(/<script src="(https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@[^"]+)"([^>]*)><\/script>/);
-    expect(match?.[1]).toBe('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0');
-    expect(match?.[2]).toContain('crossorigin="anonymous"');
-    expect(match?.[2]).toMatch(/integrity="sha384-[^"]+"/);
+    const match = html.match(/<script src="(src\/vendor\/supabase-js-2\.104\.0\.umd\.js)"><\/script>/);
+    expect(match?.[1]).toBe('src/vendor/supabase-js-2.104.0.umd.js');
+    expect(fs.existsSync(path.join(ROOT_DIR, 'src/vendor/supabase-js-2.104.0.umd.js'))).toBe(true);
   });
 });

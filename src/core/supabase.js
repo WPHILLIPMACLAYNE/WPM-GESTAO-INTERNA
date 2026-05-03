@@ -154,7 +154,7 @@
       });
       if (typeof saveUIState === 'function') saveUIState({ activeTab: 'settings' });
       if (typeof setActiveTab === 'function') setActiveTab('settings', true);
-      if (typeof renderAll === 'function') renderAll();
+      if (typeof renderAll === 'function' && state) renderAll();
       if (options.showToastMessage !== false && typeof showToast === 'function') {
         const message = options.error
           ? `Link de recuperação inválido ou expirado: ${options.error}`

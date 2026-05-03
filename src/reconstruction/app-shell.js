@@ -6,6 +6,7 @@ export const APP_SHELL_VERSION_TITLE = 'WPM Gestao Interna - v34';
 
 export const REQUIRED_LOCAL_SCRIPT_ORDER = Object.freeze([
   'src/core/env-bootstrap.js',
+  'src/vendor/supabase-js-2.104.0.umd.js',
   'src/utils/helpers.js',
   'src/core/config.js',
   'src/core/observability.js',
@@ -224,7 +225,6 @@ export function getCdnScripts(html) {
   return {
     dompurify: scripts.find((script) => script.src.includes('dompurify@3.2.6')) || null,
     chart: scripts.find((script) => script.src.includes('chart.js@4.4.7')) || null,
-    supabase: scripts.find((script) => script.src.includes('@supabase/supabase-js@2.104.0')) || null,
     scripts,
   };
 }
@@ -289,8 +289,8 @@ export function validateAppShell(html, options = {}) {
   if (!cdn.chart || cdn.chart.attrs.integrity === undefined || cdn.chart.attrs.crossorigin !== 'anonymous') {
     failures.push('cdn-chart');
   }
-  if (!cdn.supabase || cdn.supabase.attrs.integrity === undefined || cdn.supabase.attrs.crossorigin !== 'anonymous') {
-    failures.push('cdn-supabase');
+  if (!scriptOrder.localSources.includes('src/vendor/supabase-js-2.104.0.umd.js')) {
+    failures.push('local-supabase');
   }
 
   return {

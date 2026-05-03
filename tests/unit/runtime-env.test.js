@@ -131,6 +131,7 @@ describe('Backend (Supabase) — fallback offline', () => {
     const app = await loadRealApp();
     cleanup = app.cleanup;
     const { backend } = app.window.__APP_INTERNALS__;
+    app.window.supabase = null;
     app.window.__APP_ENV__.SUPABASE_URL = 'https://fake.supabase.co';
     app.window.__APP_ENV__.SUPABASE_ANON_KEY = 'fake-anon-key';
     backend.resetSupabaseClient();

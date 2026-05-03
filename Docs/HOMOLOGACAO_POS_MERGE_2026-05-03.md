@@ -267,3 +267,33 @@ Proxima etapa segura:
 2. Definir a nova senha no app publicado.
 3. Fazer login no backend e confirmar unidade `Smartfit Pampulha`, perfil `admin`.
 4. Depois disso, seguir para o dry-run de migracao assistida.
+
+## Hotfix do carregamento do SDK Supabase
+
+Ainda em 2026-05-03, o app publicado abriu o link de recovery no lugar correto, mas o painel Backend exibiu `SDK ausente`. A causa operacional era depender do CDN para carregar `@supabase/supabase-js`, o que deixava login/recovery vulneravel a bloqueio ou falha externa no navegador.
+
+Correcao aplicada:
+
+- `@supabase/supabase-js@2.104.0` foi vendorizado em `src/vendor/supabase-js-2.104.0.umd.js`.
+- `index.html` agora carrega o SDK local antes de `src/core/supabase.js`.
+- `sw.js` e o contrato reconstruido de PWA incluem o bundle local no precache, evitando que um app ja cacheado continue sem SDK.
+- O modo recovery nao renderiza a tela antes do store local existir, evitando estado `Sessao: Erro` durante bootstrap.
+- Testes de app shell, CSP, runtime Supabase e service worker foram atualizados para o novo contrato.
+
+Validacao:
+
+- `npx vitest run tests/unit/runtime-env.test.js tests/unit/reconstruction-app-shell.test.js tests/unit/security-config.test.js tests/unit/reconstruction-service-worker-pwa.test.js tests/unit/service-worker-config.test.js --maxWorkers=1 --minWorkers=1`: 48 testes passaram.
+- Deploy de producao: `dpl_3Qnt3pQX1kkE5889RvoxVLMELRMD`.
+- Alias publicado: `https://wpm-gestao-interna.vercel.app`.
+- `index.html`: carrega `src/vendor/supabase-js-2.104.0.umd.js` e nao carrega mais Supabase via CDN.
+- `sw.js`: precache inclui `src/vendor/supabase-js-2.104.0.umd.js`.
+- Validacao Playwright em `https://wpm-gestao-interna.vercel.app/?type=recovery`: `hasSdk=true`, `SDK Carregado`, `passwordRecovery=true` e campos de nova senha visiveis.
+- `DEPLOY_SMOKE_URL="https://wpm-gestao-interna.vercel.app/" npm run smoke:deploy`: 1 teste passou.
+- Recovery reenviado para `smartwonkey@gmail.com` usando o Supabase remoto `eautmpqkxibolmcfiacd.supabase.co`: HTTP `200`.
+
+Proxima etapa segura:
+
+1. Abrir somente o e-mail de recovery mais recente, enviado apos este hotfix.
+2. Se a tela antiga ainda aparecer, atualizar a pagina uma vez para o service worker assumir o novo cache.
+3. Na aba `Configuracoes` -> `Backend`, confirmar `SDK Carregado`.
+4. Preencher `Nova senha` e `Confirmar senha`, entao clicar `Definir nova senha`.

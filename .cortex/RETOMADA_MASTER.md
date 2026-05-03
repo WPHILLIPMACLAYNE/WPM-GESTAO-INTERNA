@@ -1,6 +1,6 @@
 # RETOMADA_MASTER
 
-Last updated: 2026-05-03 13:29:27 -03
+Last updated: 2026-05-03 15:19:24 -03
 
 ## Purpose
 
@@ -12,7 +12,8 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 
 - Recovery branch: `main`
 - Remote recovery branch: `origin/main`
-- Current live HEAD: `191383e`
+- Verified base HEAD before pause checkpoint: `d8da0d5`
+- Homologated technical baseline: `191383e`
 - Current production stage: remote Supabase migration homologated
 - Timezone for all continuity records: `America/Sao_Paulo`
 
@@ -28,6 +29,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 - Service worker precaches the vendored Supabase SDK.
 - Recovery, password setup, login, dry-run, initial migration, backend reload, and January-to-December navigation were manually validated on 2026-05-03.
 - The migrated remote dataset currently contains 12 periods and zero operational records.
+- Work paused by operator on 2026-05-03 at 15:19:24 -03. Resume with Etapa 11 only.
 
 ## Mandatory read order on resume
 
@@ -59,7 +61,7 @@ If work is resumed after VS Code closes, chat context is lost, or an agent chang
 If a new Codex session resumes this repo using the standard recovery commands and correctly identifies:
 
 - branch `main`
-- current live HEAD at or after `191383e`
+- current branch `main` aligned with `origin/main`
 - production runtime `https://wpm-gestao-interna.vercel.app`
 - stage `remote Supabase migration homologated`
 - next stage `controlled production pilot`
@@ -87,6 +89,7 @@ This phrase is a continuity test marker and should be used only when context was
 - Reload from backend returned `Base remota carregada com sucesso`.
 - Manual navigation from January to December validated the remote period structure.
 - Final homologation documented in `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`.
+- Post-homologation resume checkpoint published in `d8da0d5` before this pause checkpoint.
 
 ## Exact next step
 
@@ -94,6 +97,7 @@ Start **Etapa 11 - Piloto operacional controlado em producao**.
 
 Minimal safe sequence:
 
+0. verify repo status first: `git status --short --branch`, `git log --oneline -n 3`;
 1. create one controlled atendimento in `Maio/2026` using the published app;
 2. save locally and confirm it appears in the UI;
 3. intentionally use `Sincronizar agora` once only for that known change;
@@ -102,3 +106,4 @@ Minimal safe sequence:
 6. document the result before testing a pendencia or addon.
 
 Do not start broader features until this production pilot proves real-data persistence.
+Do not start UI/frontend correction work before this pilot unless the operator explicitly changes priority.

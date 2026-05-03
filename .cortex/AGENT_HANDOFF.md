@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-Last updated: 2026-05-03 13:29:27 -03
+Last updated: 2026-05-03 15:19:24 -03
 
 ## Current handoff
 
@@ -9,7 +9,7 @@ This repository has a functioning CORTEX continuity layer. Treat it as live oper
 Current state:
 
 - baseline branch in use: `main`
-- current HEAD reference: `191383e`
+- verified base before pause checkpoint: `d8da0d5`
 - remote tracking branch: `origin/main`
 - continuity source outside `.cortex/`: `Docs/RETOMADA_SEGURA.md`
 - homologation source of truth: `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
@@ -21,6 +21,7 @@ Current state:
 - remote admin: `smartwonkey@gmail.com`
 - remote role: `admin`
 - current stage: **remote Supabase migration homologated; next is controlled production pilot**
+- pause marker: operator paused work on 2026-05-03 at 15:19:24 -03; next session should resume at Etapa 11 only
 
 ## Completed in the latest work block
 
@@ -36,7 +37,8 @@ Current state:
 - Reload from backend completed successfully.
 - Fonte ativa after reload is `Supabase`.
 - Manual navigation validated January through December.
-- Final homologation was documented and pushed in commit `191383e`.
+- Final homologation was documented in commit `191383e`.
+- Post-homologation continuity docs were published in commit `d8da0d5` before this pause checkpoint.
 
 ## What must happen after each completed task
 
@@ -96,8 +98,14 @@ Use this only when the new session has actually reconstructed context from persi
 
 Run **Etapa 11 - Piloto operacional controlado em producao**:
 
-1. create one controlled atendimento in the published app;
-2. intentionally sync once if that data should go remote;
-3. reload from backend;
-4. confirm the record returns from Supabase;
-5. document the result before testing another entity.
+0. first confirm `git status --short --branch` is clean and `main` is aligned with `origin/main`;
+1. open `https://wpm-gestao-interna.vercel.app`;
+2. authenticate as `smartwonkey@gmail.com`;
+3. confirm `Smartfit Pampulha`, role `admin`, SDK loaded, and active source `Supabase`;
+4. create one controlled atendimento in `Maio/2026`;
+5. intentionally sync once if that data should go remote;
+6. reload from backend;
+7. confirm the record returns from Supabase;
+8. document the result before testing another entity.
+
+Do not start UI/frontend polish, new features, or broad refactors before this pilot is documented.

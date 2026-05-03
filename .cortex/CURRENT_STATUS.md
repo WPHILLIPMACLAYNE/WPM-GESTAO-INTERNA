@@ -1,14 +1,16 @@
 # CURRENT_STATUS
 
 Snapshot date: 2026-05-03
-Last updated: 2026-05-03 13:29:27 -03
+Last updated: 2026-05-03 15:19:24 -03
 
 ## Live status
 
 - Branch: `main`
-- HEAD: `191383e`
+- Verified base HEAD before pause checkpoint: `d8da0d5`
 - Remote tracking branch: `origin/main`
-- Local and remote state: aligned at `191383e05fb6312605ca694c49c794a74f5927d5`
+- Local and remote state: aligned at `d8da0d5a7fd42be30e6bbedbe045fb3cc9a71cad`
+- Homologated technical baseline: `191383e` (remote Supabase homologation)
+- Latest published documentation checkpoint before this pause update: `d8da0d5` (`docs: atualiza estágio pós-homologação remota`)
 - Baseline in production: Vercel alias `https://wpm-gestao-interna.vercel.app`
 - Latest production deploy validated in this block: `dpl_3Qnt3pQX1kkE5889RvoxVLMELRMD`
 - App version: `v34`
@@ -66,9 +68,11 @@ Do **not** start a new feature yet.
 
 Next stage: **Etapa 11 - Piloto operacional controlado em producao**.
 
+Session paused on 2026-05-03 at 15:19:24 -03 by operator request. On the next Codex session, resume here and do not run any new visual/frontend work before the pilot.
+
 Recommended order:
 
-1. Freeze and document `main @ 191383e` as the first remote Supabase homologated baseline.
+1. Confirm `main` is still aligned with `origin/main` and inspect the latest commit.
 2. Execute a minimal real-data pilot in the published app:
    - create one controlled atendimento in `Maio/2026`;
    - save locally;

@@ -1,7 +1,7 @@
 # RETOMADA_SEGURA.md
 
 Data: 2026-04-22
-Última atualização: 2026-05-03 13:29:27 -03
+Última atualização: 2026-05-03 15:19:24 -03
 Objetivo: continuar evolução do projeto sem risco de quebrar a versão em produção, preservando o baseline remoto Supabase já homologado.
 
 ## Baseline oficial
@@ -9,6 +9,7 @@ Objetivo: continuar evolução do projeto sem risco de quebrar a versão em prod
 - Deploy atual: `https://wpm-gestao-interna.vercel.app`
 - Branch oficial: `origin/main`
 - Commit de referência homologado: `191383e` (2026-05-03)
+- Último checkpoint documental publicado antes desta pausa: `d8da0d5` (2026-05-03)
 - Versão visual/runtime: `v34` com backend Supabase remoto homologado
 
 ## Regras de proteção
@@ -129,13 +130,14 @@ sed -n '1,240p' .cortex/TASK_LEDGER.md
 
 ## Checkpoint atual
 
-Data/hora: 2026-05-03 13:29:27 -03
+Data/hora: 2026-05-03 15:19:24 -03
 
 - Branch atual: `main`
-- Último commit conhecido: `191383e`
+- Último commit conhecido antes desta pausa: `d8da0d5`
 - Estado local/remoto: `main` alinhado com `origin/main`
 - Runtime publicado principal: `https://wpm-gestao-interna.vercel.app`
 - Estágio atual: **homologação remota Supabase concluída; próximo bloco é piloto operacional controlado**
+- Pausa operacional: trabalho pausado a pedido do operador; ao retomar amanhã, não iniciar feature, UI/frontend ou refatoração antes da Etapa 11
 - Estado do worktree ao fim desta etapa:
   - Vercel publica `env.js` com `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_UNIT_SLUG`
   - app publicado carrega Supabase pelo bundle local `src/vendor/supabase-js-2.104.0.umd.js`
@@ -158,6 +160,7 @@ Data/hora: 2026-05-03 13:29:27 -03
   - recovery remoto, senha, login, dry-run, migração, reload e navegação mensal foram homologados
   - homologação final foi registrada em `Docs/HOMOLOGACAO_POS_MERGE_2026-05-03.md`
   - docs de continuidade foram atualizados para o estágio correto
+  - planejamento de retomada para amanhã foi engatilhado para iniciar pela Etapa 11
 - Arquivos tocados no bloco de atualização documental:
   - `README.md`
   - `MIGRATION_STATUS.md`
@@ -176,6 +179,7 @@ Data/hora: 2026-05-03 13:29:27 -03
   - executar piloto operacional controlado com um atendimento real ou controlado
   - documentar o resultado antes de testar pendência/addon ou iniciar feature nova
 - Próximo passo exato mais seguro:
+  - confirmar `git status --short --branch` limpo e `main` alinhado com `origin/main`
   - criar um atendimento controlado em `Maio/2026`
   - salvar localmente
   - usar `Sincronizar agora` uma única vez, de forma intencional

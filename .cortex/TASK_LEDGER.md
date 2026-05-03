@@ -470,3 +470,32 @@ This file records one durable checkpoint per completed task.
   - do not start feature work yet
   - execute **Etapa 11 - Piloto operacional controlado em producao**
   - document the result before broadening usage
+
+### Task 016
+
+- Date/time: 2026-05-03 15:19:24 -03
+- Branch: `main`
+- HEAD before this checkpoint: `d8da0d5`
+- Task: prepare end-of-day pause checkpoint so the next Codex session resumes directly at Etapa 11
+- Files touched:
+  - `Docs/RETOMADA_SEGURA.md`
+  - `.cortex/CURRENT_STATUS.md`
+  - `.cortex/AGENT_HANDOFF.md`
+  - `.cortex/RETOMADA_MASTER.md`
+  - `.cortex/TASK_LEDGER.md`
+- Validation:
+  - `git status --short --branch` confirmed clean `main...origin/main` before edits
+  - `git rev-parse HEAD origin/main` previously confirmed local and remote aligned at `d8da0d5a7fd42be30e6bbedbe045fb3cc9a71cad`
+  - no runtime, Supabase, Vercel, UI, or frontend task was started
+- Pending:
+  - execute **Etapa 11 - Piloto operacional controlado em producao** in the next session
+- Next step tomorrow:
+  - confirm repo status first
+  - open `https://wpm-gestao-interna.vercel.app`
+  - authenticate as `smartwonkey@gmail.com`
+  - confirm `Smartfit Pampulha`, role `admin`, SDK loaded, and source `Supabase`
+  - create one controlled atendimento in `Maio/2026`
+  - sync once intentionally
+  - reload from backend
+  - confirm the atendimento returns from Supabase
+  - document the result before testing pendencia/addon or starting any UI/frontend work
